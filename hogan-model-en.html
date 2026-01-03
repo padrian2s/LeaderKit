@@ -398,58 +398,65 @@
 
         /* === PLAYGROUND === */
         .playground-container {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        .playground-header {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .playground-header h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .playground-header p {
-            color: var(--text-muted);
+            width: 100vw;
+            margin-left: calc(-50vw + 50%);
+            padding: 0;
         }
 
         .playground-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            align-items: start;
+            grid-template-columns: 220px 1fr 260px;
+            gap: 0;
+            align-items: stretch;
+            height: calc(100vh - 160px);
+            min-height: 400px;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1000px) {
+            .playground-grid {
+                grid-template-columns: 1fr 1fr;
+                height: auto;
+            }
+        }
+
+        @media (max-width: 800px) {
+            .playground-grid {
+                grid-template-columns: 1fr 1fr;
+                height: auto;
+            }
+            .results-panel {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 600px) {
             .playground-grid {
                 grid-template-columns: 1fr;
+            }
+            .results-panel {
+                grid-column: span 1;
             }
         }
 
         .sliders-panel {
             background: var(--bg-card);
-            border-radius: 20px;
-            padding: 1.5rem;
-            max-height: 600px;
+            border-radius: 0;
+            padding: 0.5rem;
             overflow-y: auto;
         }
 
         .slider-section {
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.5rem;
         }
 
         .slider-section-label {
-            font-size: 0.8rem;
+            font-size: 0.6rem;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 0.75rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
+            letter-spacing: 0.03em;
+            margin-bottom: 0.4rem;
+            padding: 0.15rem 0.35rem;
+            border-radius: 3px;
             display: inline-block;
         }
 
@@ -460,23 +467,42 @@
         .slider-group {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 0.75rem;
-            padding: 0.5rem;
+            gap: 0.3rem;
+            margin-bottom: 0.25rem;
+            padding: 0.2rem;
             background: rgba(255,255,255,0.02);
-            border-radius: 8px;
+            border-radius: 4px;
+        }
+
+        .slider-header {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            width: 70px;
+            flex-shrink: 0;
+        }
+
+        .slider-icon {
+            font-size: 0.7rem;
+        }
+
+        .slider-title {
+            font-size: 0.9rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .slider-name {
-            width: 100px;
-            font-size: 0.8rem;
+            width: 70px;
+            font-size: 0.65rem;
             flex-shrink: 0;
         }
 
         .hogan-slider {
             flex: 1;
-            height: 6px;
-            border-radius: 3px;
+            height: 4px;
+            border-radius: 2px;
             background: rgba(255,255,255,0.1);
             outline: none;
             -webkit-appearance: none;
@@ -485,40 +511,44 @@
 
         .hogan-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 16px;
-            height: 16px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             cursor: pointer;
             background: white;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            box-shadow: 0 1px 4px rgba(0,0,0,0.3);
         }
 
         .slider-value {
-            width: 30px;
+            min-width: 24px;
             text-align: right;
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 1.1rem;
             flex-shrink: 0;
+        }
+
+        .slider-labels {
+            display: none;
         }
 
         .preset-buttons {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 1rem;
-            padding-top: 1rem;
+            gap: 0.3rem;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
             border-top: 1px solid rgba(255,255,255,0.1);
         }
 
         .preset-label {
             width: 100%;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.15rem;
         }
 
         .preset-btn {
-            padding: 0.4rem 0.7rem;
+            padding: 0.15rem 0.3rem;
             border: 1px solid rgba(255,255,255,0.2);
             background: transparent;
             color: var(--text-light);
@@ -536,46 +566,57 @@
         .visualization-panel {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border-radius: 0;
+            padding: 0.5rem;
+            gap: 0.5rem;
+        }
+
+        .profile-display {
+            text-align: center;
+            padding: 0.5rem 0;
         }
 
         .risk-summary {
             background: var(--bg-card);
-            border-radius: 20px;
-            padding: 1.5rem;
+            border-radius: 12px;
+            padding: 0.5rem;
+            width: 100%;
         }
 
         .risk-summary h4 {
-            font-size: 1rem;
-            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
             text-align: center;
         }
 
         .risk-meters {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1rem;
+            gap: 0.4rem;
         }
 
         .risk-meter {
             text-align: center;
-            padding: 1rem;
-            border-radius: 12px;
+            padding: 0.4rem;
+            border-radius: 8px;
             background: rgba(255,255,255,0.03);
         }
 
-        .risk-meter.away { border-top: 3px solid var(--moving-away); }
-        .risk-meter.against { border-top: 3px solid var(--moving-against); }
-        .risk-meter.toward { border-top: 3px solid var(--moving-toward); }
+        .risk-meter.away { border-top: 2px solid var(--moving-away); }
+        .risk-meter.against { border-top: 2px solid var(--moving-against); }
+        .risk-meter.toward { border-top: 2px solid var(--moving-toward); }
 
         .risk-label {
-            font-size: 0.75rem;
+            font-size: 0.6rem;
             color: var(--text-muted);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }
 
         .risk-score {
-            font-size: 2rem;
+            font-size: 1.2rem;
             font-weight: 700;
         }
 
@@ -585,34 +626,36 @@
 
         .top-derailers {
             background: var(--bg-card);
-            border-radius: 20px;
-            padding: 1.5rem;
+            border-radius: 12px;
+            padding: 0.5rem;
+            width: 100%;
+            margin-top: 0.75rem;
         }
 
         .top-derailers h4 {
-            font-size: 1rem;
-            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
         }
 
         .top-derailer-item {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem;
+            gap: 0.4rem;
+            padding: 0.35rem;
             background: rgba(255,255,255,0.03);
-            border-radius: 10px;
-            margin-bottom: 0.5rem;
+            border-radius: 6px;
+            margin-bottom: 0.3rem;
         }
 
         .top-derailer-rank {
-            width: 24px;
-            height: 24px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 0.75rem;
+            font-size: 0.6rem;
             background: rgba(255,255,255,0.1);
         }
 
@@ -622,28 +665,34 @@
 
         .top-derailer-name {
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.75rem;
         }
 
         .top-derailer-cluster {
-            font-size: 0.75rem;
+            font-size: 0.6rem;
             color: var(--text-muted);
         }
 
         .top-derailer-score {
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 0.9rem;
+        }
+
+        .results-panel {
+            background: var(--bg-card);
+            border-radius: 0;
+            padding: 0.75rem;
+            overflow-y: auto;
         }
 
         .analysis-panel {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 1.5rem;
+            background: transparent;
+            padding: 0;
         }
 
         .analysis-section {
-            margin-bottom: 1.25rem;
-            padding-bottom: 1.25rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
@@ -655,13 +704,13 @@
 
         .analysis-section h4 {
             font-size: 0.95rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.3rem;
         }
 
         .analysis-section p {
             color: var(--text-muted);
-            font-size: 0.9rem;
-            line-height: 1.6;
+            font-size: 0.85rem;
+            line-height: 1.5;
         }
 
         /* === QUIZ === */
@@ -1080,15 +1129,11 @@
         <!-- TAB PLAYGROUND -->
         <div id="playground" class="tab-content">
             <div class="playground-container">
-                <div class="playground-header">
-                    <h2>Dark Side Simulator</h2>
-                    <p>Explore different leadership risk profiles</p>
-                </div>
-
                 <div class="playground-grid">
+                    <!-- Column 1: Sliders -->
                     <div class="sliders-panel">
                         <div class="slider-section">
-                            <div class="slider-section-label away">Moving Away</div>
+                            <div class="slider-section-label away">Away</div>
                             <div class="slider-group">
                                 <span class="slider-name">Excitable</span>
                                 <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-excitable">
@@ -1117,7 +1162,7 @@
                         </div>
 
                         <div class="slider-section">
-                            <div class="slider-section-label against">Moving Against</div>
+                            <div class="slider-section-label against">Against</div>
                             <div class="slider-group">
                                 <span class="slider-name">Bold</span>
                                 <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-bold">
@@ -1141,7 +1186,7 @@
                         </div>
 
                         <div class="slider-section">
-                            <div class="slider-section-label toward">Moving Toward</div>
+                            <div class="slider-section-label toward">Toward</div>
                             <div class="slider-group">
                                 <span class="slider-name">Diligent</span>
                                 <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-diligent">
@@ -1155,30 +1200,31 @@
                         </div>
 
                         <div class="preset-buttons">
-                            <span class="preset-label">Risk Profiles:</span>
-                            <button class="preset-btn" data-preset="narcissist">Narcissist</button>
-                            <button class="preset-btn" data-preset="avoider">Avoidant</button>
-                            <button class="preset-btn" data-preset="perfectionist">Perfectionist</button>
-                            <button class="preset-btn" data-preset="passive">Passive-Aggressive</button>
-                            <button class="preset-btn" data-preset="charismatic">Risky Charismatic</button>
-                            <button class="preset-btn" data-preset="lowrisk">Low Risk</button>
+                            <span class="preset-label">Presets:</span>
+                            <button class="preset-btn" data-preset="narcissist">Narc</button>
+                            <button class="preset-btn" data-preset="avoider">Avoid</button>
+                            <button class="preset-btn" data-preset="perfectionist">Perf</button>
+                            <button class="preset-btn" data-preset="passive">P-Agg</button>
+                            <button class="preset-btn" data-preset="charismatic">Char</button>
+                            <button class="preset-btn" data-preset="lowrisk">Low</button>
                         </div>
                     </div>
 
+                    <!-- Column 2: Visualization -->
                     <div class="visualization-panel">
                         <div class="risk-summary">
-                            <h4>Cluster Scores</h4>
+                            <h4>Clusters</h4>
                             <div class="risk-meters">
                                 <div class="risk-meter away">
-                                    <div class="risk-label">Moving Away</div>
+                                    <div class="risk-label">Away</div>
                                     <div class="risk-score" id="score-away">50</div>
                                 </div>
                                 <div class="risk-meter against">
-                                    <div class="risk-label">Moving Against</div>
+                                    <div class="risk-label">Against</div>
                                     <div class="risk-score" id="score-against">50</div>
                                 </div>
                                 <div class="risk-meter toward">
-                                    <div class="risk-label">Moving Toward</div>
+                                    <div class="risk-label">Toward</div>
                                     <div class="risk-score" id="score-toward">50</div>
                                 </div>
                             </div>
@@ -1188,7 +1234,10 @@
                             <h4>Top 3 Risks</h4>
                             <div id="top-derailers-list"></div>
                         </div>
+                    </div>
 
+                    <!-- Column 3: Results/Analysis -->
+                    <div class="results-panel">
                         <div class="analysis-panel">
                             <div class="analysis-section">
                                 <h4>Style Under Stress</h4>
@@ -1199,7 +1248,7 @@
                                 <p id="team-impact">Moderate risk to team dynamics. Monitoring recommended during periods of pressure.</p>
                             </div>
                             <div class="analysis-section">
-                                <h4>Development Recommendations</h4>
+                                <h4>Development</h4>
                                 <p id="development">Build feedback mechanisms to identify early warning signs.</p>
                             </div>
                         </div>

@@ -441,46 +441,54 @@
 
         /* === PLAYGROUND === */
         .playground-container {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        .playground-header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-        }
-
-        .playground-header h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .playground-header p {
-            color: var(--text-muted);
+            width: 100vw;
+            margin-left: calc(-50vw + 50%);
+            padding: 0;
         }
 
         .playground-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            align-items: start;
+            grid-template-columns: 220px 1fr 260px;
+            gap: 0;
+            align-items: stretch;
+            height: calc(100vh - 160px);
+            min-height: 400px;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1000px) {
+            .playground-grid {
+                grid-template-columns: 200px 1fr 220px;
+            }
+        }
+
+        @media (max-width: 800px) {
+            .playground-grid {
+                grid-template-columns: 1fr 1fr;
+                height: auto;
+            }
+            .results-panel {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 600px) {
             .playground-grid {
                 grid-template-columns: 1fr;
+            }
+            .results-panel {
+                grid-column: span 1;
             }
         }
 
         .sliders-panel {
             background: var(--bg-card);
-            border-radius: 20px;
-            padding: 1.5rem;
+            padding: 0.75rem;
+            overflow-y: auto;
         }
 
         .slider-group {
-            margin-bottom: 1.75rem;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
         }
 
         .slider-group:last-child {
@@ -490,19 +498,19 @@
         .slider-header {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 0.5rem;
+            gap: 0.4rem;
+            margin-bottom: 0.25rem;
         }
 
         .slider-icon {
-            width: 36px;
-            height: 36px;
-            border-radius: 10px;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 1rem;
+            font-size: 0.85rem;
             color: white;
         }
 
@@ -515,32 +523,34 @@
 
         .slider-title {
             font-weight: 600;
+            font-size: 0.9rem;
         }
 
         .slider-value {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 700;
+            min-width: 30px;
         }
 
         .ocean-slider {
             width: 100%;
-            height: 8px;
-            border-radius: 4px;
+            height: 6px;
+            border-radius: 3px;
             outline: none;
             -webkit-appearance: none;
             cursor: pointer;
-            margin: 0.5rem 0;
+            margin: 0.3rem 0;
         }
 
         .ocean-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 24px;
-            height: 24px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             cursor: pointer;
             transition: transform 0.2s;
             background: white;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
         }
 
         .ocean-slider::-webkit-slider-thumb:hover {
@@ -553,36 +563,33 @@
         .slider-a { background: linear-gradient(90deg, rgba(16,185,129,0.3), var(--agreeableness)); }
         .slider-n { background: linear-gradient(90deg, rgba(239,68,68,0.3), var(--neuroticism)); }
 
-        .slider-poles {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.75rem;
-            color: var(--text-muted);
+        .slider-labels {
+            display: none;
         }
 
         .preset-buttons {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 1.5rem;
-            padding-top: 1rem;
+            gap: 0.25rem;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
             border-top: 1px solid rgba(255,255,255,0.1);
         }
 
         .preset-label {
             width: 100%;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.15rem;
         }
 
         .preset-btn {
-            padding: 0.4rem 0.7rem;
+            padding: 0.2rem 0.4rem;
             border: 1px solid rgba(255,255,255,0.2);
             background: transparent;
             color: var(--text-light);
-            border-radius: 6px;
-            font-size: 0.8rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
             cursor: pointer;
             transition: all 0.3s ease;
             font-family: 'Source Sans 3', sans-serif;
@@ -595,18 +602,49 @@
         .visualization-panel {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            gap: 0.5rem;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            padding: 0.5rem;
         }
 
         .radar-container {
+            width: 100%;
+            max-width: 280px;
+            aspect-ratio: 1;
+            padding: 0;
+        }
+
+        .profile-display {
+            text-align: center;
+            padding: 0.25rem 0;
+        }
+
+        .code-display {
+            font-size: 2rem;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.15rem;
+            gap: 0.1rem;
+        }
+
+        .code-letter {
+            min-width: 32px;
+        }
+
+        .profile-name {
+            font-size: 0.8rem;
+        }
+
+        .results-panel {
             background: var(--bg-card);
-            border-radius: 20px;
-            padding: 1.5rem;
+            padding: 0.75rem;
+            overflow-y: auto;
         }
 
         .radar-svg {
             width: 100%;
-            max-width: 350px;
+            max-width: 100%;
             margin: 0 auto;
             display: block;
         }
@@ -637,18 +675,18 @@
 
         .profile-bars {
             background: var(--bg-card);
-            border-radius: 20px;
-            padding: 1.5rem;
+            border-radius: 12px;
+            padding: 0.75rem;
         }
 
         .profile-bars h4 {
-            font-size: 1rem;
-            margin-bottom: 1rem;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
             text-align: center;
         }
 
         .bar-item {
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
 
         .bar-item:last-child {
@@ -658,20 +696,20 @@
         .bar-header {
             display: flex;
             justify-content: space-between;
-            font-size: 0.85rem;
-            margin-bottom: 0.25rem;
+            font-size: 0.7rem;
+            margin-bottom: 0.15rem;
         }
 
         .bar-track {
-            height: 8px;
+            height: 6px;
             background: rgba(255,255,255,0.1);
-            border-radius: 4px;
+            border-radius: 3px;
             overflow: hidden;
         }
 
         .bar-fill {
             height: 100%;
-            border-radius: 4px;
+            border-radius: 3px;
             transition: width 0.3s ease;
         }
 
@@ -682,14 +720,13 @@
         .bar-n { background: var(--neuroticism); }
 
         .analysis-panel {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 1.5rem;
+            background: transparent;
+            padding: 0;
         }
 
         .analysis-section {
-            margin-bottom: 1.25rem;
-            padding-bottom: 1.25rem;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
@@ -701,13 +738,13 @@
 
         .analysis-section h4 {
             font-size: 0.95rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.2rem;
         }
 
         .analysis-section p {
             color: var(--text-muted);
-            font-size: 0.9rem;
-            line-height: 1.6;
+            font-size: 0.85rem;
+            line-height: 1.5;
         }
 
         /* === QUIZ === */
@@ -1108,12 +1145,8 @@
         <!-- TAB PLAYGROUND -->
         <div id="playground" class="tab-content">
             <div class="playground-container">
-                <div class="playground-header">
-                    <h2>Exploratorul de Personalitate Big Five</h2>
-                    <p>Ajustează nivelul fiecărei dimensiuni pentru a explora profiluri diferite</p>
-                </div>
-
                 <div class="playground-grid">
+                    <!-- Column 1: Sliders Panel -->
                     <div class="sliders-panel">
                         <div class="slider-group">
                             <div class="slider-header">
@@ -1124,8 +1157,8 @@
                                 </div>
                             </div>
                             <input type="range" min="0" max="100" value="50" class="ocean-slider slider-o" id="slider-O">
-                            <div class="slider-poles">
-                                <span>Convențional</span>
+                            <div class="slider-labels">
+                                <span>Conv.</span>
                                 <span>Deschis</span>
                             </div>
                         </div>
@@ -1139,9 +1172,9 @@
                                 </div>
                             </div>
                             <input type="range" min="0" max="100" value="50" class="ocean-slider slider-c" id="slider-C">
-                            <div class="slider-poles">
-                                <span>Flexibil</span>
-                                <span>Organizat</span>
+                            <div class="slider-labels">
+                                <span>Flex.</span>
+                                <span>Org.</span>
                             </div>
                         </div>
 
@@ -1154,9 +1187,9 @@
                                 </div>
                             </div>
                             <input type="range" min="0" max="100" value="50" class="ocean-slider slider-e" id="slider-E">
-                            <div class="slider-poles">
-                                <span>Introvertit</span>
-                                <span>Extravertit</span>
+                            <div class="slider-labels">
+                                <span>Intro.</span>
+                                <span>Extra.</span>
                             </div>
                         </div>
 
@@ -1169,9 +1202,9 @@
                                 </div>
                             </div>
                             <input type="range" min="0" max="100" value="50" class="ocean-slider slider-a" id="slider-A">
-                            <div class="slider-poles">
-                                <span>Competitiv</span>
-                                <span>Cooperant</span>
+                            <div class="slider-labels">
+                                <span>Comp.</span>
+                                <span>Coop.</span>
                             </div>
                         </div>
 
@@ -1184,23 +1217,24 @@
                                 </div>
                             </div>
                             <input type="range" min="0" max="100" value="50" class="ocean-slider slider-n" id="slider-N">
-                            <div class="slider-poles">
+                            <div class="slider-labels">
                                 <span>Stabil</span>
-                                <span>Reactiv</span>
+                                <span>React.</span>
                             </div>
                         </div>
 
                         <div class="preset-buttons">
-                            <span class="preset-label">Profile Tip:</span>
-                            <button class="preset-btn" data-preset="entrepreneur">Antreprenor</button>
-                            <button class="preset-btn" data-preset="scientist">Cercetător</button>
-                            <button class="preset-btn" data-preset="caregiver">Îngrijitor</button>
+                            <span class="preset-label">Profile:</span>
+                            <button class="preset-btn" data-preset="entrepreneur">Antrep.</button>
+                            <button class="preset-btn" data-preset="scientist">Cercet.</button>
+                            <button class="preset-btn" data-preset="caregiver">Ingr.</button>
                             <button class="preset-btn" data-preset="leader">Lider</button>
                             <button class="preset-btn" data-preset="artist">Artist</button>
-                            <button class="preset-btn" data-preset="balanced">Echilibrat</button>
+                            <button class="preset-btn" data-preset="balanced">Echil.</button>
                         </div>
                     </div>
 
+                    <!-- Column 2: Visualization Panel -->
                     <div class="visualization-panel">
                         <div class="radar-container">
                             <svg viewBox="0 0 400 400" class="radar-svg" id="radar-chart">
@@ -1228,11 +1262,10 @@
                             </svg>
                         </div>
 
-                        <div class="profile-bars">
-                            <h4>Profilul Tău OCEAN</h4>
+                        <div class="profile-display">
                             <div class="bar-item">
                                 <div class="bar-header">
-                                    <span>Openness</span>
+                                    <span>O</span>
                                     <span id="bar-val-O">50%</span>
                                 </div>
                                 <div class="bar-track">
@@ -1241,7 +1274,7 @@
                             </div>
                             <div class="bar-item">
                                 <div class="bar-header">
-                                    <span>Conscientiousness</span>
+                                    <span>C</span>
                                     <span id="bar-val-C">50%</span>
                                 </div>
                                 <div class="bar-track">
@@ -1250,7 +1283,7 @@
                             </div>
                             <div class="bar-item">
                                 <div class="bar-header">
-                                    <span>Extraversion</span>
+                                    <span>E</span>
                                     <span id="bar-val-E">50%</span>
                                 </div>
                                 <div class="bar-track">
@@ -1259,7 +1292,7 @@
                             </div>
                             <div class="bar-item">
                                 <div class="bar-header">
-                                    <span>Agreeableness</span>
+                                    <span>A</span>
                                     <span id="bar-val-A">50%</span>
                                 </div>
                                 <div class="bar-track">
@@ -1268,7 +1301,7 @@
                             </div>
                             <div class="bar-item">
                                 <div class="bar-header">
-                                    <span>Neuroticism</span>
+                                    <span>N</span>
                                     <span id="bar-val-N">50%</span>
                                 </div>
                                 <div class="bar-track">
@@ -1276,19 +1309,22 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
 
+                    <!-- Column 3: Results Panel -->
+                    <div class="results-panel">
                         <div class="analysis-panel">
                             <div class="analysis-section">
                                 <h4>Profil General</h4>
-                                <p id="general-profile">Profil echilibrat pe toate dimensiunile, indicând flexibilitate și adaptabilitate.</p>
+                                <p id="general-profile">Profil echilibrat pe toate dimensiunile, indicand flexibilitate si adaptabilitate.</p>
                             </div>
                             <div class="analysis-section">
-                                <h4>În Context Profesional</h4>
-                                <p id="work-profile">Versatil în roluri diverse, poate necesita clarificarea preferințelor pentru specializare.</p>
+                                <h4>In Context Profesional</h4>
+                                <p id="work-profile">Versatil in roluri diverse, poate necesita clarificarea preferintelor pentru specializare.</p>
                             </div>
                             <div class="analysis-section">
-                                <h4>În Relații</h4>
-                                <p id="relationship-profile">Echilibrat între nevoile proprii și ale celorlalți, adaptabil la diferite tipuri de relații.</p>
+                                <h4>In Relatii</h4>
+                                <p id="relationship-profile">Echilibrat intre nevoile proprii si ale celorlalti, adaptabil la diferite tipuri de relatii.</p>
                             </div>
                         </div>
                     </div>

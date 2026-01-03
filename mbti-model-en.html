@@ -411,47 +411,54 @@
 
         /* === PLAYGROUND === */
         .playground-container {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        .playground-header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-        }
-
-        .playground-header h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .playground-header p {
-            color: var(--text-muted);
+            width: 100vw;
+            margin-left: calc(-50vw + 50%);
+            padding: 0;
         }
 
         .playground-grid {
             display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 2rem;
-            align-items: start;
+            grid-template-columns: 220px 1fr 260px;
+            gap: 0;
+            align-items: stretch;
+            height: calc(100vh - 160px);
+            min-height: 400px;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1000px) {
+            .playground-grid {
+                grid-template-columns: 200px 1fr 220px;
+            }
+        }
+
+        @media (max-width: 800px) {
+            .playground-grid {
+                grid-template-columns: 1fr 1fr;
+                height: auto;
+            }
+            .results-panel {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 600px) {
             .playground-grid {
                 grid-template-columns: 1fr;
+            }
+            .results-panel {
+                grid-column: span 1;
             }
         }
 
         .sliders-panel {
             background: var(--bg-card);
-            border-radius: 20px;
-            padding: 1.5rem;
+            padding: 0.75rem;
+            overflow-y: auto;
         }
 
         .slider-group {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.5rem;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
@@ -464,7 +471,19 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.5rem;
+            gap: 0.4rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .slider-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+        }
+
+        .slider-title {
+            font-size: 0.9rem;
         }
 
         .slider-poles {
@@ -476,40 +495,40 @@
         .pole-label {
             display: flex;
             align-items: center;
-            gap: 0.5rem;
-            font-size: 0.9rem;
+            gap: 0.3rem;
+            font-size: 0.7rem;
         }
 
         .pole-letter {
-            width: 28px;
-            height: 28px;
-            border-radius: 6px;
+            width: 22px;
+            height: 22px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 0.9rem;
+            font-size: 0.75rem;
         }
 
         .mbti-slider {
             width: 100%;
-            height: 8px;
-            border-radius: 4px;
+            height: 6px;
+            border-radius: 3px;
             outline: none;
             -webkit-appearance: none;
             cursor: pointer;
-            margin: 0.75rem 0;
+            margin: 0.4rem 0;
         }
 
         .mbti-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 24px;
-            height: 24px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
             background: var(--text-light);
-            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+            box-shadow: 0 0 8px rgba(255,255,255,0.5);
         }
 
         .mbti-slider::-webkit-slider-thumb:hover {
@@ -523,32 +542,37 @@
 
         .slider-value {
             text-align: center;
-            font-size: 0.85rem;
+            font-size: 1.1rem;
+            min-width: 30px;
             color: var(--text-muted);
+        }
+
+        .slider-labels {
+            display: none;
         }
 
         .preset-buttons {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 1.5rem;
-            padding-top: 1rem;
+            gap: 0.25rem;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
             border-top: 1px solid rgba(255,255,255,0.1);
         }
 
         .preset-label {
             width: 100%;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.15rem;
         }
 
         .preset-btn {
-            padding: 0.4rem 0.6rem;
+            padding: 0.2rem 0.4rem;
             border: 1px solid rgba(255,255,255,0.2);
             background: transparent;
             color: var(--text-light);
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 0.75rem;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -567,89 +591,128 @@
         .visualization-panel {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            padding: 0.5rem;
+            gap: 0.5rem;
+        }
+
+        .radar-container {
+            width: 100%;
+            max-width: 280px;
+            aspect-ratio: 1;
+            padding: 0;
+        }
+
+        .profile-display {
+            text-align: center;
+            padding: 0.25rem 0;
+        }
+
+        .code-display {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.15rem;
+            gap: 0.1rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .code-letter {
+            min-width: 32px;
+        }
+
+        .profile-name {
+            font-size: 0.8rem;
         }
 
         .type-display {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 2rem;
+            background: transparent;
+            border-radius: 0;
+            padding: 0;
             text-align: center;
         }
 
         .type-display-code {
             font-family: 'Playfair Display', serif;
-            font-size: 4rem;
+            font-size: 2rem;
             letter-spacing: 0.1em;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.15rem;
             display: flex;
             justify-content: center;
-            gap: 0.25rem;
+            gap: 0.1rem;
         }
 
         .type-letter {
-            min-width: 60px;
+            min-width: 32px;
             transition: all 0.3s ease;
         }
 
         .type-display-name {
-            font-size: 1.5rem;
+            font-size: 0.8rem;
             font-family: 'Playfair Display', serif;
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.15rem;
         }
 
         .type-display-subtitle {
             color: var(--text-muted);
-            font-size: 0.95rem;
+            font-size: 0.75rem;
         }
 
         .functions-panel {
             background: var(--bg-card);
-            border-radius: 20px;
-            padding: 1.5rem;
+            border-radius: 12px;
+            padding: 0.75rem;
         }
 
         .functions-panel h4 {
-            font-size: 1rem;
-            margin-bottom: 1rem;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
             color: var(--text-light);
         }
 
         .function-stack {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 0.3rem;
         }
 
         .function-item {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            padding: 0.5rem;
+            gap: 0.5rem;
+            padding: 0.3rem;
             background: rgba(255,255,255,0.03);
-            border-radius: 8px;
+            border-radius: 6px;
         }
 
         .function-position {
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             color: var(--text-muted);
-            width: 60px;
+            width: 50px;
         }
 
         .function-name {
             flex: 1;
-            font-size: 0.9rem;
+            font-size: 0.75rem;
+        }
+
+        .results-panel {
+            background: var(--bg-card);
+            padding: 0.75rem;
+            overflow-y: auto;
         }
 
         .analysis-panel {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 1.5rem;
+            background: transparent;
+            padding: 0;
         }
 
         .analysis-section {
-            margin-bottom: 1.25rem;
-            padding-bottom: 1.25rem;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
@@ -661,14 +724,14 @@
 
         .analysis-section h4 {
             font-size: 0.95rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.2rem;
             color: var(--text-light);
         }
 
         .analysis-section p {
             color: var(--text-muted);
-            font-size: 0.9rem;
-            line-height: 1.6;
+            font-size: 0.85rem;
+            line-height: 1.5;
         }
 
         /* === QUIZ === */
@@ -1116,22 +1179,16 @@
         <!-- PLAYGROUND TAB -->
         <div id="playground" class="tab-content">
             <div class="playground-container">
-                <div class="playground-header">
-                    <h2>MBTI Type Explorer</h2>
-                    <p>Adjust preferences on each axis to explore different personality types</p>
-                </div>
-
                 <div class="playground-grid">
+                    <!-- Column 1: Sliders -->
                     <div class="sliders-panel">
                         <div class="slider-group">
                             <div class="slider-header">
                                 <div class="slider-poles">
                                     <div class="pole-label">
                                         <span class="pole-letter" style="background: var(--introversion); color: white;">I</span>
-                                        <span>Introversion</span>
                                     </div>
                                     <div class="pole-label">
-                                        <span>Extraversion</span>
                                         <span class="pole-letter" style="background: var(--extraversion); color: white;">E</span>
                                     </div>
                                 </div>
@@ -1145,10 +1202,8 @@
                                 <div class="slider-poles">
                                     <div class="pole-label">
                                         <span class="pole-letter" style="background: var(--sensing); color: white;">S</span>
-                                        <span>Sensing</span>
                                     </div>
                                     <div class="pole-label">
-                                        <span>Intuition</span>
                                         <span class="pole-letter" style="background: var(--intuition); color: white;">N</span>
                                     </div>
                                 </div>
@@ -1162,10 +1217,8 @@
                                 <div class="slider-poles">
                                     <div class="pole-label">
                                         <span class="pole-letter" style="background: var(--thinking); color: white;">T</span>
-                                        <span>Thinking</span>
                                     </div>
                                     <div class="pole-label">
-                                        <span>Feeling</span>
                                         <span class="pole-letter" style="background: var(--feeling); color: white;">F</span>
                                     </div>
                                 </div>
@@ -1179,10 +1232,8 @@
                                 <div class="slider-poles">
                                     <div class="pole-label">
                                         <span class="pole-letter" style="background: var(--judging); color: white;">J</span>
-                                        <span>Judging</span>
                                     </div>
                                     <div class="pole-label">
-                                        <span>Perceiving</span>
                                         <span class="pole-letter" style="background: var(--perceiving); color: white;">P</span>
                                     </div>
                                 </div>
@@ -1192,7 +1243,7 @@
                         </div>
 
                         <div class="preset-buttons">
-                            <span class="preset-label">Popular Types:</span>
+                            <span class="preset-label">Presets:</span>
                             <button class="preset-btn analyst" data-preset="INTJ">INTJ</button>
                             <button class="preset-btn analyst" data-preset="INTP">INTP</button>
                             <button class="preset-btn analyst" data-preset="ENTJ">ENTJ</button>
@@ -1208,6 +1259,7 @@
                         </div>
                     </div>
 
+                    <!-- Column 2: Visualization -->
                     <div class="visualization-panel">
                         <div class="type-display" id="type-display">
                             <div class="type-display-code" id="type-code-display">
@@ -1219,7 +1271,10 @@
                             <div class="type-display-name" id="type-name-display">The Architect</div>
                             <div class="type-display-subtitle" id="type-subtitle">Strategic thinker with long-term vision</div>
                         </div>
+                    </div>
 
+                    <!-- Column 3: Results -->
+                    <div class="results-panel">
                         <div class="analysis-panel">
                             <div class="analysis-section">
                                 <h4>Description</h4>
@@ -1234,7 +1289,7 @@
                                 <p id="pg-challenges">Can be perceived as arrogant or overly critical. May ignore others' emotions.</p>
                             </div>
                             <div class="analysis-section">
-                                <h4>Suitable Careers</h4>
+                                <h4>Careers</h4>
                                 <p id="pg-careers">Scientist, engineer, architect, lawyer, business strategist, consultant.</p>
                             </div>
                         </div>

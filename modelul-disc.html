@@ -596,71 +596,78 @@
 
         /* === PLAYGROUND === */
         .playground-container {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        .playground-header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-        }
-
-        .playground-header h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .playground-header p {
-            color: var(--text-muted);
+            width: 100vw;
+            margin-left: calc(-50vw + 50%);
+            padding: 0;
         }
 
         .playground-grid {
             display: grid;
-            grid-template-columns: 1fr 1.2fr;
-            gap: 2rem;
-            align-items: start;
+            grid-template-columns: 220px 1fr 260px;
+            gap: 0;
+            align-items: stretch;
+            height: calc(100vh - 160px);
+            min-height: 400px;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1000px) {
+            .playground-grid {
+                grid-template-columns: 200px 1fr 220px;
+            }
+        }
+
+        @media (max-width: 800px) {
+            .playground-grid {
+                grid-template-columns: 1fr 1fr;
+                height: auto;
+            }
+            .results-panel {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 600px) {
             .playground-grid {
                 grid-template-columns: 1fr;
+            }
+            .results-panel {
+                grid-column: span 1;
             }
         }
 
         .sliders-panel {
             background: var(--bg-card);
-            border-radius: 20px;
-            padding: 1.5rem;
+            padding: 0.75rem;
+            overflow-y: auto;
         }
 
         .slider-group {
-            margin-bottom: 1.5rem;
-            padding-bottom: 1.5rem;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
         .slider-group:last-of-type {
             border-bottom: none;
-            margin-bottom: 1rem;
+            margin-bottom: 0.25rem;
         }
 
         .slider-header {
             display: flex;
             align-items: center;
-            gap: 1rem;
-            margin-bottom: 0.75rem;
+            gap: 0.4rem;
+            margin-bottom: 0.25rem;
         }
 
         .slider-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-family: 'Playfair Display', serif;
-            font-size: 1.3rem;
+            font-size: 0.85rem;
             font-weight: 700;
         }
 
@@ -673,20 +680,21 @@
 
         .slider-title {
             font-weight: 600;
+            font-size: 0.9rem;
         }
 
         .slider-value {
-            font-size: 1.5rem;
+            font-size: 1.1rem;
             font-weight: 700;
             font-family: 'Playfair Display', serif;
-            min-width: 50px;
+            min-width: 30px;
             text-align: right;
         }
 
         .disc-slider {
             width: 100%;
-            height: 8px;
-            border-radius: 4px;
+            height: 6px;
+            border-radius: 3px;
             background: rgba(255,255,255,0.1);
             outline: none;
             -webkit-appearance: none;
@@ -695,8 +703,8 @@
 
         .disc-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 24px;
-            height: 24px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             cursor: pointer;
             transition: transform 0.2s, box-shadow 0.2s;
@@ -706,44 +714,38 @@
             transform: scale(1.2);
         }
 
-        .slider-d::-webkit-slider-thumb { background: var(--dominance); box-shadow: 0 0 15px var(--dominance); }
-        .slider-i::-webkit-slider-thumb { background: var(--influence); box-shadow: 0 0 15px var(--influence); }
-        .slider-s::-webkit-slider-thumb { background: var(--steadiness); box-shadow: 0 0 15px var(--steadiness); }
-        .slider-c::-webkit-slider-thumb { background: var(--conscientiousness); box-shadow: 0 0 15px var(--conscientiousness); }
+        .slider-d::-webkit-slider-thumb { background: var(--dominance); box-shadow: 0 0 10px var(--dominance); }
+        .slider-i::-webkit-slider-thumb { background: var(--influence); box-shadow: 0 0 10px var(--influence); }
+        .slider-s::-webkit-slider-thumb { background: var(--steadiness); box-shadow: 0 0 10px var(--steadiness); }
+        .slider-c::-webkit-slider-thumb { background: var(--conscientiousness); box-shadow: 0 0 10px var(--conscientiousness); }
 
         .slider-labels {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.7rem;
-            color: var(--text-muted);
-            margin-top: 0.4rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            display: none;
         }
 
         .preset-buttons {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 1rem;
-            padding-top: 1rem;
+            gap: 0.25rem;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
             border-top: 1px solid rgba(255,255,255,0.1);
         }
 
         .preset-label {
             width: 100%;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.15rem;
         }
 
         .preset-btn {
-            padding: 0.5rem 0.8rem;
+            padding: 0.2rem 0.4rem;
             border: 1px solid rgba(255,255,255,0.2);
             background: transparent;
             color: var(--text-light);
-            border-radius: 20px;
-            font-size: 0.8rem;
+            border-radius: 8px;
+            font-size: 0.75rem;
             cursor: pointer;
             transition: all 0.3s ease;
             font-family: 'Source Sans 3', sans-serif;
@@ -757,17 +759,17 @@
         .visualization-panel {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            padding: 0.5rem;
         }
 
         .radar-container {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 1.5rem;
-            aspect-ratio: 1;
-            max-width: 400px;
-            margin: 0 auto;
             width: 100%;
+            max-width: 280px;
+            aspect-ratio: 1;
+            padding: 0;
         }
 
         .radar-svg {
@@ -799,25 +801,23 @@
         }
 
         .profile-display {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 1.5rem;
             text-align: center;
+            padding: 0.25rem 0;
         }
 
         .code-display {
             font-family: 'Playfair Display', serif;
-            font-size: 3.5rem;
-            letter-spacing: 0.15em;
-            margin-bottom: 0.5rem;
+            font-size: 2rem;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.15rem;
             display: flex;
             justify-content: center;
-            gap: 0.25rem;
+            gap: 0.1rem;
         }
 
         .code-letter {
             transition: all 0.3s ease;
-            min-width: 60px;
+            min-width: 32px;
         }
 
         .code-letter.dim {
@@ -830,19 +830,24 @@
         }
 
         .profile-name {
-            font-size: 1.1rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
         }
 
-        .analysis-panel {
+        .results-panel {
             background: var(--bg-card);
-            border-radius: 20px;
-            padding: 1.5rem;
+            padding: 0.75rem;
+            overflow-y: auto;
+        }
+
+        .analysis-panel {
+            background: transparent;
+            padding: 0;
         }
 
         .analysis-section {
-            margin-bottom: 1.25rem;
-            padding-bottom: 1.25rem;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
@@ -854,14 +859,14 @@
 
         .analysis-section h4 {
             font-size: 0.95rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.3rem;
             color: var(--text-light);
         }
 
         .analysis-section p {
             color: var(--text-muted);
-            font-size: 0.9rem;
-            line-height: 1.6;
+            font-size: 0.85rem;
+            line-height: 1.5;
         }
     </style>
 </head>
@@ -1017,12 +1022,8 @@
         <!-- TAB PLAYGROUND -->
         <div id="playground" class="tab-content">
             <div class="playground-container">
-                <div class="playground-header">
-                    <h2>Simulatorul de Profil DISC</h2>
-                    <p>Ajustează nivelul fiecărei dimensiuni și observă cum se schimbă profilul</p>
-                </div>
-
                 <div class="playground-grid">
+                    <!-- Column 1: Controls -->
                     <div class="sliders-panel">
                         <div class="slider-group" data-role="D">
                             <div class="slider-header">
@@ -1034,8 +1035,7 @@
                             </div>
                             <input type="range" min="0" max="100" value="50" class="disc-slider slider-d" id="slider-D">
                             <div class="slider-labels">
-                                <span>Scăzut</span>
-                                <span>Moderat</span>
+                                <span>Scazut</span>
                                 <span>Ridicat</span>
                             </div>
                         </div>
@@ -1050,8 +1050,7 @@
                             </div>
                             <input type="range" min="0" max="100" value="50" class="disc-slider slider-i" id="slider-I">
                             <div class="slider-labels">
-                                <span>Scăzut</span>
-                                <span>Moderat</span>
+                                <span>Scazut</span>
                                 <span>Ridicat</span>
                             </div>
                         </div>
@@ -1066,8 +1065,7 @@
                             </div>
                             <input type="range" min="0" max="100" value="50" class="disc-slider slider-s" id="slider-S">
                             <div class="slider-labels">
-                                <span>Scăzut</span>
-                                <span>Moderat</span>
+                                <span>Scazut</span>
                                 <span>Ridicat</span>
                             </div>
                         </div>
@@ -1076,58 +1074,47 @@
                             <div class="slider-header">
                                 <div class="slider-icon" style="background: var(--conscientiousness);">C</div>
                                 <div class="slider-info">
-                                    <span class="slider-title">Conscientiousness</span>
+                                    <span class="slider-title">Conscientious.</span>
                                     <span class="slider-value" id="val-C">50</span>
                                 </div>
                             </div>
                             <input type="range" min="0" max="100" value="50" class="disc-slider slider-c" id="slider-C">
                             <div class="slider-labels">
-                                <span>Scăzut</span>
-                                <span>Moderat</span>
+                                <span>Scazut</span>
                                 <span>Ridicat</span>
                             </div>
                         </div>
 
                         <div class="preset-buttons">
-                            <span class="preset-label">Profile Predefinite:</span>
-                            <button class="preset-btn" data-preset="driver">Driver (Di)</button>
-                            <button class="preset-btn" data-preset="influencer">Influencer (iD)</button>
-                            <button class="preset-btn" data-preset="supporter">Supporter (Si)</button>
-                            <button class="preset-btn" data-preset="analyst">Analyst (Cs)</button>
-                            <button class="preset-btn" data-preset="salesman">Vânzător (ID)</button>
+                            <span class="preset-label">Presets:</span>
+                            <button class="preset-btn" data-preset="driver">Driver</button>
+                            <button class="preset-btn" data-preset="influencer">Influencer</button>
+                            <button class="preset-btn" data-preset="supporter">Supporter</button>
+                            <button class="preset-btn" data-preset="analyst">Analyst</button>
                             <button class="preset-btn" data-preset="balanced">Echilibrat</button>
                         </div>
                     </div>
 
+                    <!-- Column 2: Chart -->
                     <div class="visualization-panel">
                         <div class="radar-container">
                             <svg viewBox="0 0 400 400" id="radar-chart" class="radar-svg">
-                                <!-- Background circles -->
                                 <circle cx="200" cy="200" r="150" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
                                 <circle cx="200" cy="200" r="100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
                                 <circle cx="200" cy="200" r="50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
-
-                                <!-- Axis lines -->
                                 <line x1="200" y1="50" x2="200" y2="350" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
                                 <line x1="50" y1="200" x2="350" y2="200" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
-
-                                <!-- Radar polygon -->
                                 <polygon id="radar-polygon" class="radar-polygon" points="200,125 275,200 200,275 125,200"/>
-
-                                <!-- Data points -->
                                 <circle id="point-D" cx="200" cy="125" r="8" class="radar-point point-d"/>
                                 <circle id="point-I" cx="275" cy="200" r="8" class="radar-point point-i"/>
                                 <circle id="point-S" cx="200" cy="275" r="8" class="radar-point point-s"/>
                                 <circle id="point-C" cx="125" cy="200" r="8" class="radar-point point-c"/>
-
-                                <!-- Labels -->
                                 <text x="200" y="30" text-anchor="middle" class="radar-label">D</text>
                                 <text x="370" y="205" text-anchor="middle" class="radar-label">I</text>
                                 <text x="200" y="385" text-anchor="middle" class="radar-label">S</text>
                                 <text x="30" y="205" text-anchor="middle" class="radar-label">C</text>
                             </svg>
                         </div>
-
                         <div class="profile-display">
                             <div class="code-display">
                                 <span class="code-letter" id="code-D" style="color: var(--dominance);">D</span>
@@ -1137,19 +1124,22 @@
                             </div>
                             <div class="profile-name" id="profile-name">Profil Echilibrat</div>
                         </div>
+                    </div>
 
+                    <!-- Column 3: Results -->
+                    <div class="results-panel">
                         <div class="analysis-panel" id="analysis-panel">
                             <div class="analysis-section">
                                 <h4>Stil de Comunicare</h4>
-                                <p id="communication">Cu un profil echilibrat, te adaptezi ușor la diferite stiluri de comunicare.</p>
+                                <p id="communication">Cu un profil echilibrat, te adaptezi usor la diferite stiluri de comunicare.</p>
                             </div>
                             <div class="analysis-section">
                                 <h4>Puncte Forte</h4>
-                                <p id="strengths">Versatilitate și adaptabilitate în diverse contexte.</p>
+                                <p id="strengths">Versatilitate si adaptabilitate în diverse contexte.</p>
                             </div>
                             <div class="analysis-section">
-                                <h4>Provocări Potențiale</h4>
-                                <p id="challenges">Poate fi dificil să-ți identifici un stil dominant clar.</p>
+                                <h4>Provocari Potentiale</h4>
+                                <p id="challenges">Poate fi dificil sa-ti identifici un stil dominant clar.</p>
                             </div>
                         </div>
                     </div>

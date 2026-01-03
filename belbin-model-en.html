@@ -427,56 +427,64 @@
 
         /* === PLAYGROUND === */
         .playground-container {
-            max-width: 1100px;
-            margin: 0 auto;
-        }
-
-        .playground-header {
-            text-align: center;
-            margin-bottom: 2.5rem;
-        }
-
-        .playground-header h2 {
-            font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-        }
-
-        .playground-header p {
-            color: var(--text-muted);
+            width: 100vw;
+            margin-left: calc(-50vw + 50%);
+            padding: 0;
         }
 
         .playground-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
-            align-items: start;
+            grid-template-columns: 220px 1fr 260px;
+            gap: 0;
+            align-items: stretch;
+            height: calc(100vh - 160px);
+            min-height: 400px;
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 1000px) {
+            .playground-grid {
+                grid-template-columns: 200px 1fr 220px;
+            }
+        }
+
+        @media (max-width: 800px) {
+            .playground-grid {
+                grid-template-columns: 1fr 1fr;
+                height: auto;
+            }
+            .results-panel {
+                grid-column: span 2;
+            }
+        }
+
+        @media (max-width: 600px) {
             .playground-grid {
                 grid-template-columns: 1fr;
+            }
+            .results-panel {
+                grid-column: span 1;
             }
         }
 
         .sliders-panel {
             background: var(--bg-card);
-            border-radius: 20px;
-            padding: 1.5rem;
+            border-radius: 0;
+            padding: 0.5rem;
+            overflow-y: auto;
         }
 
         .slider-category {
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.5rem;
         }
 
         .slider-category-label {
-            font-size: 0.8rem;
+            font-size: 0.6rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            margin-bottom: 0.75rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
+            margin-bottom: 0.4rem;
+            padding: 0.15rem 0.35rem;
+            border-radius: 3px;
             display: inline-block;
         }
 
@@ -487,22 +495,22 @@
         .slider-group {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            margin-bottom: 0.75rem;
-            padding: 0.5rem;
+            gap: 0.4rem;
+            margin-bottom: 0.25rem;
+            padding: 0.25rem;
             background: rgba(255,255,255,0.02);
-            border-radius: 8px;
+            border-radius: 6px;
         }
 
         .slider-abbr {
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
+            width: 26px;
+            height: 26px;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             color: white;
             flex-shrink: 0;
         }
@@ -512,14 +520,18 @@
         }
 
         .slider-label {
-            font-size: 0.85rem;
-            margin-bottom: 0.25rem;
+            font-size: 0.9rem;
+            margin-bottom: 0.1rem;
+        }
+
+        .slider-labels {
+            display: none;
         }
 
         .belbin-slider {
             width: 100%;
-            height: 6px;
-            border-radius: 3px;
+            height: 5px;
+            border-radius: 2px;
             background: rgba(255,255,255,0.1);
             outline: none;
             -webkit-appearance: none;
@@ -528,8 +540,8 @@
 
         .belbin-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 18px;
-            height: 18px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
             cursor: pointer;
             transition: transform 0.2s;
@@ -540,31 +552,31 @@
         }
 
         .slider-value {
-            width: 35px;
+            min-width: 28px;
             text-align: right;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 1.1rem;
             flex-shrink: 0;
         }
 
         .preset-buttons {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
-            margin-top: 1rem;
-            padding-top: 1rem;
+            gap: 0.3rem;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
             border-top: 1px solid rgba(255,255,255,0.1);
         }
 
         .preset-label {
             width: 100%;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
-            margin-bottom: 0.25rem;
+            margin-bottom: 0.15rem;
         }
 
         .preset-btn {
-            padding: 0.4rem 0.7rem;
+            padding: 0.15rem 0.35rem;
             border: 1px solid rgba(255,255,255,0.2);
             background: transparent;
             color: var(--text-light);
@@ -582,18 +594,23 @@
         .visualization-panel {
             display: flex;
             flex-direction: column;
-            gap: 1.5rem;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border-radius: 0;
+            padding: 0.5rem;
+            gap: 0.5rem;
         }
 
         .radar-container {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 1.5rem;
+            background: transparent;
+            border-radius: 0;
+            padding: 0;
         }
 
         .radar-svg {
             width: 100%;
-            max-width: 400px;
+            max-width: 280px;
             margin: 0 auto;
             display: block;
         }
@@ -618,42 +635,42 @@
         }
 
         .profile-display {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 1.5rem;
+            text-align: center;
+            padding: 0.5rem 0;
+            width: 100%;
         }
 
         .profile-display h4 {
-            font-size: 1rem;
-            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            margin-bottom: 0.5rem;
             text-align: center;
         }
 
         .top-roles {
             display: flex;
             flex-direction: column;
-            gap: 0.75rem;
+            gap: 0.5rem;
         }
 
         .top-role-item {
             display: flex;
             align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem;
+            gap: 0.5rem;
+            padding: 0.5rem;
             background: rgba(255,255,255,0.03);
-            border-radius: 10px;
+            border-radius: 8px;
         }
 
         .top-role-rank {
-            width: 28px;
-            height: 28px;
+            width: 22px;
+            height: 22px;
             border-radius: 50%;
             background: rgba(255,255,255,0.1);
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 0.85rem;
+            font-size: 0.7rem;
         }
 
         .top-role-rank.first { background: linear-gradient(135deg, #FFD700, #FFA500); color: #1a1a2e; }
@@ -666,28 +683,34 @@
 
         .top-role-name {
             font-weight: 600;
-            font-size: 0.95rem;
+            font-size: 0.8rem;
         }
 
         .top-role-category {
-            font-size: 0.8rem;
+            font-size: 0.65rem;
             color: var(--text-muted);
         }
 
         .top-role-score {
             font-weight: 700;
-            font-size: 1.1rem;
+            font-size: 0.9rem;
+        }
+
+        .results-panel {
+            background: var(--bg-card);
+            border-radius: 0;
+            padding: 0.75rem;
+            overflow-y: auto;
         }
 
         .analysis-panel {
-            background: var(--bg-card);
-            border-radius: 20px;
-            padding: 1.5rem;
+            background: transparent;
+            padding: 0;
         }
 
         .analysis-section {
-            margin-bottom: 1.25rem;
-            padding-bottom: 1.25rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.75rem;
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
@@ -699,14 +722,15 @@
 
         .analysis-section h4 {
             font-size: 0.95rem;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.3rem;
             color: var(--text-light);
+            line-height: 1.4;
         }
 
         .analysis-section p {
             color: var(--text-muted);
-            font-size: 0.9rem;
-            line-height: 1.6;
+            font-size: 0.85rem;
+            line-height: 1.5;
         }
 
         /* === QUIZ === */
@@ -1095,19 +1119,14 @@
         <!-- TAB PLAYGROUND -->
         <div id="playground" class="tab-content">
             <div class="playground-container">
-                <div class="playground-header">
-                    <h2>Belbin Profile Simulator</h2>
-                    <p>Adjust each role's level and observe the team profile</p>
-                </div>
-
                 <div class="playground-grid">
+                    <!-- Column 1: Sliders -->
                     <div class="sliders-panel">
                         <div class="slider-category">
                             <div class="slider-category-label action">Action</div>
                             <div class="slider-group">
                                 <div class="slider-abbr" style="background: var(--shaper);">SH</div>
                                 <div class="slider-content">
-                                    <div class="slider-label">Shaper</div>
                                     <input type="range" min="0" max="100" value="50" class="belbin-slider" id="slider-SH" style="background: linear-gradient(90deg, rgba(220,38,38,0.3), var(--shaper));">
                                 </div>
                                 <div class="slider-value" id="val-SH">50</div>
@@ -1115,7 +1134,6 @@
                             <div class="slider-group">
                                 <div class="slider-abbr" style="background: var(--implementer);">IMP</div>
                                 <div class="slider-content">
-                                    <div class="slider-label">Implementer</div>
                                     <input type="range" min="0" max="100" value="50" class="belbin-slider" id="slider-IMP" style="background: linear-gradient(90deg, rgba(249,115,22,0.3), var(--implementer));">
                                 </div>
                                 <div class="slider-value" id="val-IMP">50</div>
@@ -1123,7 +1141,6 @@
                             <div class="slider-group">
                                 <div class="slider-abbr" style="background: var(--completer);">CF</div>
                                 <div class="slider-content">
-                                    <div class="slider-label">Completer Finisher</div>
                                     <input type="range" min="0" max="100" value="50" class="belbin-slider" id="slider-CF" style="background: linear-gradient(90deg, rgba(251,191,36,0.3), var(--completer));">
                                 </div>
                                 <div class="slider-value" id="val-CF">50</div>
@@ -1135,7 +1152,6 @@
                             <div class="slider-group">
                                 <div class="slider-abbr" style="background: var(--coordinator);">CO</div>
                                 <div class="slider-content">
-                                    <div class="slider-label">Coordinator</div>
                                     <input type="range" min="0" max="100" value="50" class="belbin-slider" id="slider-CO" style="background: linear-gradient(90deg, rgba(16,185,129,0.3), var(--coordinator));">
                                 </div>
                                 <div class="slider-value" id="val-CO">50</div>
@@ -1143,7 +1159,6 @@
                             <div class="slider-group">
                                 <div class="slider-abbr" style="background: var(--teamworker);">TW</div>
                                 <div class="slider-content">
-                                    <div class="slider-label">Teamworker</div>
                                     <input type="range" min="0" max="100" value="50" class="belbin-slider" id="slider-TW" style="background: linear-gradient(90deg, rgba(20,184,166,0.3), var(--teamworker));">
                                 </div>
                                 <div class="slider-value" id="val-TW">50</div>
@@ -1151,7 +1166,6 @@
                             <div class="slider-group">
                                 <div class="slider-abbr" style="background: var(--investigator);">RI</div>
                                 <div class="slider-content">
-                                    <div class="slider-label">Resource Investigator</div>
                                     <input type="range" min="0" max="100" value="50" class="belbin-slider" id="slider-RI" style="background: linear-gradient(90deg, rgba(6,182,212,0.3), var(--investigator));">
                                 </div>
                                 <div class="slider-value" id="val-RI">50</div>
@@ -1163,7 +1177,6 @@
                             <div class="slider-group">
                                 <div class="slider-abbr" style="background: var(--plant);">PL</div>
                                 <div class="slider-content">
-                                    <div class="slider-label">Plant</div>
                                     <input type="range" min="0" max="100" value="50" class="belbin-slider" id="slider-PL" style="background: linear-gradient(90deg, rgba(139,92,246,0.3), var(--plant));">
                                 </div>
                                 <div class="slider-value" id="val-PL">50</div>
@@ -1171,7 +1184,6 @@
                             <div class="slider-group">
                                 <div class="slider-abbr" style="background: var(--monitor);">ME</div>
                                 <div class="slider-content">
-                                    <div class="slider-label">Monitor Evaluator</div>
                                     <input type="range" min="0" max="100" value="50" class="belbin-slider" id="slider-ME" style="background: linear-gradient(90deg, rgba(99,102,241,0.3), var(--monitor));">
                                 </div>
                                 <div class="slider-value" id="val-ME">50</div>
@@ -1179,7 +1191,6 @@
                             <div class="slider-group">
                                 <div class="slider-abbr" style="background: var(--specialist);">SP</div>
                                 <div class="slider-content">
-                                    <div class="slider-label">Specialist</div>
                                     <input type="range" min="0" max="100" value="50" class="belbin-slider" id="slider-SP" style="background: linear-gradient(90deg, rgba(59,130,246,0.3), var(--specialist));">
                                 </div>
                                 <div class="slider-value" id="val-SP">50</div>
@@ -1187,28 +1198,24 @@
                         </div>
 
                         <div class="preset-buttons">
-                            <span class="preset-label">Preset Profiles:</span>
-                            <button class="preset-btn" data-preset="leader">Natural Leader</button>
+                            <span class="preset-label">Presets:</span>
+                            <button class="preset-btn" data-preset="leader">Leader</button>
                             <button class="preset-btn" data-preset="creative">Creative</button>
                             <button class="preset-btn" data-preset="executor">Executor</button>
                             <button class="preset-btn" data-preset="analyst">Analyst</button>
-                            <button class="preset-btn" data-preset="networker">Networker</button>
-                            <button class="preset-btn" data-preset="balanced">Balanced</button>
+                            <button class="preset-btn" data-preset="networker">Network</button>
+                            <button class="preset-btn" data-preset="balanced">Balance</button>
                         </div>
                     </div>
 
+                    <!-- Column 2: Visualization -->
                     <div class="visualization-panel">
                         <div class="radar-container">
                             <svg viewBox="0 0 400 400" class="radar-svg" id="radar-chart">
-                                <!-- Background grid -->
                                 <polygon class="radar-grid" points="200,50 320,95 355,200 320,305 200,350 80,305 45,200 80,95" />
                                 <polygon class="radar-grid" points="200,100 270,130 295,200 270,270 200,300 130,270 105,200 130,130" transform="scale(0.66) translate(100,100)" />
                                 <polygon class="radar-grid" points="200,100 270,130 295,200 270,270 200,300 130,270 105,200 130,130" transform="scale(0.33) translate(300,300)" />
-
-                                <!-- Data polygon -->
                                 <polygon id="radar-polygon" class="radar-polygon" />
-
-                                <!-- Labels -->
                                 <text x="200" y="35" text-anchor="middle" class="radar-label">SH</text>
                                 <text x="335" y="90" text-anchor="start" class="radar-label">IMP</text>
                                 <text x="370" y="205" text-anchor="start" class="radar-label">CF</text>
@@ -1217,12 +1224,10 @@
                                 <text x="65" y="320" text-anchor="end" class="radar-label">RI</text>
                                 <text x="30" y="205" text-anchor="end" class="radar-label">PL</text>
                                 <text x="65" y="90" text-anchor="end" class="radar-label">ME</text>
-                                <text x="200" y="55" text-anchor="middle" class="radar-label" style="display:none;">SP</text>
                             </svg>
                         </div>
-
                         <div class="profile-display">
-                            <h4>Dominant Roles</h4>
+                            <h4>Top Roles</h4>
                             <div class="top-roles" id="top-roles">
                                 <div class="top-role-item">
                                     <div class="top-role-rank first">1</div>
@@ -1234,7 +1239,10 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
 
+                    <!-- Column 3: Results/Analysis -->
+                    <div class="results-panel">
                         <div class="analysis-panel">
                             <div class="analysis-section">
                                 <h4>Work Style</h4>

@@ -310,63 +310,118 @@
         .theory-card.blue-card li::before { color: var(--blue); }
 
         /* Playground Section */
-        .playground-section {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 2rem;
+        .playground-container {
+            width: 100vw;
+            margin-left: calc(-50vw + 50%);
+            padding: 0;
         }
 
-        @media (max-width: 900px) {
-            .playground-section {
-                grid-template-columns: 1fr;
+        .playground-grid {
+            display: grid;
+            grid-template-columns: 220px 1fr 260px;
+            gap: 0;
+            align-items: stretch;
+            height: calc(100vh - 160px);
+            min-height: 400px;
+        }
+
+        @media (max-width: 1000px) {
+            .playground-grid {
+                grid-template-columns: 200px 1fr 220px;
             }
         }
 
-        .controls-panel {
-            background: var(--bg-card);
-            border-radius: 15px;
-            padding: 2rem;
-            border: 1px solid var(--border);
+        @media (max-width: 800px) {
+            .playground-grid {
+                grid-template-columns: 1fr 1fr;
+                height: auto;
+            }
+            .results-panel {
+                grid-column: span 2;
+            }
         }
 
-        .controls-panel h2 {
-            margin-bottom: 1.5rem;
+        @media (max-width: 600px) {
+            .playground-grid {
+                grid-template-columns: 1fr;
+            }
+            .results-panel {
+                grid-column: span 1;
+            }
+        }
+
+        .sliders-panel {
+            background: var(--bg-card);
+            padding: 0.75rem;
+            overflow-y: auto;
+            border-right: 1px solid var(--border);
+        }
+
+        .sliders-panel h3 {
+            margin-bottom: 0.5rem;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
+            font-size: 0.85rem;
         }
 
         .slider-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .slider-group:last-of-type {
+            border-bottom: none;
         }
 
         .slider-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 0.5rem;
+            gap: 0.4rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .slider-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slider-title {
+            font-size: 0.9rem;
+            font-weight: 500;
         }
 
         .slider-label {
             font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 0.5rem;
+            gap: 0.4rem;
         }
 
         .slider-value {
             background: var(--bg-dark);
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            min-width: 50px;
+            padding: 0.15rem 0.35rem;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            min-width: 30px;
             text-align: center;
+        }
+
+        .slider-labels {
+            display: none;
         }
 
         input[type="range"] {
             width: 100%;
-            height: 8px;
-            border-radius: 4px;
+            height: 6px;
+            border-radius: 3px;
             background: var(--bg-dark);
             outline: none;
             -webkit-appearance: none;
@@ -374,8 +429,8 @@
 
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 24px;
-            height: 24px;
+            width: 18px;
+            height: 18px;
             border-radius: 50%;
             cursor: pointer;
             transition: transform 0.2s;
@@ -390,34 +445,23 @@
         .slider-green::-webkit-slider-thumb { background: var(--green); }
         .slider-blue::-webkit-slider-thumb { background: var(--blue); }
 
-        .presets {
-            margin-top: 2rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid var(--border);
-        }
-
-        .presets h3 {
-            margin-bottom: 1rem;
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
         .preset-buttons {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.5rem;
+            gap: 0.25rem;
+            margin-top: 0.5rem;
+            padding-top: 0.5rem;
+            border-top: 1px solid var(--border);
         }
 
         .preset-btn {
-            padding: 0.5rem 1rem;
+            padding: 0.2rem 0.4rem;
             border: 1px solid var(--border);
             background: var(--bg-dark);
             color: var(--text-primary);
-            border-radius: 20px;
+            border-radius: 8px;
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             transition: all 0.3s ease;
         }
 
@@ -427,22 +471,20 @@
         }
 
         .visualization-panel {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             background: var(--bg-card);
-            border-radius: 15px;
-            padding: 2rem;
-            border: 1px solid var(--border);
-        }
-
-        .visualization-panel h2 {
-            margin-bottom: 1.5rem;
-            text-align: center;
+            padding: 0.5rem;
         }
 
         .wheel-container {
             position: relative;
-            width: 300px;
-            height: 300px;
-            margin: 0 auto 2rem auto;
+            width: 280px;
+            max-width: 280px;
+            aspect-ratio: 1;
+            padding: 0;
         }
 
         .color-wheel {
@@ -463,36 +505,61 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 60px;
-            height: 60px;
+            width: 50px;
+            height: 50px;
             background: var(--bg-dark);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            border: 3px solid var(--border);
+            font-size: 1.2rem;
+            border: 2px solid var(--border);
         }
 
         .profile-indicator {
             position: absolute;
-            width: 20px;
-            height: 20px;
+            width: 16px;
+            height: 16px;
             background: white;
             border-radius: 50%;
-            border: 3px solid var(--bg-dark);
+            border: 2px solid var(--bg-dark);
             transform: translate(-50%, -50%);
             transition: all 0.3s ease;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
             z-index: 10;
+        }
+
+        .profile-display {
+            text-align: center;
+            padding: 0.25rem 0;
+        }
+
+        .code-display {
+            display: flex;
+            justify-content: center;
+            font-size: 2rem;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.15rem;
+            gap: 0.1rem;
+        }
+
+        .code-letter {
+            min-width: 32px;
+            font-weight: bold;
+        }
+
+        .profile-name {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
         }
 
         .dominant-color {
             text-align: center;
-            padding: 1.5rem;
-            border-radius: 10px;
-            margin-bottom: 1.5rem;
+            padding: 0.5rem;
+            border-radius: 8px;
+            margin-bottom: 0.3rem;
             transition: all 0.3s ease;
+            width: 100%;
         }
 
         .dominant-color.red { background: linear-gradient(135deg, rgba(196, 30, 58, 0.3), rgba(196, 30, 58, 0.1)); border: 1px solid var(--red); }
@@ -501,43 +568,50 @@
         .dominant-color.blue { background: linear-gradient(135deg, rgba(30, 144, 255, 0.3), rgba(30, 144, 255, 0.1)); border: 1px solid var(--blue); }
 
         .dominant-color h3 {
-            font-size: 1.5rem;
-            margin-bottom: 0.25rem;
+            font-size: 1.1rem;
+            margin-bottom: 0.15rem;
         }
 
         .dominant-color p {
             color: var(--text-secondary);
-            font-size: 0.9rem;
+            font-size: 0.75rem;
+        }
+
+        .results-panel {
+            background: var(--bg-card);
+            padding: 0.75rem;
+            overflow-y: auto;
+            border-left: 1px solid var(--border);
         }
 
         .color-bars {
             display: grid;
-            gap: 0.75rem;
+            gap: 0.5rem;
         }
 
         .color-bar {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.5rem;
         }
 
         .color-bar-label {
-            width: 80px;
-            font-size: 0.85rem;
+            width: 60px;
+            font-size: 0.7rem;
             color: var(--text-secondary);
         }
 
         .color-bar-track {
             flex: 1;
-            height: 12px;
+            height: 8px;
             background: var(--bg-dark);
-            border-radius: 6px;
+            border-radius: 4px;
             overflow: hidden;
         }
 
         .color-bar-fill {
             height: 100%;
-            border-radius: 6px;
+            border-radius: 4px;
             transition: width 0.3s ease;
         }
 
@@ -547,28 +621,51 @@
         .color-bar-fill.blue { background: linear-gradient(90deg, var(--blue), var(--blue-light)); }
 
         .color-bar-value {
-            width: 40px;
+            width: 30px;
             text-align: right;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
         }
 
         .analysis-panel {
-            margin-top: 2rem;
-            padding: 1.5rem;
-            background: var(--bg-dark);
-            border-radius: 10px;
+            background: transparent;
+            padding: 0;
+        }
+
+        .analysis-section {
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .analysis-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .analysis-section h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.2rem;
+            color: var(--yellow);
+        }
+
+        .analysis-section p {
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: var(--text-secondary);
         }
 
         .analysis-panel h3 {
-            margin-bottom: 1rem;
-            font-size: 1rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.85rem;
             color: var(--yellow);
         }
 
         .analysis-panel p {
             color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-bottom: 0.75rem;
+            font-size: 0.75rem;
+            line-height: 1.4;
+            margin-bottom: 0.3rem;
         }
 
         /* Quiz Section */
@@ -1048,110 +1145,138 @@
 
         <!-- PLAYGROUND TAB -->
         <div id="playground" class="tab-content">
-            <div class="playground-section">
-                <div class="controls-panel">
-                    <h2>⚙️ Ajustează Energiile</h2>
+            <div class="playground-container">
+                <div class="playground-grid">
+                    <!-- Column 1: Sliders Panel -->
+                    <div class="sliders-panel">
+                        <h3>Energii</h3>
 
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <span class="slider-label">🔥 Fiery Red</span>
-                            <span class="slider-value" id="red-value">50</span>
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label">🔥 Red</span>
+                                <span class="slider-value" id="red-value">50</span>
+                            </div>
+                            <input type="range" id="red-slider" class="slider-red" min="0" max="100" value="50">
+                            <div class="slider-labels">
+                                <span>0</span>
+                                <span>100</span>
+                            </div>
                         </div>
-                        <input type="range" id="red-slider" class="slider-red" min="0" max="100" value="50">
-                    </div>
 
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <span class="slider-label">☀️ Sunshine Yellow</span>
-                            <span class="slider-value" id="yellow-value">50</span>
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label">☀️ Yellow</span>
+                                <span class="slider-value" id="yellow-value">50</span>
+                            </div>
+                            <input type="range" id="yellow-slider" class="slider-yellow" min="0" max="100" value="50">
+                            <div class="slider-labels">
+                                <span>0</span>
+                                <span>100</span>
+                            </div>
                         </div>
-                        <input type="range" id="yellow-slider" class="slider-yellow" min="0" max="100" value="50">
-                    </div>
 
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <span class="slider-label">🌿 Earth Green</span>
-                            <span class="slider-value" id="green-value">50</span>
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label">🌿 Green</span>
+                                <span class="slider-value" id="green-value">50</span>
+                            </div>
+                            <input type="range" id="green-slider" class="slider-green" min="0" max="100" value="50">
+                            <div class="slider-labels">
+                                <span>0</span>
+                                <span>100</span>
+                            </div>
                         </div>
-                        <input type="range" id="green-slider" class="slider-green" min="0" max="100" value="50">
-                    </div>
 
-                    <div class="slider-group">
-                        <div class="slider-header">
-                            <span class="slider-label">❄️ Cool Blue</span>
-                            <span class="slider-value" id="blue-value">50</span>
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <span class="slider-label">❄️ Blue</span>
+                                <span class="slider-value" id="blue-value">50</span>
+                            </div>
+                            <input type="range" id="blue-slider" class="slider-blue" min="0" max="100" value="50">
+                            <div class="slider-labels">
+                                <span>0</span>
+                                <span>100</span>
+                            </div>
                         </div>
-                        <input type="range" id="blue-slider" class="slider-blue" min="0" max="100" value="50">
-                    </div>
 
-                    <div class="presets">
-                        <h3>Profile Predefinite</h3>
                         <div class="preset-buttons">
-                            <button class="preset-btn" data-preset="director">Director</button>
-                            <button class="preset-btn" data-preset="inspirator">Inspirator</button>
-                            <button class="preset-btn" data-preset="suporter">Suporter</button>
-                            <button class="preset-btn" data-preset="analist">Analist</button>
-                            <button class="preset-btn" data-preset="motivator">Motivator</button>
-                            <button class="preset-btn" data-preset="coordonator">Coordonator</button>
-                            <button class="preset-btn" data-preset="echilibrat">Echilibrat</button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="visualization-panel">
-                    <h2>Profilul Tău de Energie</h2>
-
-                    <div class="wheel-container">
-                        <div class="color-wheel">
-                            <div class="profile-indicator" id="profile-indicator"></div>
-                        </div>
-                        <div class="wheel-center" id="wheel-emoji">⚡</div>
-                    </div>
-
-                    <div class="dominant-color" id="dominant-display">
-                        <h3 id="dominant-title">Profil Echilibrat</h3>
-                        <p id="dominant-subtitle">Energie distribuită uniform</p>
-                    </div>
-
-                    <div class="color-bars">
-                        <div class="color-bar">
-                            <span class="color-bar-label">Fiery Red</span>
-                            <div class="color-bar-track">
-                                <div class="color-bar-fill red" id="bar-red" style="width: 50%"></div>
-                            </div>
-                            <span class="color-bar-value" id="bar-red-value">50%</span>
-                        </div>
-                        <div class="color-bar">
-                            <span class="color-bar-label">Sunshine Yellow</span>
-                            <div class="color-bar-track">
-                                <div class="color-bar-fill yellow" id="bar-yellow" style="width: 50%"></div>
-                            </div>
-                            <span class="color-bar-value" id="bar-yellow-value">50%</span>
-                        </div>
-                        <div class="color-bar">
-                            <span class="color-bar-label">Earth Green</span>
-                            <div class="color-bar-track">
-                                <div class="color-bar-fill green" id="bar-green" style="width: 50%"></div>
-                            </div>
-                            <span class="color-bar-value" id="bar-green-value">50%</span>
-                        </div>
-                        <div class="color-bar">
-                            <span class="color-bar-label">Cool Blue</span>
-                            <div class="color-bar-track">
-                                <div class="color-bar-fill blue" id="bar-blue" style="width: 50%"></div>
-                            </div>
-                            <span class="color-bar-value" id="bar-blue-value">50%</span>
+                            <button class="preset-btn" data-preset="director">Dir</button>
+                            <button class="preset-btn" data-preset="inspirator">Insp</button>
+                            <button class="preset-btn" data-preset="suporter">Sup</button>
+                            <button class="preset-btn" data-preset="analist">Ana</button>
+                            <button class="preset-btn" data-preset="motivator">Mot</button>
+                            <button class="preset-btn" data-preset="coordonator">Coord</button>
+                            <button class="preset-btn" data-preset="echilibrat">Echil</button>
                         </div>
                     </div>
 
-                    <div class="analysis-panel">
-                        <h3>📊 Analiză</h3>
-                        <p id="analysis-text">
-                            Profilul echilibrat sugerează versatilitate și adaptabilitate în diferite situații.
-                            Poți accesa fiecare energie în funcție de context.
-                        </p>
-                        <p id="analysis-strength"></p>
-                        <p id="analysis-growth"></p>
+                    <!-- Column 2: Visualization Panel -->
+                    <div class="visualization-panel">
+                        <div class="wheel-container">
+                            <div class="color-wheel">
+                                <div class="profile-indicator" id="profile-indicator"></div>
+                            </div>
+                            <div class="wheel-center" id="wheel-emoji">⚡</div>
+                        </div>
+
+                        <div class="profile-display">
+                            <div class="dominant-color" id="dominant-display">
+                                <h3 id="dominant-title">Profil Echilibrat</h3>
+                                <p id="dominant-subtitle">Energie distribuita uniform</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Column 3: Results Panel -->
+                    <div class="results-panel">
+                        <div class="color-bars">
+                            <div class="color-bar">
+                                <span class="color-bar-label">Fiery Red</span>
+                                <div class="color-bar-track">
+                                    <div class="color-bar-fill red" id="bar-red" style="width: 50%"></div>
+                                </div>
+                                <span class="color-bar-value" id="bar-red-value">50%</span>
+                            </div>
+                            <div class="color-bar">
+                                <span class="color-bar-label">Sunshine Yellow</span>
+                                <div class="color-bar-track">
+                                    <div class="color-bar-fill yellow" id="bar-yellow" style="width: 50%"></div>
+                                </div>
+                                <span class="color-bar-value" id="bar-yellow-value">50%</span>
+                            </div>
+                            <div class="color-bar">
+                                <span class="color-bar-label">Earth Green</span>
+                                <div class="color-bar-track">
+                                    <div class="color-bar-fill green" id="bar-green" style="width: 50%"></div>
+                                </div>
+                                <span class="color-bar-value" id="bar-green-value">50%</span>
+                            </div>
+                            <div class="color-bar">
+                                <span class="color-bar-label">Cool Blue</span>
+                                <div class="color-bar-track">
+                                    <div class="color-bar-fill blue" id="bar-blue" style="width: 50%"></div>
+                                </div>
+                                <span class="color-bar-value" id="bar-blue-value">50%</span>
+                            </div>
+                        </div>
+
+                        <div class="analysis-panel">
+                            <h3>Analiza</h3>
+                            <div class="analysis-section">
+                                <p id="analysis-text">
+                                    Profilul echilibrat sugerează versatilitate și adaptabilitate în diferite situații.
+                                    Poți accesa fiecare energie în funcție de context.
+                                </p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Puncte forte</h4>
+                                <p id="analysis-strength"></p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Dezvoltare</h4>
+                                <p id="analysis-growth"></p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1315,9 +1440,11 @@
             const task = (values.red + values.blue) - (values.yellow + values.green);
 
             const indicator = document.getElementById('profile-indicator');
-            const centerX = 150;
-            const centerY = 150;
-            const maxRadius = 110;
+            const wheelContainer = document.querySelector('.wheel-container');
+            const wheelSize = wheelContainer.offsetWidth;
+            const centerX = wheelSize / 2;
+            const centerY = wheelSize / 2;
+            const maxRadius = (wheelSize / 2) * 0.73;
 
             const angle = Math.atan2(extraversion, -task);
             const magnitude = Math.min(Math.sqrt(extraversion*extraversion + task*task) / 200, 1);
@@ -1337,8 +1464,8 @@
             const data = colorData[dominant];
 
             document.getElementById('analysis-text').textContent = data.description;
-            document.getElementById('analysis-strength').textContent = '💪 Puncte forte: ' + data.strengths;
-            document.getElementById('analysis-growth').textContent = '🌱 Dezvoltare: ' + data.growth;
+            document.getElementById('analysis-strength').textContent = data.strengths;
+            document.getElementById('analysis-growth').textContent = data.growth;
         }
 
         // Attach slider listeners
@@ -1360,6 +1487,9 @@
 
         // Initial update
         updateVisualization();
+
+        // Update on resize for responsive wheel
+        window.addEventListener('resize', updateVisualization);
 
         // Quiz Logic
         const questions = [

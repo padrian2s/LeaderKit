@@ -405,16 +405,16 @@
 
         .playground-grid {
             display: grid;
-            grid-template-columns: 220px 1fr 260px;
+            grid-template-columns: 240px 1fr 280px;
             gap: 0;
             align-items: stretch;
             height: calc(100vh - 160px);
-            min-height: 400px;
+            min-height: 500px;
         }
 
         @media (max-width: 1000px) {
             .playground-grid {
-                grid-template-columns: 200px 1fr 220px;
+                grid-template-columns: 220px 1fr 240px;
             }
         }
 
@@ -439,22 +439,22 @@
 
         .sliders-panel {
             background: var(--bg-card);
-            padding: 0.5rem;
+            padding: 1rem;
             overflow-y: auto;
         }
 
         .slider-section {
-            margin-bottom: 0.5rem;
+            margin-bottom: 1rem;
         }
 
         .slider-section-label {
-            font-size: 0.6rem;
+            font-size: 0.8rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            margin-bottom: 0.3rem;
-            padding: 0.15rem 0.35rem;
-            border-radius: 3px;
+            margin-bottom: 0.5rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
             display: inline-block;
         }
 
@@ -465,39 +465,40 @@
         .slider-group {
             display: flex;
             align-items: center;
-            gap: 0.3rem;
-            margin-bottom: 0.25rem;
-            padding: 0.2rem;
+            gap: 0.5rem;
+            margin-bottom: 0.4rem;
+            padding: 0.4rem;
             background: rgba(255,255,255,0.02);
-            border-radius: 4px;
+            border-radius: 6px;
         }
 
         .slider-header {
-            gap: 0.4rem;
-            margin-bottom: 0.25rem;
+            gap: 0.5rem;
+            margin-bottom: 0.3rem;
         }
 
         .slider-icon {
-            width: 24px;
-            height: 24px;
-            border-radius: 4px;
-            font-size: 0.85rem;
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            font-size: 1rem;
         }
 
         .slider-title {
-            font-size: 0.9rem;
+            font-size: 1rem;
         }
 
         .slider-name {
-            width: 70px;
-            font-size: 0.65rem;
+            width: 85px;
+            font-size: 0.85rem;
             flex-shrink: 0;
+            font-weight: 500;
         }
 
         .hogan-slider {
             flex: 1;
-            height: 4px;
-            border-radius: 2px;
+            height: 6px;
+            border-radius: 3px;
             background: rgba(255,255,255,0.1);
             outline: none;
             -webkit-appearance: none;
@@ -506,19 +507,19 @@
 
         .hogan-slider::-webkit-slider-thumb {
             -webkit-appearance: none;
-            width: 12px;
-            height: 12px;
+            width: 16px;
+            height: 16px;
             border-radius: 50%;
             cursor: pointer;
             background: white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
         }
 
         .slider-value {
             font-size: 1.1rem;
-            min-width: 24px;
+            min-width: 30px;
             text-align: right;
-            font-weight: 600;
+            font-weight: 700;
             flex-shrink: 0;
         }
 
@@ -529,26 +530,26 @@
         .preset-buttons {
             display: flex;
             flex-wrap: wrap;
-            gap: 0.2rem;
-            margin-top: 0.3rem;
-            padding-top: 0.3rem;
+            gap: 0.35rem;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
             border-top: 1px solid rgba(255,255,255,0.1);
         }
 
         .preset-label {
             width: 100%;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             color: var(--text-muted);
-            margin-bottom: 0.15rem;
+            margin-bottom: 0.25rem;
         }
 
         .preset-btn {
-            padding: 0.15rem 0.3rem;
+            padding: 0.3rem 0.5rem;
             border: 1px solid rgba(255,255,255,0.2);
             background: transparent;
             color: var(--text-light);
-            border-radius: 6px;
-            font-size: 0.75rem;
+            border-radius: 8px;
+            font-size: 0.85rem;
             cursor: pointer;
             transition: all 0.3s ease;
             font-family: 'Source Sans 3', sans-serif;
@@ -561,11 +562,11 @@
         .visualization-panel {
             display: flex;
             flex-direction: column;
-            gap: 0.5rem;
+            gap: 1.5rem;
             align-items: center;
             justify-content: center;
             background: var(--bg-card);
-            padding: 0.5rem;
+            padding: 2rem;
         }
 
         .radar-container {
@@ -577,62 +578,67 @@
 
         .profile-display {
             text-align: center;
-            padding: 0.25rem 0;
+            padding: 1rem 0;
         }
 
         .code-display {
-            font-size: 2rem;
-            letter-spacing: 0.1em;
-            margin-bottom: 0.15rem;
-            gap: 0.1rem;
+            font-size: 3rem;
+            letter-spacing: 0.15em;
+            margin-bottom: 0.5rem;
+            gap: 0.2rem;
         }
 
         .code-letter {
-            min-width: 32px;
+            min-width: 50px;
         }
 
         .profile-name {
-            font-size: 0.8rem;
+            font-size: 1.3rem;
+            font-family: 'Playfair Display', serif;
         }
 
         .risk-summary {
-            background: var(--bg-card);
-            border-radius: 12px;
-            padding: 0.5rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 400px;
         }
 
         .risk-summary h4 {
-            font-size: 0.75rem;
-            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
             text-align: center;
+            font-family: 'Playfair Display', serif;
         }
 
         .risk-meters {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 0.4rem;
+            gap: 1rem;
         }
 
         .risk-meter {
             text-align: center;
-            padding: 0.4rem;
-            border-radius: 8px;
+            padding: 1rem;
+            border-radius: 12px;
             background: rgba(255,255,255,0.03);
         }
 
-        .risk-meter.away { border-top: 2px solid var(--moving-away); }
-        .risk-meter.against { border-top: 2px solid var(--moving-against); }
-        .risk-meter.toward { border-top: 2px solid var(--moving-toward); }
+        .risk-meter.away { border-top: 3px solid var(--moving-away); }
+        .risk-meter.against { border-top: 3px solid var(--moving-against); }
+        .risk-meter.toward { border-top: 3px solid var(--moving-toward); }
 
         .risk-label {
-            font-size: 0.6rem;
+            font-size: 0.9rem;
             color: var(--text-muted);
-            margin-bottom: 0.2rem;
+            margin-bottom: 0.5rem;
         }
 
         .risk-score {
-            font-size: 1.2rem;
+            font-size: 2.5rem;
             font-weight: 700;
+            font-family: 'Playfair Display', serif;
         }
 
         .risk-meter.away .risk-score { color: var(--moving-away); }
@@ -640,35 +646,39 @@
         .risk-meter.toward .risk-score { color: var(--moving-toward); }
 
         .top-derailers {
-            background: var(--bg-card);
-            border-radius: 12px;
-            padding: 0.5rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 16px;
+            padding: 1.5rem;
+            width: 100%;
+            max-width: 400px;
         }
 
         .top-derailers h4 {
-            font-size: 0.75rem;
-            margin-bottom: 0.4rem;
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            font-family: 'Playfair Display', serif;
+            text-align: center;
         }
 
         .top-derailer-item {
             display: flex;
             align-items: center;
-            gap: 0.4rem;
-            padding: 0.35rem;
+            gap: 0.75rem;
+            padding: 0.75rem;
             background: rgba(255,255,255,0.03);
-            border-radius: 6px;
-            margin-bottom: 0.25rem;
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
         }
 
         .top-derailer-rank {
-            width: 18px;
-            height: 18px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            font-size: 0.6rem;
+            font-size: 0.9rem;
             background: rgba(255,255,255,0.1);
         }
 
@@ -678,22 +688,23 @@
 
         .top-derailer-name {
             font-weight: 600;
-            font-size: 0.7rem;
+            font-size: 1rem;
         }
 
         .top-derailer-cluster {
-            font-size: 0.6rem;
+            font-size: 0.85rem;
             color: var(--text-muted);
         }
 
         .top-derailer-score {
             font-weight: 700;
-            font-size: 0.8rem;
+            font-size: 1.3rem;
+            font-family: 'Playfair Display', serif;
         }
 
         .results-panel {
             background: var(--bg-card);
-            padding: 0.75rem;
+            padding: 1.25rem;
             overflow-y: auto;
         }
 
@@ -703,8 +714,8 @@
         }
 
         .analysis-section {
-            margin-bottom: 0.5rem;
-            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
 
@@ -715,14 +726,15 @@
         }
 
         .analysis-section h4 {
-            font-size: 0.95rem;
-            margin-bottom: 0.2rem;
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            font-family: 'Playfair Display', serif;
         }
 
         .analysis-section p {
             color: var(--text-muted);
-            font-size: 0.85rem;
-            line-height: 1.5;
+            font-size: 1rem;
+            line-height: 1.6;
         }
 
         /* === QUIZ === */

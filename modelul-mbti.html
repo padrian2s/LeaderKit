@@ -418,16 +418,16 @@
 
         .playground-grid {
             display: grid;
-            grid-template-columns: 220px 1fr 260px;
+            grid-template-columns: 200px 1fr 240px;
             gap: 0;
             align-items: stretch;
             height: calc(100vh - 160px);
-            min-height: 400px;
+            min-height: 500px;
         }
 
         @media (max-width: 1000px) {
             .playground-grid {
-                grid-template-columns: 200px 1fr 220px;
+                grid-template-columns: 180px 1fr 200px;
             }
         }
 
@@ -594,13 +594,13 @@
             align-items: center;
             justify-content: center;
             background: var(--bg-card);
-            padding: 0.5rem;
-            gap: 0.5rem;
+            padding: 2rem;
+            gap: 1.5rem;
         }
 
         .radar-container {
             width: 100%;
-            max-width: 280px;
+            max-width: 400px;
             aspect-ratio: 1;
             padding: 0;
         }
@@ -612,53 +612,56 @@
 
         .code-display {
             font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            letter-spacing: 0.1em;
-            margin-bottom: 0.15rem;
-            gap: 0.1rem;
+            font-size: 4rem;
+            letter-spacing: 0.15em;
+            margin-bottom: 0.5rem;
+            gap: 0.2rem;
             display: flex;
             justify-content: center;
         }
 
         .code-letter {
-            min-width: 32px;
+            min-width: 60px;
         }
 
         .profile-name {
-            font-size: 0.8rem;
+            font-size: 1.2rem;
         }
 
         .type-display {
             background: transparent;
             border-radius: 0;
-            padding: 0;
+            padding: 1rem;
             text-align: center;
         }
 
         .type-display-code {
             font-family: 'Playfair Display', serif;
-            font-size: 2rem;
-            letter-spacing: 0.1em;
-            margin-bottom: 0.15rem;
+            font-size: 5rem;
+            letter-spacing: 0.15em;
+            margin-bottom: 0.5rem;
             display: flex;
             justify-content: center;
-            gap: 0.1rem;
+            gap: 0.2rem;
         }
 
         .type-letter {
-            min-width: 32px;
+            min-width: 70px;
             transition: all 0.3s ease;
         }
 
         .type-display-name {
-            font-size: 0.8rem;
+            font-size: 2rem;
             font-family: 'Playfair Display', serif;
-            margin-bottom: 0.15rem;
+            margin-bottom: 0.5rem;
         }
 
         .type-display-subtitle {
             color: var(--text-muted);
-            font-size: 0.75rem;
+            font-size: 1.1rem;
+            max-width: 400px;
+            margin: 0 auto;
+            line-height: 1.4;
         }
 
         .functions-panel {
@@ -1558,17 +1561,6 @@
                 TF: parseInt(sliders.TF.value),
                 JP: parseInt(sliders.JP.value)
             };
-
-            // Update slider labels
-            Object.keys(vals).forEach(key => {
-                const val = vals[key];
-                let label = 'Echilibrat';
-                if (val < 35) label = axisLabels[key].low + ' clar';
-                else if (val < 50) label = axisLabels[key].low + ' ușor';
-                else if (val > 65) label = axisLabels[key].high + ' clar';
-                else if (val > 50) label = axisLabels[key].high + ' ușor';
-                document.getElementById(`val-${key}`).textContent = label;
-            });
 
             // Get type
             const type = getTypeFromSliders();

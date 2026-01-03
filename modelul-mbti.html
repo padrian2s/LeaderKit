@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modelul MBTI Myers-Briggs | Învățare Interactivă</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --analyst: #8B5CF6;
+            --diplomat: #10B981;
+            --sentinel: #3B82F6;
+            --explorer: #F59E0B;
+            --extraversion: #EC4899;
+            --introversion: #6366F1;
+            --sensing: #14B8A6;
+            --intuition: #A855F7;
+            --thinking: #EF4444;
+            --feeling: #22C55E;
+            --judging: #3B82F6;
+            --perceiving: #F97316;
+            --bg-dark: #1a1a2e;
+            --bg-card: #16213e;
+            --text-light: #edf2f7;
+            --text-muted: #a0aec0;
+            --accent-glow: rgba(139, 92, 246, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 2rem 2rem;
+            position: relative;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--text-light) 0%, var(--analyst) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 2rem auto;
+            padding: 0.5rem;
+            background: var(--bg-card);
+            border-radius: 50px;
+            max-width: 500px;
+        }
+
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-light);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--analyst) 0%, var(--diplomat) 100%);
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === MODEL VIZUAL - 16 TYPES GRID === */
+        .types-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .types-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .types-header p {
+            color: var(--text-muted);
+        }
+
+        .types-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .types-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .type-group-label {
+            grid-column: span 4;
+            text-align: center;
+            padding: 0.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 900px) {
+            .type-group-label {
+                grid-column: span 2;
+            }
+        }
+
+        .type-group-label.analysts { background: rgba(139, 92, 246, 0.2); color: var(--analyst); }
+        .type-group-label.diplomats { background: rgba(16, 185, 129, 0.2); color: var(--diplomat); }
+        .type-group-label.sentinels { background: rgba(59, 130, 246, 0.2); color: var(--sentinel); }
+        .type-group-label.explorers { background: rgba(245, 158, 11, 0.2); color: var(--explorer); }
+
+        .type-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            text-align: center;
+        }
+
+        .type-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .type-card.active {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .type-card.analyst { border-color: var(--analyst); }
+        .type-card.diplomat { border-color: var(--diplomat); }
+        .type-card.sentinel { border-color: var(--sentinel); }
+        .type-card.explorer { border-color: var(--explorer); }
+
+        .type-code {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .type-card.analyst .type-code { color: var(--analyst); }
+        .type-card.diplomat .type-code { color: var(--diplomat); }
+        .type-card.sentinel .type-code { color: var(--sentinel); }
+        .type-card.explorer .type-code { color: var(--explorer); }
+
+        .type-name {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .info-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .info-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .info-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .info-title h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-title span {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .info-content p {
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        .info-traits {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .trait-tag {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* === TEORIE === */
+        .axes-section {
+            margin-bottom: 3rem;
+        }
+
+        .axes-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .axis-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .axis-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .axis-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .axis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .axis-pole {
+            text-align: center;
+            flex: 1;
+        }
+
+        .axis-pole h4 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .axis-pole span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .axis-vs {
+            padding: 0 1rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .axis-description {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .pole-desc {
+            padding: 0.75rem;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.03);
+        }
+
+        .pole-desc h5 {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .pole-desc p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .theory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .theory-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border-left: 4px solid;
+        }
+
+        .theory-card.tc-analyst { border-color: var(--analyst); }
+        .theory-card.tc-diplomat { border-color: var(--diplomat); }
+        .theory-card.tc-sentinel { border-color: var(--sentinel); }
+        .theory-card.tc-explorer { border-color: var(--explorer); }
+
+        .theory-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .theory-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* === PLAYGROUND === */
+        .playground-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .playground-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .playground-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .playground-header p {
+            color: var(--text-muted);
+        }
+
+        .playground-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .playground-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sliders-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .slider-group {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .slider-group:last-of-type {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .slider-poles {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .pole-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .pole-letter {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .mbti-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            margin: 0.75rem 0;
+        }
+
+        .mbti-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: var(--text-light);
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .mbti-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .slider-ei { background: linear-gradient(90deg, var(--introversion), var(--extraversion)); }
+        .slider-sn { background: linear-gradient(90deg, var(--sensing), var(--intuition)); }
+        .slider-tf { background: linear-gradient(90deg, var(--thinking), var(--feeling)); }
+        .slider-jp { background: linear-gradient(90deg, var(--judging), var(--perceiving)); }
+
+        .slider-value {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .preset-label {
+            width: 100%;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .preset-btn {
+            padding: 0.4rem 0.6rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: var(--text-light);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Source Sans 3', sans-serif;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .preset-btn.analyst { border-color: var(--analyst); }
+        .preset-btn.diplomat { border-color: var(--diplomat); }
+        .preset-btn.sentinel { border-color: var(--sentinel); }
+        .preset-btn.explorer { border-color: var(--explorer); }
+
+        .visualization-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .type-display {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .type-display-code {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        .type-letter {
+            min-width: 60px;
+            transition: all 0.3s ease;
+        }
+
+        .type-display-name {
+            font-size: 1.5rem;
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 0.25rem;
+        }
+
+        .type-display-subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .functions-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .functions-panel h4 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--text-light);
+        }
+
+        .function-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .function-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+        }
+
+        .function-position {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            width: 60px;
+        }
+
+        .function-name {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+
+        .analysis-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .analysis-section {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .analysis-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .analysis-section h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+
+        .analysis-section p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* === QUIZ === */
+        .simulator-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-card);
+            border-radius: 3px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--analyst), var(--diplomat));
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        .question-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .question-number {
+            color: var(--analyst);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            line-height: 1.5;
+            margin-bottom: 2rem;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .option {
+            padding: 1.2rem 1.5rem;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .option.selected {
+            border-color: var(--analyst);
+            background: rgba(139, 92, 246, 0.15);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-light);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--analyst), var(--diplomat));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--accent-glow);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results-container {
+            text-align: center;
+        }
+
+        .results-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .results-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .result-type-display {
+            font-family: 'Playfair Display', serif;
+            font-size: 5rem;
+            letter-spacing: 0.15em;
+            margin-bottom: 1rem;
+        }
+
+        .result-type-name {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .axes-results {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        @media (max-width: 600px) {
+            .axes-results {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .axis-result {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .axis-result-letter {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .axis-result-name {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .axis-result-percent {
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .profile-description {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .profile-description h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .profile-description p {
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .restart-btn {
+            margin-top: 2rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="noise-overlay"></div>
+
+    <header>
+        <h1>Modelul MBTI</h1>
+        <p class="subtitle">Myers-Briggs Type Indicator - 16 Tipuri de Personalitate</p>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="model">Cele 16 Tipuri</button>
+        <button class="tab-btn" data-tab="theory">Teorie</button>
+        <button class="tab-btn" data-tab="playground">Playground</button>
+        <button class="tab-btn" data-tab="simulator">Quiz</button>
+    </div>
+
+    <div class="container">
+        <!-- TAB MODEL -->
+        <div id="model" class="tab-content active">
+            <div class="types-header">
+                <h2>Cele 16 Tipuri de Personalitate</h2>
+                <p>Click pe un tip pentru a vedea detalii</p>
+            </div>
+
+            <div class="types-grid">
+                <div class="type-group-label analysts">Analiștii (NT)</div>
+                <div class="type-card analyst" data-type="INTJ">
+                    <div class="type-code">INTJ</div>
+                    <div class="type-name">Arhitectul</div>
+                </div>
+                <div class="type-card analyst" data-type="INTP">
+                    <div class="type-code">INTP</div>
+                    <div class="type-name">Logicianul</div>
+                </div>
+                <div class="type-card analyst" data-type="ENTJ">
+                    <div class="type-code">ENTJ</div>
+                    <div class="type-name">Comandantul</div>
+                </div>
+                <div class="type-card analyst" data-type="ENTP">
+                    <div class="type-code">ENTP</div>
+                    <div class="type-name">Dezbătătorul</div>
+                </div>
+
+                <div class="type-group-label diplomats">Diplomații (NF)</div>
+                <div class="type-card diplomat" data-type="INFJ">
+                    <div class="type-code">INFJ</div>
+                    <div class="type-name">Avocatul</div>
+                </div>
+                <div class="type-card diplomat" data-type="INFP">
+                    <div class="type-code">INFP</div>
+                    <div class="type-name">Mediatorul</div>
+                </div>
+                <div class="type-card diplomat" data-type="ENFJ">
+                    <div class="type-code">ENFJ</div>
+                    <div class="type-name">Protagonistul</div>
+                </div>
+                <div class="type-card diplomat" data-type="ENFP">
+                    <div class="type-code">ENFP</div>
+                    <div class="type-name">Activistul</div>
+                </div>
+
+                <div class="type-group-label sentinels">Sentinelele (SJ)</div>
+                <div class="type-card sentinel" data-type="ISTJ">
+                    <div class="type-code">ISTJ</div>
+                    <div class="type-name">Logisticianul</div>
+                </div>
+                <div class="type-card sentinel" data-type="ISFJ">
+                    <div class="type-code">ISFJ</div>
+                    <div class="type-name">Apărătorul</div>
+                </div>
+                <div class="type-card sentinel" data-type="ESTJ">
+                    <div class="type-code">ESTJ</div>
+                    <div class="type-name">Executivul</div>
+                </div>
+                <div class="type-card sentinel" data-type="ESFJ">
+                    <div class="type-code">ESFJ</div>
+                    <div class="type-name">Consulul</div>
+                </div>
+
+                <div class="type-group-label explorers">Exploratorii (SP)</div>
+                <div class="type-card explorer" data-type="ISTP">
+                    <div class="type-code">ISTP</div>
+                    <div class="type-name">Virtuozul</div>
+                </div>
+                <div class="type-card explorer" data-type="ISFP">
+                    <div class="type-code">ISFP</div>
+                    <div class="type-name">Aventurierul</div>
+                </div>
+                <div class="type-card explorer" data-type="ESTP">
+                    <div class="type-code">ESTP</div>
+                    <div class="type-name">Antreprenorul</div>
+                </div>
+                <div class="type-card explorer" data-type="ESFP">
+                    <div class="type-code">ESFP</div>
+                    <div class="type-name">Animatorul</div>
+                </div>
+            </div>
+
+            <div class="info-panel" id="info-panel">
+                <div class="info-header">
+                    <div class="info-icon" id="info-icon" style="background: var(--analyst);">INTJ</div>
+                    <div class="info-title">
+                        <h2 id="info-name">Arhitectul</h2>
+                        <span id="info-subtitle">Introvertit, Intuitiv, Gânditor, Judecător</span>
+                    </div>
+                </div>
+                <div class="info-content">
+                    <p id="info-description">INTJ-urile sunt gânditori strategici cu un plan pentru toate. Sunt arhitecți ai propriei vieți, căutând mereu să îmbunătățească sistemele și ideile din jurul lor.</p>
+                    <p id="info-details">Sunt independenți, hotărâți și caută eficiența în toate. Preferă să lucreze singuri sau în grupuri mici de oameni competenți.</p>
+                </div>
+                <div class="info-traits" id="info-traits">
+                    <span class="trait-tag">Strategic</span>
+                    <span class="trait-tag">Independent</span>
+                    <span class="trait-tag">Vizionar</span>
+                    <span class="trait-tag">Perfecționist</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB TEORIE -->
+        <div id="theory" class="tab-content">
+            <div class="axes-section">
+                <h2>Cele 4 Axe ale Preferințelor</h2>
+                <div class="axis-grid">
+                    <div class="axis-card">
+                        <div class="axis-header">
+                            <div class="axis-pole">
+                                <h4 style="color: var(--extraversion);">E</h4>
+                                <span>Extraversie</span>
+                            </div>
+                            <span class="axis-vs">vs</span>
+                            <div class="axis-pole">
+                                <h4 style="color: var(--introversion);">I</h4>
+                                <span>Introversie</span>
+                            </div>
+                        </div>
+                        <div class="axis-description">
+                            <div class="pole-desc">
+                                <h5 style="color: var(--extraversion);">Extraversie</h5>
+                                <p>Energie din exterior, preferă acțiunea, sociabil, gândește vorbind</p>
+                            </div>
+                            <div class="pole-desc">
+                                <h5 style="color: var(--introversion);">Introversie</h5>
+                                <p>Energie din interior, preferă reflecția, rezervat, gândește înainte de a vorbi</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="axis-card">
+                        <div class="axis-header">
+                            <div class="axis-pole">
+                                <h4 style="color: var(--sensing);">S</h4>
+                                <span>Senzorial</span>
+                            </div>
+                            <span class="axis-vs">vs</span>
+                            <div class="axis-pole">
+                                <h4 style="color: var(--intuition);">N</h4>
+                                <span>Intuitiv</span>
+                            </div>
+                        </div>
+                        <div class="axis-description">
+                            <div class="pole-desc">
+                                <h5 style="color: var(--sensing);">Senzorial</h5>
+                                <p>Focus pe prezent, practic, detaliat, bazat pe experiență</p>
+                            </div>
+                            <div class="pole-desc">
+                                <h5 style="color: var(--intuition);">Intuitiv</h5>
+                                <p>Focus pe viitor, abstract, vezi imaginea de ansamblu, posibilități</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="axis-card">
+                        <div class="axis-header">
+                            <div class="axis-pole">
+                                <h4 style="color: var(--thinking);">T</h4>
+                                <span>Gândire</span>
+                            </div>
+                            <span class="axis-vs">vs</span>
+                            <div class="axis-pole">
+                                <h4 style="color: var(--feeling);">F</h4>
+                                <span>Simțire</span>
+                            </div>
+                        </div>
+                        <div class="axis-description">
+                            <div class="pole-desc">
+                                <h5 style="color: var(--thinking);">Gândire</h5>
+                                <p>Decizii logice, obiectiv, analitic, caută adevărul</p>
+                            </div>
+                            <div class="pole-desc">
+                                <h5 style="color: var(--feeling);">Simțire</h5>
+                                <p>Decizii bazate pe valori, empatic, armonie, caută consensul</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="axis-card">
+                        <div class="axis-header">
+                            <div class="axis-pole">
+                                <h4 style="color: var(--judging);">J</h4>
+                                <span>Judecător</span>
+                            </div>
+                            <span class="axis-vs">vs</span>
+                            <div class="axis-pole">
+                                <h4 style="color: var(--perceiving);">P</h4>
+                                <span>Perceptiv</span>
+                            </div>
+                        </div>
+                        <div class="axis-description">
+                            <div class="pole-desc">
+                                <h5 style="color: var(--judging);">Judecător</h5>
+                                <p>Structurat, planificat, organizat, preferă închiderea</p>
+                            </div>
+                            <div class="pole-desc">
+                                <h5 style="color: var(--perceiving);">Perceptiv</h5>
+                                <p>Flexibil, spontan, adaptabil, preferă opțiunile deschise</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="font-family: 'Playfair Display', serif; font-size: 1.8rem; text-align: center; margin-bottom: 2rem;">Cele 4 Grupuri de Temperament</h2>
+            <div class="theory-grid">
+                <div class="theory-card tc-analyst">
+                    <h3 style="color: var(--analyst);">Analiștii (NT)</h3>
+                    <p>INTJ, INTP, ENTJ, ENTP - Raționali și independenți. Caută cunoaștere, competență și înțelegere profundă. Sunt strategici și orientați spre rezolvarea problemelor complexe.</p>
+                </div>
+                <div class="theory-card tc-diplomat">
+                    <h3 style="color: var(--diplomat);">Diplomații (NF)</h3>
+                    <p>INFJ, INFP, ENFJ, ENFP - Empatici și idealiști. Caută autenticitate, sens și conexiuni profunde. Sunt orientați spre dezvoltare personală și armonie.</p>
+                </div>
+                <div class="theory-card tc-sentinel">
+                    <h3 style="color: var(--sentinel);">Sentinelele (SJ)</h3>
+                    <p>ISTJ, ISFJ, ESTJ, ESFJ - Responsabili și tradiționali. Caută stabilitate, ordine și apartenență. Sunt de încredere și orientați spre datorie.</p>
+                </div>
+                <div class="theory-card tc-explorer">
+                    <h3 style="color: var(--explorer);">Exploratorii (SP)</h3>
+                    <p>ISTP, ISFP, ESTP, ESFP - Spontani și energici. Caută libertate, varietate și experiențe. Sunt adaptabili și orientați spre acțiune.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB PLAYGROUND -->
+        <div id="playground" class="tab-content">
+            <div class="playground-container">
+                <div class="playground-header">
+                    <h2>Exploratorul de Tipuri MBTI</h2>
+                    <p>Ajustează preferințele pe fiecare axă pentru a explora diferite tipuri de personalitate</p>
+                </div>
+
+                <div class="playground-grid">
+                    <div class="sliders-panel">
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <div class="slider-poles">
+                                    <div class="pole-label">
+                                        <span class="pole-letter" style="background: var(--introversion); color: white;">I</span>
+                                        <span>Introversie</span>
+                                    </div>
+                                    <div class="pole-label">
+                                        <span>Extraversie</span>
+                                        <span class="pole-letter" style="background: var(--extraversion); color: white;">E</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="mbti-slider slider-ei" id="slider-EI">
+                            <div class="slider-value" id="val-EI">Echilibrat</div>
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <div class="slider-poles">
+                                    <div class="pole-label">
+                                        <span class="pole-letter" style="background: var(--sensing); color: white;">S</span>
+                                        <span>Senzorial</span>
+                                    </div>
+                                    <div class="pole-label">
+                                        <span>Intuitiv</span>
+                                        <span class="pole-letter" style="background: var(--intuition); color: white;">N</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="mbti-slider slider-sn" id="slider-SN">
+                            <div class="slider-value" id="val-SN">Echilibrat</div>
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <div class="slider-poles">
+                                    <div class="pole-label">
+                                        <span class="pole-letter" style="background: var(--thinking); color: white;">T</span>
+                                        <span>Gândire</span>
+                                    </div>
+                                    <div class="pole-label">
+                                        <span>Simțire</span>
+                                        <span class="pole-letter" style="background: var(--feeling); color: white;">F</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="mbti-slider slider-tf" id="slider-TF">
+                            <div class="slider-value" id="val-TF">Echilibrat</div>
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <div class="slider-poles">
+                                    <div class="pole-label">
+                                        <span class="pole-letter" style="background: var(--judging); color: white;">J</span>
+                                        <span>Judecător</span>
+                                    </div>
+                                    <div class="pole-label">
+                                        <span>Perceptiv</span>
+                                        <span class="pole-letter" style="background: var(--perceiving); color: white;">P</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="mbti-slider slider-jp" id="slider-JP">
+                            <div class="slider-value" id="val-JP">Echilibrat</div>
+                        </div>
+
+                        <div class="preset-buttons">
+                            <span class="preset-label">Tipuri Populare:</span>
+                            <button class="preset-btn analyst" data-preset="INTJ">INTJ</button>
+                            <button class="preset-btn analyst" data-preset="INTP">INTP</button>
+                            <button class="preset-btn analyst" data-preset="ENTJ">ENTJ</button>
+                            <button class="preset-btn analyst" data-preset="ENTP">ENTP</button>
+                            <button class="preset-btn diplomat" data-preset="INFJ">INFJ</button>
+                            <button class="preset-btn diplomat" data-preset="INFP">INFP</button>
+                            <button class="preset-btn diplomat" data-preset="ENFJ">ENFJ</button>
+                            <button class="preset-btn diplomat" data-preset="ENFP">ENFP</button>
+                            <button class="preset-btn sentinel" data-preset="ISTJ">ISTJ</button>
+                            <button class="preset-btn sentinel" data-preset="ISFJ">ISFJ</button>
+                            <button class="preset-btn explorer" data-preset="ESTP">ESTP</button>
+                            <button class="preset-btn explorer" data-preset="ESFP">ESFP</button>
+                        </div>
+                    </div>
+
+                    <div class="visualization-panel">
+                        <div class="type-display" id="type-display">
+                            <div class="type-display-code" id="type-code-display">
+                                <span class="type-letter" id="letter-1">I</span>
+                                <span class="type-letter" id="letter-2">N</span>
+                                <span class="type-letter" id="letter-3">T</span>
+                                <span class="type-letter" id="letter-4">J</span>
+                            </div>
+                            <div class="type-display-name" id="type-name-display">Arhitectul</div>
+                            <div class="type-display-subtitle" id="type-subtitle">Gânditor strategic cu viziune pe termen lung</div>
+                        </div>
+
+                        <div class="analysis-panel">
+                            <div class="analysis-section">
+                                <h4>Descriere</h4>
+                                <p id="pg-description">INTJ-urile sunt gânditori independenți, cu o viziune clară și capacitatea de a crea planuri pe termen lung.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Puncte Forte</h4>
+                                <p id="pg-strengths">Strategici, independenți, hotărâți, competenți, vizionari.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Provocări</h4>
+                                <p id="pg-challenges">Pot fi percepuți ca aroganti sau prea critici. Pot ignora emoțiile celorlalți.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Cariere Potrivite</h4>
+                                <p id="pg-careers">Scientist, inginer, arhitect, avocat, strateg de afaceri, consultant.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB QUIZ -->
+        <div id="simulator" class="tab-content">
+            <div class="simulator-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+
+                <div id="quiz-container">
+                    <div class="question-card">
+                        <div class="question-number" id="question-number">Întrebarea 1 din 20</div>
+                        <div class="question-text" id="question-text">La o petrecere, preferi să:</div>
+                        <div class="options" id="options"></div>
+                    </div>
+
+                    <div class="nav-buttons">
+                        <button class="btn btn-secondary" id="prev-btn" disabled>Înapoi</button>
+                        <button class="btn btn-primary" id="next-btn" disabled>Următoarea</button>
+                    </div>
+                </div>
+
+                <div id="results-container" class="results-container hidden">
+                    <h2 class="results-title">Tipul Tău de Personalitate</h2>
+                    <p class="results-subtitle">Bazat pe răspunsurile tale</p>
+
+                    <div class="result-type-display" id="result-type"></div>
+                    <div class="result-type-name" id="result-name"></div>
+
+                    <div class="axes-results">
+                        <div class="axis-result">
+                            <div class="axis-result-letter" id="res-ei-letter">I</div>
+                            <div class="axis-result-name" id="res-ei-name">Introversie</div>
+                            <div class="axis-result-percent" id="res-ei-pct">60%</div>
+                        </div>
+                        <div class="axis-result">
+                            <div class="axis-result-letter" id="res-sn-letter">N</div>
+                            <div class="axis-result-name" id="res-sn-name">Intuitiv</div>
+                            <div class="axis-result-percent" id="res-sn-pct">70%</div>
+                        </div>
+                        <div class="axis-result">
+                            <div class="axis-result-letter" id="res-tf-letter">T</div>
+                            <div class="axis-result-name" id="res-tf-name">Gândire</div>
+                            <div class="axis-result-percent" id="res-tf-pct">55%</div>
+                        </div>
+                        <div class="axis-result">
+                            <div class="axis-result-letter" id="res-jp-letter">J</div>
+                            <div class="axis-result-name" id="res-jp-name">Judecător</div>
+                            <div class="axis-result-percent" id="res-jp-pct">65%</div>
+                        </div>
+                    </div>
+
+                    <div class="profile-description">
+                        <h3 id="profile-title">Despre Tipul Tău</h3>
+                        <p id="profile-text">Descrierea profilului tău va apărea aici.</p>
+                    </div>
+
+                    <button class="btn btn-primary restart-btn" id="restart-btn">Reia Testul</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === DATA ===
+        const typeData = {
+            INTJ: { name: 'Arhitectul', group: 'analyst', subtitle: 'Gânditor strategic cu viziune pe termen lung',
+                description: 'INTJ-urile sunt gânditori independenți cu o viziune clară. Sunt arhitecți ai propriei vieți, căutând mereu să îmbunătățească sistemele din jurul lor.',
+                strengths: 'Strategici, independenți, hotărâți, competenți, vizionari.',
+                challenges: 'Pot fi percepuți ca aroganti sau prea critici. Pot ignora emoțiile.',
+                careers: 'Scientist, inginer, arhitect, avocat, strateg de afaceri.',
+                traits: ['Strategic', 'Independent', 'Vizionar', 'Perfecționist'] },
+            INTP: { name: 'Logicianul', group: 'analyst', subtitle: 'Gânditor inovator cu sete de cunoaștere',
+                description: 'INTP-urile sunt gânditori originali cu o minte analitică puternică. Caută să înțeleagă principiile universale din spatele lucrurilor.',
+                strengths: 'Analitici, originali, deschiși, obiectivi, logici.',
+                challenges: 'Pot fi distrași, nehotărâți și insensibili la emoții.',
+                careers: 'Cercetător, programator, analist, profesor, filosof.',
+                traits: ['Analitic', 'Curios', 'Obiectiv', 'Inventiv'] },
+            ENTJ: { name: 'Comandantul', group: 'analyst', subtitle: 'Lider hotărât cu viziune strategică',
+                description: 'ENTJ-urile sunt lideri născuți. Văd ineficiența și găsesc soluții. Sunt hotărâți și energici în urmărirea obiectivelor.',
+                strengths: 'Hotărâți, strategici, carismatici, eficienți, încrezători.',
+                challenges: 'Pot fi dominanți, lipsiți de răbdare și insensibili.',
+                careers: 'CEO, antreprenor, avocat, consultant, manager.',
+                traits: ['Lider', 'Strategic', 'Hotărât', 'Eficient'] },
+            ENTP: { name: 'Dezbătătorul', group: 'analyst', subtitle: 'Gânditor agil care iubește provocările',
+                description: 'ENTP-urile sunt gânditori rapizi și inventivi. Le place să dezasambleze idei și să găsească soluții inovative.',
+                strengths: 'Inovatori, carismatici, energici, strategici, deschiși.',
+                challenges: 'Pot fi argumentativi, insensibili și nerabdatori cu rutina.',
+                careers: 'Antreprenor, avocat, consultant, inventator, jurnalist.',
+                traits: ['Inovator', 'Carismatic', 'Agil', 'Provocator'] },
+            INFJ: { name: 'Avocatul', group: 'diplomat', subtitle: 'Vizionar idealist cu empatie profundă',
+                description: 'INFJ-urile sunt vizionari idealiști. Caută sens profund și impact pozitiv în lume. Sunt empatici și principiali.',
+                strengths: 'Empatici, determinați, creativi, principiali, vizionari.',
+                challenges: 'Pot fi perfecționiști, retrași și sensibili la critică.',
+                careers: 'Consilier, scriitor, HR, psiholog, profesor.',
+                traits: ['Empatic', 'Vizionar', 'Principial', 'Inspirator'] },
+            INFP: { name: 'Mediatorul', group: 'diplomat', subtitle: 'Idealist creativ cu valori profunde',
+                description: 'INFP-urile sunt idealisti creativi. Sunt ghidați de propriile valori și caută autenticitate în toate.',
+                strengths: 'Empatici, creativi, pasionați, deschiși, dedicați.',
+                challenges: 'Pot fi prea idealiști, retrași și sensibili.',
+                careers: 'Scriitor, artist, consilier, HR, non-profit.',
+                traits: ['Idealist', 'Creativ', 'Empatic', 'Autentic'] },
+            ENFJ: { name: 'Protagonistul', group: 'diplomat', subtitle: 'Lider carismatic care inspiră pe ceilalți',
+                description: 'ENFJ-urile sunt lideri naturali și inspiratori. Se concentrează pe dezvoltarea altora și crearea armoniei.',
+                strengths: 'Carismatici, empatici, organizați, inspiratori, altruiști.',
+                challenges: 'Pot fi prea idealiști și sensibili la critică.',
+                careers: 'Profesor, coach, HR, politician, consilier.',
+                traits: ['Carismatic', 'Inspirator', 'Empatic', 'Organizat'] },
+            ENFP: { name: 'Activistul', group: 'diplomat', subtitle: 'Spirit liber cu entuziasm contagios',
+                description: 'ENFP-urile sunt entuziaști și creativi. Văd posibilități pretutindeni și inspiră pe ceilalți cu energia lor.',
+                strengths: 'Entuziaști, creativi, sociabili, empatici, versatili.',
+                challenges: 'Pot fi dezorganizați, neconcentrați și prea optimiști.',
+                careers: 'Jurnalist, actor, consultant, antreprenor, marketing.',
+                traits: ['Entuziast', 'Creativ', 'Sociabil', 'Optimist'] },
+            ISTJ: { name: 'Logisticianul', group: 'sentinel', subtitle: 'Organizator de încredere cu simț al datoriei',
+                description: 'ISTJ-urile sunt de încredere și responsabili. Respectă tradițiile și își îndeplinesc datoriile cu dedicare.',
+                strengths: 'De încredere, responsabili, organizați, loiali, practici.',
+                challenges: 'Pot fi rigizi, insensibili și rezisenți la schimbare.',
+                careers: 'Contabil, manager, inginer, militar, jurist.',
+                traits: ['Responsabil', 'Organizat', 'Loial', 'Practic'] },
+            ISFJ: { name: 'Apărătorul', group: 'sentinel', subtitle: 'Protector dedicat cu inimă caldă',
+                description: 'ISFJ-urile sunt protectori loiali. Sunt atenți la nevoile celorlalți și își dedică energia pentru a-i ajuta.',
+                strengths: 'Suportivi, de încredere, răbdători, observanți, loiali.',
+                challenges: 'Pot fi retrași, rezisenți la schimbare și prea modești.',
+                careers: 'Asistent medical, administrator, contabil, HR.',
+                traits: ['Suportiv', 'Loial', 'Răbdător', 'Grijuliu'] },
+            ESTJ: { name: 'Executivul', group: 'sentinel', subtitle: 'Administrator dedicat cu simț civic',
+                description: 'ESTJ-urile sunt organizatori și administratori. Aduc ordine și structură, respectând regulile și tradițiile.',
+                strengths: 'Organizați, dedicați, hotărâți, de încredere, practici.',
+                challenges: 'Pot fi rigizi, inflexibili și prea focusați pe reguli.',
+                careers: 'Manager, judecător, militar, administrator, antreprenor.',
+                traits: ['Organizat', 'Hotărât', 'Responsabil', 'Direct'] },
+            ESFJ: { name: 'Consulul', group: 'sentinel', subtitle: 'Gazdă caldă care creează armonie',
+                description: 'ESFJ-urile sunt sociabili și grijulii. Se concentrează pe nevoile celorlalți și creează medii armonioase.',
+                strengths: 'Grijulii, sociabili, de încredere, loiali, organizați.',
+                challenges: 'Pot fi prea preocupați de opinia altora și inflexibili.',
+                careers: 'Asistent medical, profesor, HR, event planner.',
+                traits: ['Grijuliu', 'Sociabil', 'Loial', 'Organizat'] },
+            ISTP: { name: 'Virtuozul', group: 'explorer', subtitle: 'Meșter practic cu spirit de explorator',
+                description: 'ISTP-urile sunt meșteri și rezolvatori de probleme. Sunt curioși și practici, preferând să învețe prin acțiune.',
+                strengths: 'Practici, adaptabili, analitici, independenți, calmi.',
+                challenges: 'Pot fi retrași, insensibili și impulsivi.',
+                careers: 'Inginer, mecanic, pilot, programator, detectiv.',
+                traits: ['Practic', 'Adaptabil', 'Analitic', 'Independent'] },
+            ISFP: { name: 'Aventurierul', group: 'explorer', subtitle: 'Artist sensibil cu spirit de aventură',
+                description: 'ISFP-urile sunt artiști și exploratori. Sunt sensibili la frumusețe și preferă să trăiască în prezent.',
+                strengths: 'Creativi, sensibili, prietenoși, spontani, dedicați.',
+                challenges: 'Pot fi retrași, imprevizibili și prea sensibili.',
+                careers: 'Artist, designer, asistent medical, veterinar.',
+                traits: ['Creativ', 'Sensibil', 'Spontan', 'Prietenos'] },
+            ESTP: { name: 'Antreprenorul', group: 'explorer', subtitle: 'Energic și pragmatic în acțiune',
+                description: 'ESTP-urile sunt energici și pragmatici. Le place acțiunea și rezolvă problemele în timp real.',
+                strengths: 'Energici, pragmatici, observanți, directi, adaptabili.',
+                challenges: 'Pot fi impulsivi, insensibili și nerabdatori.',
+                careers: 'Vânzător, antreprenor, polițist, sportiv, paramedic.',
+                traits: ['Energic', 'Pragmatic', 'Direct', 'Adaptabil'] },
+            ESFP: { name: 'Animatorul', group: 'explorer', subtitle: 'Entertainer spontan care aduce bucurie',
+                description: 'ESFP-urile sunt entertaineri și optimiști. Aduc energie și bucurie în orice situație.',
+                strengths: 'Entuziaști, sociabili, spontani, energici, practici.',
+                challenges: 'Pot fi neconcentrați, sensibili la critică și impulsivi.',
+                careers: 'Actor, organizator de evenimente, vânzător, trainer.',
+                traits: ['Entuziast', 'Sociabil', 'Spontan', 'Optimist'] }
+        };
+
+        const axisLabels = {
+            EI: { low: 'Introversie', high: 'Extraversie' },
+            SN: { low: 'Senzorial', high: 'Intuitiv' },
+            TF: { low: 'Gândire', high: 'Simțire' },
+            JP: { low: 'Judecător', high: 'Perceptiv' }
+        };
+
+        // === TAB NAVIGATION ===
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // === MODEL - TYPE CARDS ===
+        const typeCards = document.querySelectorAll('.type-card');
+
+        function updateInfoPanelModel(type) {
+            const data = typeData[type];
+            const groupColors = { analyst: 'var(--analyst)', diplomat: 'var(--diplomat)', sentinel: 'var(--sentinel)', explorer: 'var(--explorer)' };
+
+            document.getElementById('info-icon').textContent = type;
+            document.getElementById('info-icon').style.background = groupColors[data.group];
+            document.getElementById('info-name').textContent = data.name;
+            document.getElementById('info-subtitle').textContent = data.subtitle;
+            document.getElementById('info-description').textContent = data.description;
+            document.getElementById('info-details').textContent = `Puncte forte: ${data.strengths}`;
+            document.getElementById('info-traits').innerHTML = data.traits.map(t => `<span class="trait-tag">${t}</span>`).join('');
+        }
+
+        typeCards.forEach(card => {
+            card.addEventListener('click', () => {
+                typeCards.forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                updateInfoPanelModel(card.dataset.type);
+            });
+        });
+
+        // === PLAYGROUND ===
+        const sliders = {
+            EI: document.getElementById('slider-EI'),
+            SN: document.getElementById('slider-SN'),
+            TF: document.getElementById('slider-TF'),
+            JP: document.getElementById('slider-JP')
+        };
+
+        const presets = {
+            INTJ: { EI: 20, SN: 80, TF: 20, JP: 20 },
+            INTP: { EI: 20, SN: 80, TF: 20, JP: 80 },
+            ENTJ: { EI: 80, SN: 80, TF: 20, JP: 20 },
+            ENTP: { EI: 80, SN: 80, TF: 20, JP: 80 },
+            INFJ: { EI: 20, SN: 80, TF: 80, JP: 20 },
+            INFP: { EI: 20, SN: 80, TF: 80, JP: 80 },
+            ENFJ: { EI: 80, SN: 80, TF: 80, JP: 20 },
+            ENFP: { EI: 80, SN: 80, TF: 80, JP: 80 },
+            ISTJ: { EI: 20, SN: 20, TF: 20, JP: 20 },
+            ISFJ: { EI: 20, SN: 20, TF: 80, JP: 20 },
+            ESTP: { EI: 80, SN: 20, TF: 20, JP: 80 },
+            ESFP: { EI: 80, SN: 20, TF: 80, JP: 80 }
+        };
+
+        function getTypeFromSliders() {
+            const ei = parseInt(sliders.EI.value);
+            const sn = parseInt(sliders.SN.value);
+            const tf = parseInt(sliders.TF.value);
+            const jp = parseInt(sliders.JP.value);
+
+            return (ei >= 50 ? 'E' : 'I') +
+                   (sn >= 50 ? 'N' : 'S') +
+                   (tf >= 50 ? 'F' : 'T') +
+                   (jp >= 50 ? 'P' : 'J');
+        }
+
+        function updatePlayground() {
+            const vals = {
+                EI: parseInt(sliders.EI.value),
+                SN: parseInt(sliders.SN.value),
+                TF: parseInt(sliders.TF.value),
+                JP: parseInt(sliders.JP.value)
+            };
+
+            // Update slider labels
+            Object.keys(vals).forEach(key => {
+                const val = vals[key];
+                let label = 'Echilibrat';
+                if (val < 35) label = axisLabels[key].low + ' clar';
+                else if (val < 50) label = axisLabels[key].low + ' ușor';
+                else if (val > 65) label = axisLabels[key].high + ' clar';
+                else if (val > 50) label = axisLabels[key].high + ' ușor';
+                document.getElementById(`val-${key}`).textContent = label;
+            });
+
+            // Get type
+            const type = getTypeFromSliders();
+            const data = typeData[type];
+            const groupColors = { analyst: 'var(--analyst)', diplomat: 'var(--diplomat)', sentinel: 'var(--sentinel)', explorer: 'var(--explorer)' };
+
+            // Update letters
+            document.getElementById('letter-1').textContent = type[0];
+            document.getElementById('letter-1').style.color = vals.EI >= 50 ? 'var(--extraversion)' : 'var(--introversion)';
+            document.getElementById('letter-2').textContent = type[1];
+            document.getElementById('letter-2').style.color = vals.SN >= 50 ? 'var(--intuition)' : 'var(--sensing)';
+            document.getElementById('letter-3').textContent = type[2];
+            document.getElementById('letter-3').style.color = vals.TF >= 50 ? 'var(--feeling)' : 'var(--thinking)';
+            document.getElementById('letter-4').textContent = type[3];
+            document.getElementById('letter-4').style.color = vals.JP >= 50 ? 'var(--perceiving)' : 'var(--judging)';
+
+            // Update display
+            document.getElementById('type-name-display').textContent = data.name;
+            document.getElementById('type-name-display').style.color = groupColors[data.group];
+            document.getElementById('type-subtitle').textContent = data.subtitle;
+            document.getElementById('type-display').style.borderTop = `4px solid ${groupColors[data.group]}`;
+
+            // Update analysis
+            document.getElementById('pg-description').textContent = data.description;
+            document.getElementById('pg-strengths').textContent = data.strengths;
+            document.getElementById('pg-challenges').textContent = data.challenges;
+            document.getElementById('pg-careers').textContent = data.careers;
+        }
+
+        Object.values(sliders).forEach(slider => {
+            slider.addEventListener('input', updatePlayground);
+        });
+
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const preset = presets[btn.dataset.preset];
+                if (preset) {
+                    Object.keys(preset).forEach(key => {
+                        sliders[key].value = preset[key];
+                    });
+                    updatePlayground();
+                }
+            });
+        });
+
+        updatePlayground();
+
+        // === QUIZ ===
+        const questions = [
+            { text: "La o petrecere, preferi să:", axis: 'EI',
+                options: [{ text: "Interacționezi cu mulți oameni, inclusiv necunoscuți", type: 'E' },
+                         { text: "Interacționezi cu câțiva oameni pe care îi cunoști", type: 'I' }] },
+            { text: "Te consideri mai degrabă:", axis: 'EI',
+                options: [{ text: "Realist și practic", type: 'S' },
+                         { text: "Imaginativ și inovator", type: 'N' }] },
+            { text: "Când iei decizii importante, te bazezi pe:", axis: 'TF',
+                options: [{ text: "Logică și analiză obiectivă", type: 'T' },
+                         { text: "Valori personale și impactul asupra oamenilor", type: 'F' }] },
+            { text: "Preferi un stil de viață:", axis: 'JP',
+                options: [{ text: "Planificat și organizat", type: 'J' },
+                         { text: "Flexibil și spontan", type: 'P' }] },
+            { text: "Când lucrezi la un proiect, preferi să:", axis: 'EI',
+                options: [{ text: "Colaborezi și discuți ideile cu alții", type: 'E' },
+                         { text: "Lucrezi singur și reflectezi", type: 'I' }] },
+            { text: "Ești mai atras de:", axis: 'SN',
+                options: [{ text: "Fapte și detalii concrete", type: 'S' },
+                         { text: "Concepte și posibilități abstracte", type: 'N' }] },
+            { text: "În conflict, prioritizezi:", axis: 'TF',
+                options: [{ text: "Găsirea soluției corecte și logice", type: 'T' },
+                         { text: "Menținerea armoniei și a relațiilor", type: 'F' }] },
+            { text: "Preferi să:", axis: 'JP',
+                options: [{ text: "Ai lucrurile decise și stabilite", type: 'J' },
+                         { text: "Păstrezi opțiunile deschise", type: 'P' }] },
+            { text: "După o zi lungă, te reîncărci:", axis: 'EI',
+                options: [{ text: "Ieșind cu prietenii", type: 'E' },
+                         { text: "Având timp singur", type: 'I' }] },
+            { text: "Când citești o carte, preferi:", axis: 'SN',
+                options: [{ text: "Povești bazate pe realitate", type: 'S' },
+                         { text: "Ficțiune cu idei abstracte", type: 'N' }] },
+            { text: "Ești mai mult:", axis: 'TF',
+                options: [{ text: "O persoană cu cap rece", type: 'T' },
+                         { text: "O persoană cu inimă caldă", type: 'F' }] },
+            { text: "La job, preferi:", axis: 'JP',
+                options: [{ text: "Termene clare și așteptări definite", type: 'J' },
+                         { text: "Flexibilitate și adaptare la situații", type: 'P' }] },
+            { text: "În grupuri noi, ai tendința să:", axis: 'EI',
+                options: [{ text: "Inițiezi conversații", type: 'E' },
+                         { text: "Aștepți să fii abordat", type: 'I' }] },
+            { text: "Când înveți ceva nou, preferi:", axis: 'SN',
+                options: [{ text: "Pași practici și exemple concrete", type: 'S' },
+                         { text: "Teoria și principiile de bază", type: 'N' }] },
+            { text: "Este mai important să fii:", axis: 'TF',
+                options: [{ text: "Drept și corect", type: 'T' },
+                         { text: "Compasiv și înțelegător", type: 'F' }] },
+            { text: "Cum îți organizezi spațiul de lucru?", axis: 'JP',
+                options: [{ text: "Totul are un loc stabilit", type: 'J' },
+                         { text: "Mai dezorganizat, dar știu unde e fiecare lucru", type: 'P' }] },
+            { text: "Când gândești, preferi să:", axis: 'EI',
+                options: [{ text: "Vorbești și gândești în același timp", type: 'E' },
+                         { text: "Reflectezi înainte de a vorbi", type: 'I' }] },
+            { text: "Te focusezi mai mult pe:", axis: 'SN',
+                options: [{ text: "Prezent și realitatea curentă", type: 'S' },
+                         { text: "Viitor și posibilități", type: 'N' }] },
+            { text: "În feedback, preferi:", axis: 'TF',
+                options: [{ text: "Critică directă și onestă", type: 'T' },
+                         { text: "Feedback constructiv și încurajator", type: 'F' }] },
+            { text: "Termenii-limită sunt:", axis: 'JP',
+                options: [{ text: "Sacri și trebuie respectați", type: 'J' },
+                         { text: "Orientative, pot fi ajustați", type: 'P' }] }
+        ];
+
+        let currentQuestion = 0;
+        let answers = [];
+        let quizScores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+
+        const questionText = document.getElementById('question-text');
+        const questionNumber = document.getElementById('question-number');
+        const optionsContainer = document.getElementById('options');
+        const progressFill = document.getElementById('progress-fill');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            questionNumber.textContent = `Întrebarea ${currentQuestion + 1} din ${questions.length}`;
+            questionText.textContent = q.text;
+            progressFill.style.width = `${((currentQuestion) / questions.length) * 100}%`;
+
+            optionsContainer.innerHTML = q.options.map((opt, i) => `
+                <div class="option ${answers[currentQuestion] === opt.type ? 'selected' : ''}" data-type="${opt.type}">
+                    ${opt.text}
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.addEventListener('click', () => selectOption(opt.dataset.type));
+            });
+
+            prevBtn.disabled = currentQuestion === 0;
+            nextBtn.disabled = !answers[currentQuestion];
+            nextBtn.textContent = currentQuestion === questions.length - 1 ? 'Vezi Rezultatul' : 'Următoarea';
+        }
+
+        function selectOption(type) {
+            answers[currentQuestion] = type;
+            document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+            document.querySelector(`[data-type="${type}"]`).classList.add('selected');
+            nextBtn.disabled = false;
+        }
+
+        function calculateQuizResults() {
+            quizScores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+            answers.forEach(a => quizScores[a]++);
+
+            const type = (quizScores.E >= quizScores.I ? 'E' : 'I') +
+                        (quizScores.N >= quizScores.S ? 'N' : 'S') +
+                        (quizScores.F >= quizScores.T ? 'F' : 'T') +
+                        (quizScores.P >= quizScores.J ? 'P' : 'J');
+
+            const percentages = {
+                EI: Math.round((quizScores.E / (quizScores.E + quizScores.I || 1)) * 100),
+                SN: Math.round((quizScores.N / (quizScores.S + quizScores.N || 1)) * 100),
+                TF: Math.round((quizScores.F / (quizScores.T + quizScores.F || 1)) * 100),
+                JP: Math.round((quizScores.P / (quizScores.J + quizScores.P || 1)) * 100)
+            };
+
+            return { type, percentages };
+        }
+
+        function showQuizResults() {
+            const { type, percentages } = calculateQuizResults();
+            const data = typeData[type];
+            const groupColors = { analyst: 'var(--analyst)', diplomat: 'var(--diplomat)', sentinel: 'var(--sentinel)', explorer: 'var(--explorer)' };
+
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            progressFill.style.width = '100%';
+
+            document.getElementById('result-type').textContent = type;
+            document.getElementById('result-type').style.color = groupColors[data.group];
+            document.getElementById('result-name').textContent = data.name;
+
+            // Update axis results
+            document.getElementById('res-ei-letter').textContent = type[0];
+            document.getElementById('res-ei-name').textContent = type[0] === 'E' ? 'Extraversie' : 'Introversie';
+            document.getElementById('res-ei-pct').textContent = type[0] === 'E' ? `${percentages.EI}%` : `${100-percentages.EI}%`;
+
+            document.getElementById('res-sn-letter').textContent = type[1];
+            document.getElementById('res-sn-name').textContent = type[1] === 'N' ? 'Intuitiv' : 'Senzorial';
+            document.getElementById('res-sn-pct').textContent = type[1] === 'N' ? `${percentages.SN}%` : `${100-percentages.SN}%`;
+
+            document.getElementById('res-tf-letter').textContent = type[2];
+            document.getElementById('res-tf-name').textContent = type[2] === 'F' ? 'Simțire' : 'Gândire';
+            document.getElementById('res-tf-pct').textContent = type[2] === 'F' ? `${percentages.TF}%` : `${100-percentages.TF}%`;
+
+            document.getElementById('res-jp-letter').textContent = type[3];
+            document.getElementById('res-jp-name').textContent = type[3] === 'P' ? 'Perceptiv' : 'Judecător';
+            document.getElementById('res-jp-pct').textContent = type[3] === 'P' ? `${percentages.JP}%` : `${100-percentages.JP}%`;
+
+            document.getElementById('profile-title').textContent = `${type} - ${data.name}`;
+            document.getElementById('profile-text').textContent = data.description;
+        }
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                showQuizResults();
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            currentQuestion = 0;
+            answers = [];
+            quizScores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+            quizContainer.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+            renderQuestion();
+        });
+
+        renderQuestion();
+    </script>
+</body>
+</html>

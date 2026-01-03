@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hogan Assessment | Interactive Learning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --moving-away: #EF4444;
+            --moving-against: #F59E0B;
+            --moving-toward: #3B82F6;
+            --bright: #10B981;
+            --dark: #8B5CF6;
+            --values: #EC4899;
+            --bg-dark: #1a1a2e;
+            --bg-card: #16213e;
+            --text-light: #edf2f7;
+            --text-muted: #a0aec0;
+            --accent-glow: rgba(139, 92, 246, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 2rem 2rem;
+            position: relative;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--text-light) 0%, var(--dark) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--dark);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 2rem auto;
+            padding: 0.5rem;
+            background: var(--bg-card);
+            border-radius: 50px;
+            max-width: 600px;
+        }
+
+        .tab-btn {
+            padding: 0.8rem 1.2rem;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-light);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--dark), var(--moving-against));
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === MODEL === */
+        .model-intro {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .model-intro h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .model-intro p {
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .assessment-types {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .assessment-types {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .assessment-type {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-top: 4px solid transparent;
+        }
+
+        .assessment-type:hover {
+            transform: translateY(-5px);
+        }
+
+        .assessment-type.active {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .assessment-type[data-type="bright"] { border-color: var(--bright); }
+        .assessment-type[data-type="dark"] { border-color: var(--dark); }
+        .assessment-type[data-type="values"] { border-color: var(--values); }
+
+        .assessment-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .assessment-type h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .assessment-type p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Dark Side Clusters */
+        .clusters-section {
+            margin-top: 2rem;
+        }
+
+        .cluster-label {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .cluster-label.away { background: rgba(239, 68, 68, 0.2); color: var(--moving-away); }
+        .cluster-label.against { background: rgba(245, 158, 11, 0.2); color: var(--moving-against); }
+        .cluster-label.toward { background: rgba(59, 130, 246, 0.2); color: var(--moving-toward); }
+
+        .derailers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .derailer-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .derailer-card:hover {
+            transform: translateX(5px);
+        }
+
+        .derailer-card.active {
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .derailer-card.away { border-color: var(--moving-away); }
+        .derailer-card.against { border-color: var(--moving-against); }
+        .derailer-card.toward { border-color: var(--moving-toward); }
+
+        .derailer-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .derailer-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .derailer-brief {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .info-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .info-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .info-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-header span {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-box {
+            padding: 1rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+        }
+
+        .info-box h4 {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-box p, .info-box ul {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-box li {
+            padding: 0.25rem 0;
+        }
+
+        /* === THEORY === */
+        .theory-section {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .theory-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .theory-section p {
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .three-columns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .three-columns {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .column-card {
+            padding: 1.25rem;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.03);
+        }
+
+        .column-card h4 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .column-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .column-card li {
+            padding: 0.3rem 0;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* === PLAYGROUND === */
+        .playground-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .playground-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .playground-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .playground-header p {
+            color: var(--text-muted);
+        }
+
+        .playground-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .playground-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sliders-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .slider-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .slider-section-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .slider-section-label.away { background: rgba(239, 68, 68, 0.2); color: var(--moving-away); }
+        .slider-section-label.against { background: rgba(245, 158, 11, 0.2); color: var(--moving-against); }
+        .slider-section-label.toward { background: rgba(59, 130, 246, 0.2); color: var(--moving-toward); }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            padding: 0.5rem;
+            background: rgba(255,255,255,0.02);
+            border-radius: 8px;
+        }
+
+        .slider-name {
+            width: 100px;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        .hogan-slider {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.1);
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        .hogan-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+            background: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .slider-value {
+            width: 30px;
+            text-align: right;
+            font-weight: 600;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .preset-label {
+            width: 100%;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .preset-btn {
+            padding: 0.4rem 0.7rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: var(--text-light);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Source Sans 3', sans-serif;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .visualization-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .risk-summary {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .risk-summary h4 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .risk-meters {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .risk-meter {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.03);
+        }
+
+        .risk-meter.away { border-top: 3px solid var(--moving-away); }
+        .risk-meter.against { border-top: 3px solid var(--moving-against); }
+        .risk-meter.toward { border-top: 3px solid var(--moving-toward); }
+
+        .risk-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .risk-score {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .risk-meter.away .risk-score { color: var(--moving-away); }
+        .risk-meter.against .risk-score { color: var(--moving-against); }
+        .risk-meter.toward .risk-score { color: var(--moving-toward); }
+
+        .top-derailers {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .top-derailers h4 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .top-derailer-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+        }
+
+        .top-derailer-rank {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .top-derailer-info {
+            flex: 1;
+        }
+
+        .top-derailer-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .top-derailer-cluster {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .top-derailer-score {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .analysis-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .analysis-section {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .analysis-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .analysis-section h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .analysis-section p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* === QUIZ === */
+        .simulator-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-card);
+            border-radius: 3px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--dark), var(--moving-against));
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        .question-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .question-number {
+            color: var(--dark);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            line-height: 1.5;
+            margin-bottom: 2rem;
+        }
+
+        .likert-scale {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .likert-option {
+            flex: 1;
+            padding: 1rem 0.5rem;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .likert-option:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .likert-option.selected {
+            border-color: var(--dark);
+            background: rgba(139, 92, 246, 0.15);
+        }
+
+        .likert-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .likert-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-light);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--dark), var(--moving-against));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--accent-glow);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results-container {
+            text-align: center;
+        }
+
+        .results-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .results-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+
+        .result-item {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1rem;
+            border-left: 3px solid;
+        }
+
+        .result-item.away { border-color: var(--moving-away); }
+        .result-item.against { border-color: var(--moving-against); }
+        .result-item.toward { border-color: var(--moving-toward); }
+
+        .result-name {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .result-score {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .result-item.away .result-score { color: var(--moving-away); }
+        .result-item.against .result-score { color: var(--moving-against); }
+        .result-item.toward .result-score { color: var(--moving-toward); }
+
+        .profile-description {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .profile-description h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .profile-description p {
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .restart-btn {
+            margin-top: 2rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="noise-overlay"></div>
+
+    <header>
+        <h1>Hogan Assessment</h1>
+        <p class="subtitle">Predicting Performance and Derailing Risks</p>
+        <span class="badge">Corporate Standard</span>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="model">Dark Side</button>
+        <button class="tab-btn" data-tab="theory">Theory</button>
+        <button class="tab-btn" data-tab="playground">Playground</button>
+        <button class="tab-btn" data-tab="simulator">Quiz</button>
+    </div>
+
+    <div class="container">
+        <!-- TAB MODEL -->
+        <div id="model" class="tab-content active">
+            <div class="model-intro">
+                <h2>The 11 "Dark Side" Traits</h2>
+                <p>Traits that emerge under stress or when we stop monitoring our behavior. Grouped into 3 clusters based on how they affect relationships.</p>
+            </div>
+
+            <div class="clusters-section">
+                <div class="cluster-label away">Moving Away (Avoidance)</div>
+                <div class="derailers-grid">
+                    <div class="derailer-card away" data-derailer="excitable">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Excitable</div>
+                        </div>
+                        <div class="derailer-brief">Easily enthused but quickly disappointed. Volatile emotions.</div>
+                    </div>
+                    <div class="derailer-card away" data-derailer="skeptical">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Skeptical</div>
+                        </div>
+                        <div class="derailer-brief">Cynical, distrustful, sees hidden motives everywhere.</div>
+                    </div>
+                    <div class="derailer-card away" data-derailer="cautious">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Cautious</div>
+                        </div>
+                        <div class="derailer-brief">Avoids risks, resistant to change, indecisive.</div>
+                    </div>
+                    <div class="derailer-card away" data-derailer="reserved">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Reserved</div>
+                        </div>
+                        <div class="derailer-brief">Distant, hard to read, doesn't provide feedback.</div>
+                    </div>
+                    <div class="derailer-card away" data-derailer="leisurely">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Leisurely</div>
+                        </div>
+                        <div class="derailer-brief">Passive-aggressive, cooperative on the surface but subtly resistant.</div>
+                    </div>
+                </div>
+
+                <div class="cluster-label against">Moving Against (Confrontation)</div>
+                <div class="derailers-grid">
+                    <div class="derailer-card against" data-derailer="bold">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Bold</div>
+                        </div>
+                        <div class="derailer-brief">Overconfident, doesn't acknowledge mistakes, intimidating.</div>
+                    </div>
+                    <div class="derailer-card against" data-derailer="mischievous">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Mischievous</div>
+                        </div>
+                        <div class="derailer-brief">Thrill-seeking, tests limits, manipulative.</div>
+                    </div>
+                    <div class="derailer-card against" data-derailer="colorful">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Colorful</div>
+                        </div>
+                        <div class="derailer-brief">Attention-seeking, dramatic, interrupts focus.</div>
+                    </div>
+                    <div class="derailer-card against" data-derailer="imaginative">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Imaginative</div>
+                        </div>
+                        <div class="derailer-brief">Unconventional but impractical ideas, hard to follow.</div>
+                    </div>
+                </div>
+
+                <div class="cluster-label toward">Moving Toward (Approaching)</div>
+                <div class="derailers-grid">
+                    <div class="derailer-card toward" data-derailer="diligent">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Diligent</div>
+                        </div>
+                        <div class="derailer-brief">Perfectionist, micromanager, overly critical of details.</div>
+                    </div>
+                    <div class="derailer-card toward" data-derailer="dutiful">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Dutiful</div>
+                        </div>
+                        <div class="derailer-brief">Too conforming, avoids conflict with authority, doesn't challenge.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-panel" id="info-panel">
+                <div class="info-header">
+                    <h2 id="info-name">Excitable</h2>
+                    <span id="info-cluster">Moving Away - Avoidance</span>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-box">
+                        <h4>Under Stress</h4>
+                        <p id="info-stress">Gets enthusiastic about new projects but quickly loses interest. Emotionally volatile, easily disappointed by people and situations.</p>
+                    </div>
+                    <div class="info-box">
+                        <h4>Team Impact</h4>
+                        <p id="info-impact">The team becomes uncertain about direction, doesn't know what to expect. Morale drops when the leader seems to lose enthusiasm.</p>
+                    </div>
+                    <div class="info-box">
+                        <h4>Management Strategies</h4>
+                        <p id="info-strategies">Monitor your emotional reactions. Don't make important decisions when frustrated. Communicate consistently.</p>
+                    </div>
+                    <div class="info-box">
+                        <h4>In Interviews</h4>
+                        <p id="info-interview">Watch for candidates who frequently change jobs or projects. Ask about moments of frustration.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB THEORY -->
+        <div id="theory" class="tab-content">
+            <div class="theory-section">
+                <h2>The Hogan System</h2>
+                <p>Dr. Robert Hogan developed one of the most widely used personality assessment systems for predicting professional performance. The system includes three complementary instruments:</p>
+
+                <div class="three-columns">
+                    <div class="column-card" style="border-top: 3px solid var(--bright);">
+                        <h4 style="color: var(--bright);">HPI - Bright Side</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">The traits that define us when we're at our best</p>
+                        <ul>
+                            <li>Adjustment (stability)</li>
+                            <li>Ambition (drive)</li>
+                            <li>Sociability</li>
+                            <li>Interpersonal Sensitivity</li>
+                            <li>Prudence</li>
+                            <li>Inquisitive</li>
+                            <li>Learning Approach</li>
+                        </ul>
+                    </div>
+                    <div class="column-card" style="border-top: 3px solid var(--dark);">
+                        <h4 style="color: var(--dark);">HDS - Dark Side</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">Behaviors that emerge under stress or pressure</p>
+                        <ul>
+                            <li>Moving Away (5 scales)</li>
+                            <li>Moving Against (4 scales)</li>
+                            <li>Moving Toward (2 scales)</li>
+                            <li>Total: 11 derailers</li>
+                        </ul>
+                    </div>
+                    <div class="column-card" style="border-top: 3px solid var(--values);">
+                        <h4 style="color: var(--values);">MVPI - Values</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">What motivates us and what type of culture we seek</p>
+                        <ul>
+                            <li>Recognition</li>
+                            <li>Power</li>
+                            <li>Hedonism</li>
+                            <li>Altruistic</li>
+                            <li>Affiliation</li>
+                            <li>Tradition</li>
+                            <li>Security</li>
+                            <li>Commerce</li>
+                            <li>Aesthetics</li>
+                            <li>Science</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h2>The 3 Dark Side Clusters</h2>
+                <p>Karen Horney identified three ways people respond to anxiety in relationships. Hogan applied this framework to leadership behaviors:</p>
+
+                <div class="three-columns">
+                    <div class="column-card" style="border-top: 3px solid var(--moving-away);">
+                        <h4 style="color: var(--moving-away);">Moving Away</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Manages insecurity through withdrawal and avoidance. Includes: Excitable, Skeptical, Cautious, Reserved, Leisurely.</p>
+                    </div>
+                    <div class="column-card" style="border-top: 3px solid var(--moving-against);">
+                        <h4 style="color: var(--moving-against);">Moving Against</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Manages insecurity through dominance and intimidation. Includes: Bold, Mischievous, Colorful, Imaginative.</p>
+                    </div>
+                    <div class="column-card" style="border-top: 3px solid var(--moving-toward);">
+                        <h4 style="color: var(--moving-toward);">Moving Toward</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Manages insecurity by trying to please. Includes: Diligent, Dutiful.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h2>Why Dark Side Matters</h2>
+                <p>Studies show that about 50% of leaders fail. The reasons are not lack of intelligence or technical competence, but dysfunctional interpersonal behaviors that emerge under stress. Knowing your own "dark side traits" allows:</p>
+                <ul style="color: var(--text-muted); margin-left: 1.5rem; margin-top: 1rem;">
+                    <li style="margin-bottom: 0.5rem;">Self-monitoring in stressful situations</li>
+                    <li style="margin-bottom: 0.5rem;">Building preventive strategies</li>
+                    <li style="margin-bottom: 0.5rem;">Choosing roles that minimize risks</li>
+                    <li>Developing coaching relationships for feedback</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- TAB PLAYGROUND -->
+        <div id="playground" class="tab-content">
+            <div class="playground-container">
+                <div class="playground-header">
+                    <h2>Dark Side Simulator</h2>
+                    <p>Explore different leadership risk profiles</p>
+                </div>
+
+                <div class="playground-grid">
+                    <div class="sliders-panel">
+                        <div class="slider-section">
+                            <div class="slider-section-label away">Moving Away</div>
+                            <div class="slider-group">
+                                <span class="slider-name">Excitable</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-excitable">
+                                <span class="slider-value" id="val-excitable">50</span>
+                            </div>
+                            <div class="slider-group">
+                                <span class="slider-name">Skeptical</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-skeptical">
+                                <span class="slider-value" id="val-skeptical">50</span>
+                            </div>
+                            <div class="slider-group">
+                                <span class="slider-name">Cautious</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-cautious">
+                                <span class="slider-value" id="val-cautious">50</span>
+                            </div>
+                            <div class="slider-group">
+                                <span class="slider-name">Reserved</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-reserved">
+                                <span class="slider-value" id="val-reserved">50</span>
+                            </div>
+                            <div class="slider-group">
+                                <span class="slider-name">Leisurely</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-leisurely">
+                                <span class="slider-value" id="val-leisurely">50</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-section">
+                            <div class="slider-section-label against">Moving Against</div>
+                            <div class="slider-group">
+                                <span class="slider-name">Bold</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-bold">
+                                <span class="slider-value" id="val-bold">50</span>
+                            </div>
+                            <div class="slider-group">
+                                <span class="slider-name">Mischievous</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-mischievous">
+                                <span class="slider-value" id="val-mischievous">50</span>
+                            </div>
+                            <div class="slider-group">
+                                <span class="slider-name">Colorful</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-colorful">
+                                <span class="slider-value" id="val-colorful">50</span>
+                            </div>
+                            <div class="slider-group">
+                                <span class="slider-name">Imaginative</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-imaginative">
+                                <span class="slider-value" id="val-imaginative">50</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-section">
+                            <div class="slider-section-label toward">Moving Toward</div>
+                            <div class="slider-group">
+                                <span class="slider-name">Diligent</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-diligent">
+                                <span class="slider-value" id="val-diligent">50</span>
+                            </div>
+                            <div class="slider-group">
+                                <span class="slider-name">Dutiful</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-dutiful">
+                                <span class="slider-value" id="val-dutiful">50</span>
+                            </div>
+                        </div>
+
+                        <div class="preset-buttons">
+                            <span class="preset-label">Risk Profiles:</span>
+                            <button class="preset-btn" data-preset="narcissist">Narcissist</button>
+                            <button class="preset-btn" data-preset="avoider">Avoidant</button>
+                            <button class="preset-btn" data-preset="perfectionist">Perfectionist</button>
+                            <button class="preset-btn" data-preset="passive">Passive-Aggressive</button>
+                            <button class="preset-btn" data-preset="charismatic">Risky Charismatic</button>
+                            <button class="preset-btn" data-preset="lowrisk">Low Risk</button>
+                        </div>
+                    </div>
+
+                    <div class="visualization-panel">
+                        <div class="risk-summary">
+                            <h4>Cluster Scores</h4>
+                            <div class="risk-meters">
+                                <div class="risk-meter away">
+                                    <div class="risk-label">Moving Away</div>
+                                    <div class="risk-score" id="score-away">50</div>
+                                </div>
+                                <div class="risk-meter against">
+                                    <div class="risk-label">Moving Against</div>
+                                    <div class="risk-score" id="score-against">50</div>
+                                </div>
+                                <div class="risk-meter toward">
+                                    <div class="risk-label">Moving Toward</div>
+                                    <div class="risk-score" id="score-toward">50</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="top-derailers">
+                            <h4>Top 3 Risks</h4>
+                            <div id="top-derailers-list"></div>
+                        </div>
+
+                        <div class="analysis-panel">
+                            <div class="analysis-section">
+                                <h4>Style Under Stress</h4>
+                                <p id="stress-style">Balanced profile - no extreme derailing tendencies identified.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Team Impact</h4>
+                                <p id="team-impact">Moderate risk to team dynamics. Monitoring recommended during periods of pressure.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Development Recommendations</h4>
+                                <p id="development">Build feedback mechanisms to identify early warning signs.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB QUIZ -->
+        <div id="simulator" class="tab-content">
+            <div class="simulator-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+
+                <div id="quiz-container">
+                    <div class="question-card">
+                        <div class="question-number" id="question-number">Question 1 of 22</div>
+                        <div class="question-text" id="question-text">When something doesn't go well at work, my first impulse is to lose my enthusiasm.</div>
+                        <div class="likert-scale" id="options"></div>
+                    </div>
+
+                    <div class="nav-buttons">
+                        <button class="btn btn-secondary" id="prev-btn" disabled>Back</button>
+                        <button class="btn btn-primary" id="next-btn" disabled>Next</button>
+                    </div>
+                </div>
+
+                <div id="results-container" class="results-container hidden">
+                    <h2 class="results-title">Your Dark Side Profile</h2>
+                    <p class="results-subtitle">Potential leadership risks under stress</p>
+
+                    <div class="results-grid" id="results-grid"></div>
+
+                    <div class="profile-description">
+                        <h3>Interpretation</h3>
+                        <p id="profile-text-main"></p>
+                        <p id="profile-text-secondary"></p>
+                    </div>
+
+                    <button class="btn btn-primary restart-btn" id="restart-btn">Retake Test</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === DATA ===
+        const derailerData = {
+            excitable: {
+                name: 'Excitable', cluster: 'away', clusterName: 'Moving Away - Avoidance',
+                stress: 'Gets enthusiastic about new projects but quickly loses interest. Emotionally volatile, easily disappointed by people and situations.',
+                impact: 'The team becomes uncertain about direction, doesn\'t know what to expect. Morale drops when the leader seems to lose enthusiasm.',
+                strategies: 'Monitor your emotional reactions. Don\'t make important decisions when frustrated. Communicate consistently.',
+                interview: 'Watch for candidates who frequently change jobs or projects. Ask about moments of frustration.'
+            },
+            skeptical: {
+                name: 'Skeptical', cluster: 'away', clusterName: 'Moving Away - Avoidance',
+                stress: 'Becomes cynical and distrustful. Suspects hidden motives, interprets neutral as negative, holds grudges.',
+                impact: 'Creates a culture of distrust. People hesitate to share information or ask for help.',
+                strategies: 'Verify interpretations before reacting. Look for positive intentions. Give the benefit of the doubt.',
+                interview: 'Listen to how they talk about former colleagues and bosses. Watch for blaming patterns.'
+            },
+            cautious: {
+                name: 'Cautious', cluster: 'away', clusterName: 'Moving Away - Avoidance',
+                stress: 'Becomes excessively cautious, avoids decisions, resistant to change, paralyzed by fear of failure.',
+                impact: 'Slows down progress. The team becomes frustrated by lack of direction. Opportunities are missed.',
+                strategies: 'Set deadlines for decisions. Accept that perfection doesn\'t exist. Start with small steps.',
+                interview: 'Ask about quick decisions. How do they handle ambiguity? Do they have examples of calculated risks?'
+            },
+            reserved: {
+                name: 'Reserved', cluster: 'away', clusterName: 'Moving Away - Avoidance',
+                stress: 'Becomes withdrawn, distant, hard to read. Doesn\'t offer feedback or recognition. Seems disinterested.',
+                impact: 'The team feels unappreciated and unguided. They don\'t know where they stand. Low engagement.',
+                strategies: 'Schedule regular check-ins. Practice giving positive feedback. Share more.',
+                interview: 'Observe the level of engagement in conversation. Ask about their communication style with the team.'
+            },
+            leisurely: {
+                name: 'Leisurely', cluster: 'away', clusterName: 'Moving Away - Avoidance',
+                stress: 'Becomes passive-aggressive. Agrees on the surface but subtly sabotages. Procrastinates, "forgets," finds excuses.',
+                impact: 'Frustrates colleagues. Projects are delayed. Others don\'t understand why things aren\'t moving.',
+                strategies: 'Be direct when you disagree. Express dissatisfaction openly. Honor commitments.',
+                interview: 'Check references about follow-through. Ask how they handle disagreements.'
+            },
+            bold: {
+                name: 'Bold', cluster: 'against', clusterName: 'Moving Against - Confrontation',
+                stress: 'Becomes overconfident, doesn\'t accept feedback, minimizes own mistakes, can be intimidating.',
+                impact: 'The team stops offering honest input. Bad decisions go unchecked. Culture of fear.',
+                strategies: 'Actively seek critical feedback. Acknowledge mistakes publicly. Listen more.',
+                interview: 'How do they respond to negative feedback in the interview? How do they talk about failures?'
+            },
+            mischievous: {
+                name: 'Mischievous', cluster: 'against', clusterName: 'Moving Against - Confrontation',
+                stress: 'Tests limits, seeks thrills, can be manipulative or unethical, "rules are for others."',
+                impact: 'Creates risks for the organization. Policies violated. Trust erodes.',
+                strategies: 'Recognize long-term impact. Respect processes. Find legitimate ways to get excitement.',
+                interview: 'Explore ethically ambiguous situations. How do they justify shortcuts? Check references carefully.'
+            },
+            colorful: {
+                name: 'Colorful', cluster: 'against', clusterName: 'Moving Against - Confrontation',
+                stress: 'Attention-seeking, dramatic, interrupts to be center stage, can be superficial.',
+                impact: 'Distracts from objectives. Others aren\'t heard. Substance is sacrificed for show.',
+                strategies: 'Give space to others. Focus on results not presentation. Listen actively.',
+                interview: 'Observe if they dominate the conversation. Can they give credit to others? How substantive are their answers?'
+            },
+            imaginative: {
+                name: 'Imaginative', cluster: 'against', clusterName: 'Moving Against - Confrontation',
+                stress: 'Unconventional ideas disconnected from reality. Hard to follow. Constantly changes direction.',
+                impact: 'Team is confused. Resources wasted on impractical ideas. Execution suffers.',
+                strategies: 'Test ideas with others before launching. Accept practical feedback. Focus on implementation.',
+                interview: 'Ask how they\'ve implemented ideas. Can they make concrete plans? Have they completed projects?'
+            },
+            diligent: {
+                name: 'Diligent', cluster: 'toward', clusterName: 'Moving Toward - Approaching',
+                stress: 'Perfectionist, micromanager, overly critical of details, hard to satisfy, unrealistic standards.',
+                impact: 'Team paralyzed by criticism. Burnout. Creativity stifled by excessive control.',
+                strategies: 'Define "good enough." Delegate with trust. Focus on what really matters.',
+                interview: 'How do they define quality? Can they give examples of delegation? How do they handle others\' errors?'
+            },
+            dutiful: {
+                name: 'Dutiful', cluster: 'toward', clusterName: 'Moving Toward - Approaching',
+                stress: 'Too conforming, avoids any conflict with authority, doesn\'t challenge status quo, "yes person."',
+                impact: 'Doesn\'t bring critical perspective. Bad decisions go unchallenged. Limited initiative.',
+                strategies: 'Practice expressing constructive disagreement. Offer alternatives. Take calculated risks.',
+                interview: 'Have they ever challenged a decision? How? Have they initiated changes? When did they say "no"?'
+            }
+        };
+
+        // === TAB NAVIGATION ===
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // === MODEL ===
+        const derailerCards = document.querySelectorAll('.derailer-card');
+
+        function updateInfoPanel(derailer) {
+            const data = derailerData[derailer];
+            document.getElementById('info-name').textContent = data.name;
+            document.getElementById('info-cluster').textContent = data.clusterName;
+            document.getElementById('info-stress').textContent = data.stress;
+            document.getElementById('info-impact').textContent = data.impact;
+            document.getElementById('info-strategies').textContent = data.strategies;
+            document.getElementById('info-interview').textContent = data.interview;
+        }
+
+        derailerCards.forEach(card => {
+            card.addEventListener('click', () => {
+                derailerCards.forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                updateInfoPanel(card.dataset.derailer);
+            });
+        });
+
+        // === PLAYGROUND ===
+        const derailers = ['excitable', 'skeptical', 'cautious', 'reserved', 'leisurely', 'bold', 'mischievous', 'colorful', 'imaginative', 'diligent', 'dutiful'];
+        const sliders = {};
+        derailers.forEach(d => {
+            sliders[d] = document.getElementById(`slider-${d}`);
+        });
+
+        const clusters = {
+            away: ['excitable', 'skeptical', 'cautious', 'reserved', 'leisurely'],
+            against: ['bold', 'mischievous', 'colorful', 'imaginative'],
+            toward: ['diligent', 'dutiful']
+        };
+
+        const presets = {
+            narcissist: { excitable: 30, skeptical: 60, cautious: 20, reserved: 40, leisurely: 35, bold: 95, mischievous: 75, colorful: 85, imaginative: 70, diligent: 25, dutiful: 15 },
+            avoider: { excitable: 75, skeptical: 70, cautious: 90, reserved: 85, leisurely: 60, bold: 20, mischievous: 25, colorful: 20, imaginative: 30, diligent: 40, dutiful: 70 },
+            perfectionist: { excitable: 50, skeptical: 55, cautious: 65, reserved: 50, leisurely: 40, bold: 35, mischievous: 25, colorful: 30, imaginative: 45, diligent: 95, dutiful: 75 },
+            passive: { excitable: 60, skeptical: 70, cautious: 55, reserved: 65, leisurely: 90, bold: 20, mischievous: 30, colorful: 25, imaginative: 35, diligent: 50, dutiful: 80 },
+            charismatic: { excitable: 55, skeptical: 35, cautious: 25, reserved: 20, leisurely: 30, bold: 85, mischievous: 70, colorful: 95, imaginative: 80, diligent: 30, dutiful: 25 },
+            lowrisk: { excitable: 30, skeptical: 35, cautious: 40, reserved: 35, leisurely: 30, bold: 40, mischievous: 30, colorful: 35, imaginative: 40, diligent: 45, dutiful: 40 }
+        };
+
+        function updatePlayground() {
+            const vals = {};
+            derailers.forEach(d => {
+                vals[d] = parseInt(sliders[d].value);
+                document.getElementById(`val-${d}`).textContent = vals[d];
+            });
+
+            // Calculate cluster averages
+            const clusterScores = {};
+            Object.keys(clusters).forEach(cluster => {
+                const sum = clusters[cluster].reduce((acc, d) => acc + vals[d], 0);
+                clusterScores[cluster] = Math.round(sum / clusters[cluster].length);
+            });
+
+            document.getElementById('score-away').textContent = clusterScores.away;
+            document.getElementById('score-against').textContent = clusterScores.against;
+            document.getElementById('score-toward').textContent = clusterScores.toward;
+
+            // Top 3 derailers
+            const sorted = Object.entries(vals).sort((a, b) => b[1] - a[1]).slice(0, 3);
+            const clusterNames = { away: 'Moving Away', against: 'Moving Against', toward: 'Moving Toward' };
+
+            document.getElementById('top-derailers-list').innerHTML = sorted.map(([derailer, score], i) => {
+                const data = derailerData[derailer];
+                return `
+                    <div class="top-derailer-item">
+                        <div class="top-derailer-rank">${i + 1}</div>
+                        <div class="top-derailer-info">
+                            <div class="top-derailer-name">${data.name}</div>
+                            <div class="top-derailer-cluster">${clusterNames[data.cluster]}</div>
+                        </div>
+                        <div class="top-derailer-score">${score}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // Analysis
+            const maxCluster = Object.entries(clusterScores).sort((a, b) => b[1] - a[1])[0];
+            const topDerailer = sorted[0][0];
+
+            const stressStyles = {
+                away: 'Under stress, the tendency is to withdraw and avoid. You risk isolating yourself or becoming passive when pressure increases.',
+                against: 'Under stress, the tendency is confrontation and dominance. You risk becoming intimidating or ignoring others\' input.',
+                toward: 'Under stress, the tendency is excessive conformity. You risk losing your own voice or becoming too perfectionist.'
+            };
+
+            const teamImpacts = {
+                away: 'The team may feel they aren\'t getting enough direction or feedback. Communication may suffer.',
+                against: 'The team may become reluctant to offer honest input. The climate may become tense.',
+                toward: 'The team may feel standards are unrealistically high or there\'s no room for error.'
+            };
+
+            document.getElementById('stress-style').textContent = stressStyles[maxCluster[0]] || 'Balanced profile - no extreme tendencies.';
+            document.getElementById('team-impact').textContent = teamImpacts[maxCluster[0]] || 'Moderate risk. Monitoring recommended.';
+
+            const topData = derailerData[topDerailer];
+            document.getElementById('development').textContent = topData.strategies;
+        }
+
+        derailers.forEach(d => {
+            sliders[d].addEventListener('input', updatePlayground);
+        });
+
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const preset = presets[btn.dataset.preset];
+                derailers.forEach(d => {
+                    sliders[d].value = preset[d];
+                });
+                updatePlayground();
+            });
+        });
+
+        updatePlayground();
+
+        // === QUIZ ===
+        const questions = [
+            { text: "When something doesn't go well at work, my first impulse is to lose my enthusiasm.", derailer: 'excitable' },
+            { text: "I often wonder what hidden motives others have.", derailer: 'skeptical' },
+            { text: "I prefer not to risk rather than make mistakes.", derailer: 'cautious' },
+            { text: "People say I'm hard to read.", derailer: 'reserved' },
+            { text: "When I disagree, I prefer not to say it directly.", derailer: 'leisurely' },
+            { text: "I'm confident in my judgment even when others disagree.", derailer: 'bold' },
+            { text: "Rules are guidelines, not absolutes.", derailer: 'mischievous' },
+            { text: "I like being the center of attention.", derailer: 'colorful' },
+            { text: "I have creative ideas that others consider too unusual.", derailer: 'imaginative' },
+            { text: "My standards are higher than most people's.", derailer: 'diligent' },
+            { text: "I prefer to avoid conflicts with superiors.", derailer: 'dutiful' },
+            { text: "I get bored easily with projects after the initial enthusiasm.", derailer: 'excitable' },
+            { text: "It's hard for me to fully trust people.", derailer: 'skeptical' },
+            { text: "I need a lot of information before making a decision.", derailer: 'cautious' },
+            { text: "I'm not very expressive with my emotions.", derailer: 'reserved' },
+            { text: "Sometimes I postpone things I disagree with.", derailer: 'leisurely' },
+            { text: "Criticism doesn't affect me - I know what I know.", derailer: 'bold' },
+            { text: "I get bored if there's no risk or adrenaline.", derailer: 'mischievous' },
+            { text: "I'm enthusiastic and expressive in presentations.", derailer: 'colorful' },
+            { text: "I see connections and possibilities that others don't see.", derailer: 'imaginative' },
+            { text: "Details matter - I check them multiple times.", derailer: 'diligent' },
+            { text: "I respect authority and hierarchy.", derailer: 'dutiful' }
+        ];
+
+        let currentQuestion = 0;
+        let answers = [];
+
+        const questionText = document.getElementById('question-text');
+        const questionNumber = document.getElementById('question-number');
+        const optionsContainer = document.getElementById('options');
+        const progressFill = document.getElementById('progress-fill');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            questionNumber.textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            questionText.textContent = q.text;
+            progressFill.style.width = `${((currentQuestion) / questions.length) * 100}%`;
+
+            optionsContainer.innerHTML = [1, 2, 3, 4, 5].map(val => `
+                <div class="likert-option ${answers[currentQuestion] === val ? 'selected' : ''}" data-value="${val}">
+                    <span class="likert-value">${val}</span>
+                    <span class="likert-label">${['Never', 'Rarely', 'Sometimes', 'Often', 'Always'][val-1]}</span>
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.likert-option').forEach(opt => {
+                opt.addEventListener('click', () => selectOption(parseInt(opt.dataset.value)));
+            });
+
+            prevBtn.disabled = currentQuestion === 0;
+            nextBtn.disabled = answers[currentQuestion] === undefined;
+            nextBtn.textContent = currentQuestion === questions.length - 1 ? 'See Results' : 'Next';
+        }
+
+        function selectOption(value) {
+            answers[currentQuestion] = value;
+            document.querySelectorAll('.likert-option').forEach(o => o.classList.remove('selected'));
+            document.querySelector(`[data-value="${value}"]`).classList.add('selected');
+            nextBtn.disabled = false;
+        }
+
+        function calculateQuizResults() {
+            const scores = {};
+            derailers.forEach(d => scores[d] = 0);
+            const counts = {};
+            derailers.forEach(d => counts[d] = 0);
+
+            questions.forEach((q, i) => {
+                if (answers[i] !== undefined) {
+                    scores[q.derailer] += answers[i];
+                    counts[q.derailer]++;
+                }
+            });
+
+            const percentages = {};
+            derailers.forEach(d => {
+                percentages[d] = counts[d] > 0 ? Math.round((scores[d] / (counts[d] * 5)) * 100) : 0;
+            });
+
+            return percentages;
+        }
+
+        function showQuizResults() {
+            const percentages = calculateQuizResults();
+
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            progressFill.style.width = '100%';
+
+            const sorted = Object.entries(percentages).sort((a, b) => b[1] - a[1]);
+
+            document.getElementById('results-grid').innerHTML = sorted.map(([derailer, score]) => {
+                const data = derailerData[derailer];
+                return `
+                    <div class="result-item ${data.cluster}">
+                        <div class="result-name">${data.name}</div>
+                        <div class="result-score">${score}%</div>
+                    </div>
+                `;
+            }).join('');
+
+            const top = sorted[0];
+            const topData = derailerData[top[0]];
+
+            document.getElementById('profile-text-main').textContent = `Primary risk identified: ${topData.name}. ${topData.stress}`;
+            document.getElementById('profile-text-secondary').textContent = `Recommended strategies: ${topData.strategies}`;
+        }
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                showQuizResults();
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            currentQuestion = 0;
+            answers = [];
+            quizContainer.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+            renderQuestion();
+        });
+
+        renderQuestion();
+    </script>
+</body>
+</html>

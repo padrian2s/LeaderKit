@@ -1,0 +1,1729 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modelul DISC | Învățare Interactivă</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dominance: #DC2626;
+            --influence: #F59E0B;
+            --steadiness: #10B981;
+            --conscientiousness: #3B82F6;
+            --bg-dark: #1a1a2e;
+            --bg-card: #16213e;
+            --text-light: #edf2f7;
+            --text-muted: #a0aec0;
+            --accent-glow: rgba(220, 38, 38, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 2rem 2rem;
+            position: relative;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--text-light) 0%, var(--dominance) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 2rem auto;
+            padding: 0.5rem;
+            background: var(--bg-card);
+            border-radius: 50px;
+            max-width: 500px;
+        }
+
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-light);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--dominance) 0%, var(--influence) 100%);
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === MODEL VIZUAL === */
+        .model-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        @media (max-width: 900px) {
+            .model-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .quadrant-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            aspect-ratio: 1;
+        }
+
+        .quadrant-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .quadrant {
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quadrant::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .quadrant:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+
+        .quadrant:hover::before {
+            opacity: 1;
+        }
+
+        .quadrant.active {
+            transform: scale(1.08);
+            z-index: 10;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .q-dominance { background: linear-gradient(135deg, var(--dominance), #991b1b); }
+        .q-influence { background: linear-gradient(135deg, var(--influence), #d97706); }
+        .q-steadiness { background: linear-gradient(135deg, var(--steadiness), #059669); }
+        .q-conscientiousness { background: linear-gradient(135deg, var(--conscientiousness), #1d4ed8); }
+
+        .quadrant-letter {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            opacity: 0.9;
+        }
+
+        .quadrant-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        .axis-labels {
+            position: absolute;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .axis-top { top: -30px; left: 50%; transform: translateX(-50%); }
+        .axis-bottom { bottom: -30px; left: 50%; transform: translateX(-50%); }
+        .axis-left { left: -70px; top: 50%; transform: translateY(-50%) rotate(-90deg); white-space: nowrap; }
+        .axis-right { right: -70px; top: 50%; transform: translateY(-50%) rotate(90deg); white-space: nowrap; }
+
+        .info-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            min-height: 400px;
+        }
+
+        .info-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .info-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .info-title h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-title span {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .info-content p {
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        .info-traits {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .trait-tag {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* === SIMULATOR === */
+        .simulator-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-card);
+            border-radius: 3px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--dominance), var(--influence));
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        .question-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .question-number {
+            color: var(--dominance);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            line-height: 1.5;
+            margin-bottom: 2rem;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .option {
+            padding: 1.2rem 1.5rem;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .option:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .option.selected {
+            border-color: var(--dominance);
+            background: rgba(220, 38, 38, 0.15);
+        }
+
+        .option-letter {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .option.selected .option-letter {
+            background: var(--dominance);
+            color: white;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-light);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--dominance), var(--influence));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--accent-glow);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* === REZULTATE === */
+        .results-container {
+            text-align: center;
+        }
+
+        .results-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .results-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+        }
+
+        .profile-chart {
+            max-width: 500px;
+            margin: 0 auto 3rem;
+        }
+
+        .chart-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .chart-label {
+            width: 140px;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .chart-track {
+            flex: 1;
+            height: 40px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chart-fill {
+            height: 100%;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 1rem;
+            font-weight: 600;
+            transition: width 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .chart-fill.d { background: linear-gradient(90deg, var(--dominance), #991b1b); }
+        .chart-fill.i { background: linear-gradient(90deg, var(--influence), #d97706); }
+        .chart-fill.s { background: linear-gradient(90deg, var(--steadiness), #059669); }
+        .chart-fill.c { background: linear-gradient(90deg, var(--conscientiousness), #1d4ed8); }
+
+        .profile-code {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            letter-spacing: 0.2em;
+            margin-bottom: 2rem;
+        }
+
+        .profile-description {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .profile-description h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .profile-description p {
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .restart-btn {
+            margin-top: 2rem;
+        }
+
+        /* === TEORIE === */
+        .theory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .theory-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border-left: 4px solid;
+            transition: transform 0.3s ease;
+        }
+
+        .theory-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .theory-card.tc-d { border-color: var(--dominance); }
+        .theory-card.tc-i { border-color: var(--influence); }
+        .theory-card.tc-s { border-color: var(--steadiness); }
+        .theory-card.tc-c { border-color: var(--conscientiousness); }
+
+        .theory-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .theory-card p {
+            color: var(--text-muted);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        .matrix-section {
+            margin-top: 3rem;
+        }
+
+        .matrix-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 4px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+
+        .matrix-table th, .matrix-table td {
+            padding: 1rem;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        .matrix-table th {
+            background: rgba(255,255,255,0.05);
+            font-weight: 600;
+        }
+
+        .matrix-table td {
+            background: rgba(255,255,255,0.02);
+            color: var(--text-muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* === PLAYGROUND === */
+        .playground-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .playground-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .playground-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .playground-header p {
+            color: var(--text-muted);
+        }
+
+        .playground-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .playground-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sliders-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .slider-group {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .slider-group:last-of-type {
+            border-bottom: none;
+            margin-bottom: 1rem;
+        }
+
+        .slider-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .slider-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .slider-info {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slider-title {
+            font-weight: 600;
+        }
+
+        .slider-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .disc-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        .disc-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .disc-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .slider-d::-webkit-slider-thumb { background: var(--dominance); box-shadow: 0 0 15px var(--dominance); }
+        .slider-i::-webkit-slider-thumb { background: var(--influence); box-shadow: 0 0 15px var(--influence); }
+        .slider-s::-webkit-slider-thumb { background: var(--steadiness); box-shadow: 0 0 15px var(--steadiness); }
+        .slider-c::-webkit-slider-thumb { background: var(--conscientiousness); box-shadow: 0 0 15px var(--conscientiousness); }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .preset-label {
+            width: 100%;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .preset-btn {
+            padding: 0.5rem 0.8rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: var(--text-light);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Source Sans 3', sans-serif;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--dominance);
+        }
+
+        .visualization-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .radar-container {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            aspect-ratio: 1;
+            max-width: 400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .radar-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .radar-polygon {
+            fill: rgba(220, 38, 38, 0.2);
+            stroke: var(--dominance);
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+
+        .radar-point {
+            transition: all 0.3s ease;
+        }
+
+        .point-d { fill: var(--dominance); }
+        .point-i { fill: var(--influence); }
+        .point-s { fill: var(--steadiness); }
+        .point-c { fill: var(--conscientiousness); }
+
+        .radar-label {
+            fill: var(--text-muted);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .profile-display {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .code-display {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            letter-spacing: 0.15em;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        .code-letter {
+            transition: all 0.3s ease;
+            min-width: 60px;
+        }
+
+        .code-letter.dim {
+            opacity: 0.3;
+            text-transform: lowercase;
+        }
+
+        .code-letter.absent {
+            opacity: 0.15;
+        }
+
+        .profile-name {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+        }
+
+        .analysis-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .analysis-section {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .analysis-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .analysis-section h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+
+        .analysis-section p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="noise-overlay"></div>
+
+    <header>
+        <h1>Modelul DISC</h1>
+        <p class="subtitle">Framework pentru Comunicare și Comportament</p>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="model">Modelul</button>
+        <button class="tab-btn" data-tab="theory">Teorie</button>
+        <button class="tab-btn" data-tab="playground">Playground</button>
+        <button class="tab-btn" data-tab="simulator">Quiz</button>
+    </div>
+
+    <div class="container">
+        <!-- TAB MODEL -->
+        <div id="model" class="tab-content active">
+            <div class="model-section">
+                <div class="quadrant-container">
+                    <span class="axis-labels axis-top">Orientat spre Sarcini</span>
+                    <span class="axis-labels axis-bottom">Orientat spre Oameni</span>
+                    <span class="axis-labels axis-left">Activ / Rapid</span>
+                    <span class="axis-labels axis-right">Reflexiv / Metodic</span>
+
+                    <div class="quadrant-grid">
+                        <div class="quadrant q-dominance" data-role="dominance">
+                            <span class="quadrant-letter">D</span>
+                            <span class="quadrant-name">Dominance</span>
+                        </div>
+                        <div class="quadrant q-conscientiousness" data-role="conscientiousness">
+                            <span class="quadrant-letter">C</span>
+                            <span class="quadrant-name">Conscientiousness</span>
+                        </div>
+                        <div class="quadrant q-influence" data-role="influence">
+                            <span class="quadrant-letter">I</span>
+                            <span class="quadrant-name">Influence</span>
+                        </div>
+                        <div class="quadrant q-steadiness" data-role="steadiness">
+                            <span class="quadrant-letter">S</span>
+                            <span class="quadrant-name">Steadiness</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-panel" id="info-panel">
+                    <div class="info-header">
+                        <div class="info-icon" id="info-icon" style="background: var(--dominance);">D</div>
+                        <div class="info-title">
+                            <h2 id="info-name">Dominance</h2>
+                            <span id="info-focus">Direct, Orientat spre Rezultate</span>
+                        </div>
+                    </div>
+                    <div class="info-content">
+                        <p id="info-description">Persoanele cu stil D sunt directe, hotărâte și orientate spre rezultate. Preferă să ia decizii rapide și să-și asume riscuri. Sunt motivate de provocări și competiție.</p>
+                        <p id="info-details">În comunicare, preferă mesaje scurte și la obiect. Se concentrează pe "ce" nu pe "cum". Pot părea abrute sau lipsite de răbdare pentru ceilalți.</p>
+                    </div>
+                    <div class="info-traits" id="info-traits">
+                        <span class="trait-tag">Direct</span>
+                        <span class="trait-tag">Hotărât</span>
+                        <span class="trait-tag">Competitiv</span>
+                        <span class="trait-tag">Orientat spre rezultate</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB TEORIE -->
+        <div id="theory" class="tab-content">
+            <div class="theory-grid">
+                <div class="theory-card tc-d">
+                    <h3><span style="color: var(--dominance);">D</span> Dominance</h3>
+                    <p>Stilul D se concentrează pe rezultate și acțiune. Persoanele D sunt directe, decisive și orientate spre obiective. Își asumă controlul, acceptă provocările și rezolvă problemele rapid. Pot fi percepute ca exigente sau lipsite de răbdare.</p>
+                </div>
+                <div class="theory-card tc-i">
+                    <h3><span style="color: var(--influence);">I</span> Influence</h3>
+                    <p>Stilul I se concentrează pe interacțiuni și entuziasm. Persoanele I sunt sociabile, optimiste și colaborative. Excelează în persuasiune și networking. Pot fi percepute ca dezorganizate sau prea optimiste.</p>
+                </div>
+                <div class="theory-card tc-s">
+                    <h3><span style="color: var(--steadiness);">S</span> Steadiness</h3>
+                    <p>Stilul S se concentrează pe cooperare și stabilitate. Persoanele S sunt răbdătoare, de încredere și orientate spre echipă. Preferă medii previzibile și relații armonioase. Pot fi rezistente la schimbare.</p>
+                </div>
+                <div class="theory-card tc-c">
+                    <h3><span style="color: var(--conscientiousness);">C</span> Conscientiousness</h3>
+                    <p>Stilul C se concentrează pe acuratețe și calitate. Persoanele C sunt analitice, sistematice și orientate spre detalii. Caută date și dovezi înainte de a lua decizii. Pot fi percepute ca prea critice sau perfecționiste.</p>
+                </div>
+            </div>
+
+            <div class="matrix-section">
+                <h2>Matricea Stilurilor DISC</h2>
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Orientat spre Sarcini</th>
+                            <th>Orientat spre Oameni</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Activ / Extrovertit</strong></td>
+                            <td style="background: rgba(220, 38, 38, 0.2);"><strong style="color: var(--dominance);">D</strong> - Dominance<br>Control, Rezultate</td>
+                            <td style="background: rgba(245, 158, 11, 0.2);"><strong style="color: var(--influence);">I</strong> - Influence<br>Persuasiune, Entuziasm</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Reflexiv / Introvertit</strong></td>
+                            <td style="background: rgba(59, 130, 246, 0.2);"><strong style="color: var(--conscientiousness);">C</strong> - Conscientiousness<br>Precizie, Analiză</td>
+                            <td style="background: rgba(16, 185, 129, 0.2);"><strong style="color: var(--steadiness);">S</strong> - Steadiness<br>Stabilitate, Suport</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="matrix-section">
+                <h2>Comunicarea cu Fiecare Stil</h2>
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th>Stil</th>
+                            <th>Ce să Faci</th>
+                            <th>Ce să Eviți</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="color: var(--dominance);"><strong>D</strong></td>
+                            <td>Fii direct, concentrează-te pe rezultate, oferă opțiuni</td>
+                            <td>Prea multe detalii, indecizii, a-i pierde timpul</td>
+                        </tr>
+                        <tr>
+                            <td style="color: var(--influence);"><strong>I</strong></td>
+                            <td>Fii entuziast, permite socializare, recunoaște-le ideile</td>
+                            <td>Prea multe date, rigiditate, să-i ignori</td>
+                        </tr>
+                        <tr>
+                            <td style="color: var(--steadiness);"><strong>S</strong></td>
+                            <td>Fii sincer, oferă siguranță, dă-le timp să proceseze</td>
+                            <td>Presiune, schimbări bruște, confruntări</td>
+                        </tr>
+                        <tr>
+                            <td style="color: var(--conscientiousness);"><strong>C</strong></td>
+                            <td>Oferă date, fii specific, permite timp pentru analiză</td>
+                            <td>Generalizări, presiune emoțională, lipsa pregătirii</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB PLAYGROUND -->
+        <div id="playground" class="tab-content">
+            <div class="playground-container">
+                <div class="playground-header">
+                    <h2>Simulatorul de Profil DISC</h2>
+                    <p>Ajustează nivelul fiecărei dimensiuni și observă cum se schimbă profilul</p>
+                </div>
+
+                <div class="playground-grid">
+                    <div class="sliders-panel">
+                        <div class="slider-group" data-role="D">
+                            <div class="slider-header">
+                                <div class="slider-icon" style="background: var(--dominance);">D</div>
+                                <div class="slider-info">
+                                    <span class="slider-title">Dominance</span>
+                                    <span class="slider-value" id="val-D">50</span>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="disc-slider slider-d" id="slider-D">
+                            <div class="slider-labels">
+                                <span>Scăzut</span>
+                                <span>Moderat</span>
+                                <span>Ridicat</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-group" data-role="I">
+                            <div class="slider-header">
+                                <div class="slider-icon" style="background: var(--influence);">I</div>
+                                <div class="slider-info">
+                                    <span class="slider-title">Influence</span>
+                                    <span class="slider-value" id="val-I">50</span>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="disc-slider slider-i" id="slider-I">
+                            <div class="slider-labels">
+                                <span>Scăzut</span>
+                                <span>Moderat</span>
+                                <span>Ridicat</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-group" data-role="S">
+                            <div class="slider-header">
+                                <div class="slider-icon" style="background: var(--steadiness);">S</div>
+                                <div class="slider-info">
+                                    <span class="slider-title">Steadiness</span>
+                                    <span class="slider-value" id="val-S">50</span>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="disc-slider slider-s" id="slider-S">
+                            <div class="slider-labels">
+                                <span>Scăzut</span>
+                                <span>Moderat</span>
+                                <span>Ridicat</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-group" data-role="C">
+                            <div class="slider-header">
+                                <div class="slider-icon" style="background: var(--conscientiousness);">C</div>
+                                <div class="slider-info">
+                                    <span class="slider-title">Conscientiousness</span>
+                                    <span class="slider-value" id="val-C">50</span>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="disc-slider slider-c" id="slider-C">
+                            <div class="slider-labels">
+                                <span>Scăzut</span>
+                                <span>Moderat</span>
+                                <span>Ridicat</span>
+                            </div>
+                        </div>
+
+                        <div class="preset-buttons">
+                            <span class="preset-label">Profile Predefinite:</span>
+                            <button class="preset-btn" data-preset="driver">Driver (Di)</button>
+                            <button class="preset-btn" data-preset="influencer">Influencer (iD)</button>
+                            <button class="preset-btn" data-preset="supporter">Supporter (Si)</button>
+                            <button class="preset-btn" data-preset="analyst">Analyst (Cs)</button>
+                            <button class="preset-btn" data-preset="salesman">Vânzător (ID)</button>
+                            <button class="preset-btn" data-preset="balanced">Echilibrat</button>
+                        </div>
+                    </div>
+
+                    <div class="visualization-panel">
+                        <div class="radar-container">
+                            <svg viewBox="0 0 400 400" id="radar-chart" class="radar-svg">
+                                <!-- Background circles -->
+                                <circle cx="200" cy="200" r="150" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                                <circle cx="200" cy="200" r="100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                                <circle cx="200" cy="200" r="50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+                                <!-- Axis lines -->
+                                <line x1="200" y1="50" x2="200" y2="350" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                                <line x1="50" y1="200" x2="350" y2="200" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+                                <!-- Radar polygon -->
+                                <polygon id="radar-polygon" class="radar-polygon" points="200,125 275,200 200,275 125,200"/>
+
+                                <!-- Data points -->
+                                <circle id="point-D" cx="200" cy="125" r="8" class="radar-point point-d"/>
+                                <circle id="point-I" cx="275" cy="200" r="8" class="radar-point point-i"/>
+                                <circle id="point-S" cx="200" cy="275" r="8" class="radar-point point-s"/>
+                                <circle id="point-C" cx="125" cy="200" r="8" class="radar-point point-c"/>
+
+                                <!-- Labels -->
+                                <text x="200" y="30" text-anchor="middle" class="radar-label">D</text>
+                                <text x="370" y="205" text-anchor="middle" class="radar-label">I</text>
+                                <text x="200" y="385" text-anchor="middle" class="radar-label">S</text>
+                                <text x="30" y="205" text-anchor="middle" class="radar-label">C</text>
+                            </svg>
+                        </div>
+
+                        <div class="profile-display">
+                            <div class="code-display">
+                                <span class="code-letter" id="code-D" style="color: var(--dominance);">D</span>
+                                <span class="code-letter" id="code-I" style="color: var(--influence);">I</span>
+                                <span class="code-letter" id="code-S" style="color: var(--steadiness);">S</span>
+                                <span class="code-letter" id="code-C" style="color: var(--conscientiousness);">C</span>
+                            </div>
+                            <div class="profile-name" id="profile-name">Profil Echilibrat</div>
+                        </div>
+
+                        <div class="analysis-panel" id="analysis-panel">
+                            <div class="analysis-section">
+                                <h4>Stil de Comunicare</h4>
+                                <p id="communication">Cu un profil echilibrat, te adaptezi ușor la diferite stiluri de comunicare.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Puncte Forte</h4>
+                                <p id="strengths">Versatilitate și adaptabilitate în diverse contexte.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Provocări Potențiale</h4>
+                                <p id="challenges">Poate fi dificil să-ți identifici un stil dominant clar.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB SIMULATOR -->
+        <div id="simulator" class="tab-content">
+            <div class="simulator-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+
+                <div id="quiz-container">
+                    <div class="question-card">
+                        <div class="question-number" id="question-number">Întrebarea 1 din 12</div>
+                        <div class="question-text" id="question-text">Într-o discuție de grup, preferi să:</div>
+                        <div class="options" id="options"></div>
+                    </div>
+
+                    <div class="nav-buttons">
+                        <button class="btn btn-secondary" id="prev-btn" disabled>Înapoi</button>
+                        <button class="btn btn-primary" id="next-btn" disabled>Următoarea</button>
+                    </div>
+                </div>
+
+                <div id="results-container" class="results-container hidden">
+                    <h2 class="results-title">Profilul Tău DISC</h2>
+                    <p class="results-subtitle">Bazat pe răspunsurile tale</p>
+
+                    <div class="profile-chart">
+                        <div class="chart-bar">
+                            <span class="chart-label">Dominance</span>
+                            <div class="chart-track">
+                                <div class="chart-fill d" id="bar-d" style="width: 0%"><span id="score-d">0%</span></div>
+                            </div>
+                        </div>
+                        <div class="chart-bar">
+                            <span class="chart-label">Influence</span>
+                            <div class="chart-track">
+                                <div class="chart-fill i" id="bar-i" style="width: 0%"><span id="score-i">0%</span></div>
+                            </div>
+                        </div>
+                        <div class="chart-bar">
+                            <span class="chart-label">Steadiness</span>
+                            <div class="chart-track">
+                                <div class="chart-fill s" id="bar-s" style="width: 0%"><span id="score-s">0%</span></div>
+                            </div>
+                        </div>
+                        <div class="chart-bar">
+                            <span class="chart-label">Conscientiousness</span>
+                            <div class="chart-track">
+                                <div class="chart-fill c" id="bar-c" style="width: 0%"><span id="score-c">0%</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-code" id="profile-code">----</div>
+
+                    <div class="profile-description">
+                        <h3 id="profile-title">Profilul Tău</h3>
+                        <p id="profile-text">Descrierea profilului tău va apărea aici.</p>
+                    </div>
+
+                    <button class="btn btn-primary restart-btn" id="restart-btn">Reia Testul</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === TAB NAVIGATION ===
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // === MODEL INTERACTIV ===
+        const roleData = {
+            dominance: {
+                letter: 'D',
+                name: 'Dominance',
+                focus: 'Direct, Orientat spre Rezultate',
+                color: 'var(--dominance)',
+                description: 'Persoanele cu stil D sunt directe, hotărâte și orientate spre rezultate. Preferă să ia decizii rapide și să-și asume riscuri. Sunt motivate de provocări și competiție.',
+                details: 'În comunicare, preferă mesaje scurte și la obiect. Se concentrează pe "ce" nu pe "cum". Pot părea abrute sau lipsite de răbdare pentru ceilalți.',
+                traits: ['Direct', 'Hotărât', 'Competitiv', 'Orientat spre rezultate', 'Asumat']
+            },
+            influence: {
+                letter: 'I',
+                name: 'Influence',
+                focus: 'Entuziast, Orientat spre Relații',
+                color: 'var(--influence)',
+                description: 'Persoanele cu stil I sunt sociabile, optimiste și convingătoare. Le place să fie în centrul atenției și excelează în construirea relațiilor.',
+                details: 'În comunicare, sunt expresive și entuziasmante. Preferă interacțiunea față în față și discuțiile informale. Pot fi percepute ca prea vorbărețe sau superficiale.',
+                traits: ['Entuziast', 'Sociabil', 'Optimist', 'Persuasiv', 'Colaborativ']
+            },
+            steadiness: {
+                letter: 'S',
+                name: 'Steadiness',
+                focus: 'Răbdător, Orientat spre Stabilitate',
+                color: 'var(--steadiness)',
+                description: 'Persoanele cu stil S sunt răbdătoare, de încredere și orientate spre echipă. Preferă stabilitatea și armonia în mediul de lucru.',
+                details: 'În comunicare, sunt buni ascultători și oferă suport. Preferă schimbările graduale și au nevoie de timp pentru a se adapta. Pot fi percepute ca prea passive.',
+                traits: ['Răbdător', 'De încredere', 'Loial', 'Calm', 'Suportiv']
+            },
+            conscientiousness: {
+                letter: 'C',
+                name: 'Conscientiousness',
+                focus: 'Analitic, Orientat spre Calitate',
+                color: 'var(--conscientiousness)',
+                description: 'Persoanele cu stil C sunt analitice, sistematice și orientate spre calitate. Caută precizie și acuratețe în tot ceea ce fac.',
+                details: 'În comunicare, preferă fapte și date concrete. Pun întrebări detaliate și au nevoie de timp pentru a analiza informațiile. Pot fi percepute ca prea critice sau distante.',
+                traits: ['Analitic', 'Precis', 'Sistematic', 'Rezervat', 'Logic']
+            }
+        };
+
+        const quadrants = document.querySelectorAll('.quadrant');
+
+        function updateInfoPanel(role) {
+            const data = roleData[role];
+            document.getElementById('info-icon').textContent = data.letter;
+            document.getElementById('info-icon').style.background = data.color;
+            document.getElementById('info-name').textContent = data.name;
+            document.getElementById('info-focus').textContent = data.focus;
+            document.getElementById('info-description').textContent = data.description;
+            document.getElementById('info-details').textContent = data.details;
+
+            const traitsContainer = document.getElementById('info-traits');
+            traitsContainer.innerHTML = data.traits.map(t => `<span class="trait-tag">${t}</span>`).join('');
+        }
+
+        quadrants.forEach(q => {
+            q.addEventListener('click', () => {
+                quadrants.forEach(quad => quad.classList.remove('active'));
+                q.classList.add('active');
+                updateInfoPanel(q.dataset.role);
+            });
+
+            q.addEventListener('mouseenter', () => {
+                updateInfoPanel(q.dataset.role);
+            });
+        });
+
+        // === SIMULATOR ===
+        const questions = [
+            {
+                text: "Într-o discuție de grup, preferi să:",
+                options: [
+                    { text: "Conduci discuția și iei decizii rapide", type: 'D' },
+                    { text: "Motivezi echipa și aduci energie", type: 'I' },
+                    { text: "Asculți și susții ideile celorlalți", type: 'S' },
+                    { text: "Analizezi informațiile înainte de a vorbi", type: 'C' }
+                ]
+            },
+            {
+                text: "Când întâmpini o problemă, prima ta reacție este să:",
+                options: [
+                    { text: "Acționezi imediat pentru a o rezolva", type: 'D' },
+                    { text: "Discuți cu ceilalți despre posibile soluții", type: 'I' },
+                    { text: "Cauți o soluție care menține armonia", type: 'S' },
+                    { text: "Cercetezi toate aspectele înainte de a acționa", type: 'C' }
+                ]
+            },
+            {
+                text: "Ce te motivează cel mai mult la locul de muncă?",
+                options: [
+                    { text: "Provocări și oportunități de a câștiga", type: 'D' },
+                    { text: "Recunoaștere și interacțiune socială", type: 'I' },
+                    { text: "Stabilitate și relații de încredere", type: 'S' },
+                    { text: "Oportunitatea de a face lucrurile corect", type: 'C' }
+                ]
+            },
+            {
+                text: "Cum preferi să primești feedback?",
+                options: [
+                    { text: "Direct și la obiect, fără prea multe explicații", type: 'D' },
+                    { text: "Într-un mod pozitiv, cu recunoașterea eforturilor", type: 'I' },
+                    { text: "Într-un context privat, cu răbdare și înțelegere", type: 'S' },
+                    { text: "Cu date concrete și exemple specifice", type: 'C' }
+                ]
+            },
+            {
+                text: "În situații de stres, ai tendința să:",
+                options: [
+                    { text: "Devii mai direct și mai exigent", type: 'D' },
+                    { text: "Devii mai vorbăreț și cauți suport emoțional", type: 'I' },
+                    { text: "Te retragi și eviți conflictul", type: 'S' },
+                    { text: "Devii mai critic și mai perfecționist", type: 'C' }
+                ]
+            },
+            {
+                text: "Ce tip de mediu de lucru preferi?",
+                options: [
+                    { text: "Dinamic, competitiv, orientat spre rezultate", type: 'D' },
+                    { text: "Deschis, colaborativ, cu multă interacțiune", type: 'I' },
+                    { text: "Stabil, predictibil, cu relații de lungă durată", type: 'S' },
+                    { text: "Structurat, cu standarde clare și procese definite", type: 'C' }
+                ]
+            },
+            {
+                text: "Când lucrezi în echipă, ești cel care:",
+                options: [
+                    { text: "Impune ritmul și ia deciziile dificile", type: 'D' },
+                    { text: "Menține moralul ridicat și motivează echipa", type: 'I' },
+                    { text: "Asigură coeziunea și rezolvă conflictele", type: 'S' },
+                    { text: "Verifică detaliile și asigură calitatea", type: 'C' }
+                ]
+            },
+            {
+                text: "Ce îți place cel mai mult să faci într-un proiect?",
+                options: [
+                    { text: "Să iau inițiativa și să duc lucrurile la capăt", type: 'D' },
+                    { text: "Să prezint ideile și să conving pe ceilalți", type: 'I' },
+                    { text: "Să susțin echipa și să mențin un mediu plăcut", type: 'S' },
+                    { text: "Să planific în detaliu și să asigur acuratețea", type: 'C' }
+                ]
+            },
+            {
+                text: "Cum reacționezi la schimbări neașteptate?",
+                options: [
+                    { text: "Le văd ca provocări și mă adaptez rapid", type: 'D' },
+                    { text: "Încerc să găsesc partea pozitivă și îi ajut pe ceilalți să se adapteze", type: 'I' },
+                    { text: "Am nevoie de timp să procesez și prefer tranziții graduale", type: 'S' },
+                    { text: "Analizez implicațiile și planific cum să le gestionez", type: 'C' }
+                ]
+            },
+            {
+                text: "Ce te frustrează cel mai mult?",
+                options: [
+                    { text: "Lipsa de eficiență și pierderea timpului", type: 'D' },
+                    { text: "Să fiu ignorat sau să lucrez izolat", type: 'I' },
+                    { text: "Conflictele și schimbările bruște", type: 'S' },
+                    { text: "Munca neglijentă și lipsa de standarde", type: 'C' }
+                ]
+            },
+            {
+                text: "Când comunici cu ceilalți, ești:",
+                options: [
+                    { text: "Concis și la obiect", type: 'D' },
+                    { text: "Expresiv și entuziast", type: 'I' },
+                    { text: "Calm și atent la nevoile lor", type: 'S' },
+                    { text: "Precis și bazat pe fapte", type: 'C' }
+                ]
+            },
+            {
+                text: "Ce caracteristică te descrie cel mai bine?",
+                options: [
+                    { text: "Hotărât și orientat spre obiective", type: 'D' },
+                    { text: "Optimist și sociabil", type: 'I' },
+                    { text: "Răbdător și de încredere", type: 'S' },
+                    { text: "Analitic și atent la detalii", type: 'C' }
+                ]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let answers = [];
+        let scores = { D: 0, I: 0, S: 0, C: 0 };
+
+        const questionText = document.getElementById('question-text');
+        const questionNumber = document.getElementById('question-number');
+        const optionsContainer = document.getElementById('options');
+        const progressFill = document.getElementById('progress-fill');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            questionNumber.textContent = `Întrebarea ${currentQuestion + 1} din ${questions.length}`;
+            questionText.textContent = q.text;
+            progressFill.style.width = `${((currentQuestion) / questions.length) * 100}%`;
+
+            const shuffledOptions = shuffleArray(q.options);
+            const letters = ['A', 'B', 'C', 'D'];
+
+            optionsContainer.innerHTML = shuffledOptions.map((opt, i) => `
+                <div class="option ${answers[currentQuestion] === opt.type ? 'selected' : ''}" data-type="${opt.type}">
+                    <span class="option-letter">${letters[i]}</span>
+                    <span>${opt.text}</span>
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.addEventListener('click', () => selectOption(opt.dataset.type));
+            });
+
+            prevBtn.disabled = currentQuestion === 0;
+            nextBtn.disabled = !answers[currentQuestion];
+            nextBtn.textContent = currentQuestion === questions.length - 1 ? 'Vezi Rezultatul' : 'Următoarea';
+        }
+
+        function selectOption(type) {
+            answers[currentQuestion] = type;
+            document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+            document.querySelector(`[data-type="${type}"]`).classList.add('selected');
+            nextBtn.disabled = false;
+        }
+
+        function calculateResults() {
+            scores = { D: 0, I: 0, S: 0, C: 0 };
+            answers.forEach(a => scores[a]++);
+
+            const total = questions.length;
+            const percentages = {
+                D: Math.round((scores.D / total) * 100),
+                I: Math.round((scores.I / total) * 100),
+                S: Math.round((scores.S / total) * 100),
+                C: Math.round((scores.C / total) * 100)
+            };
+
+            return percentages;
+        }
+
+        function getProfileCode(percentages) {
+            const sorted = Object.entries(percentages).sort((a, b) => b[1] - a[1]);
+            return sorted.map(([role, pct]) => {
+                if (pct >= 25) return role;
+                if (pct >= 12) return role.toLowerCase();
+                return '-';
+            }).join('');
+        }
+
+        function getProfileDescription(percentages) {
+            const sorted = Object.entries(percentages).sort((a, b) => b[1] - a[1]);
+            const dominant = sorted[0][0];
+            const secondary = sorted[1][0];
+
+            const descriptions = {
+                'D': 'Ești orientat puternic spre rezultate și acțiune directă.',
+                'I': 'Excelezi în influențare și construirea relațiilor.',
+                'S': 'Oferi stabilitate și suport constant echipei.',
+                'C': 'Aduci precizie și analiză în tot ce faci.'
+            };
+
+            const combinations = {
+                'DI': 'Combini forța decizională cu abilitatea de a convinge - ești un lider carismatic care obține rezultate prin oameni.',
+                'DC': 'Ești orientat spre rezultate dar și spre calitate - nu doar livrezi rapid, ci livrezi bine.',
+                'DS': 'Combini determinarea cu răbdarea - ești hotărât dar ții cont și de nevoile echipei.',
+                'ID': 'Ești un comunicator puternic care poate și executa - influențezi și livrezi.',
+                'IS': 'Creezi medii de lucru pozitive și stabile - oamenii te urmează pentru că îi faci să se simtă bine.',
+                'IC': 'Combini entuziasmul cu atenția la detalii - prezinți ideile în mod convingător dar fundamentat.',
+                'SD': 'Oferi stabilitate dar poți lua și decizii dure când e necesar.',
+                'SI': 'Ești un suporter sociabil - menții armonia și construiești relații durabile.',
+                'SC': 'Combini loialitatea cu precizia - ești de încredere și atent la detalii.',
+                'CD': 'Analizezi înainte de a acționa, dar când acționezi ești hotărât.',
+                'CI': 'Prezinți date într-un mod accesibil - faci informația tehnică ușor de înțeles.',
+                'CS': 'Ești metodic și răbdător - calitatea și consistența sunt prioritățile tale.'
+            };
+
+            const combo = dominant + secondary;
+            return combinations[combo] || `${descriptions[dominant]} ${descriptions[secondary]}`;
+        }
+
+        function showResults() {
+            const percentages = calculateResults();
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            progressFill.style.width = '100%';
+
+            setTimeout(() => {
+                document.getElementById('bar-d').style.width = `${percentages.D}%`;
+                document.getElementById('bar-i').style.width = `${percentages.I}%`;
+                document.getElementById('bar-s').style.width = `${percentages.S}%`;
+                document.getElementById('bar-c').style.width = `${percentages.C}%`;
+
+                document.getElementById('score-d').textContent = `${percentages.D}%`;
+                document.getElementById('score-i').textContent = `${percentages.I}%`;
+                document.getElementById('score-s').textContent = `${percentages.S}%`;
+                document.getElementById('score-c').textContent = `${percentages.C}%`;
+            }, 100);
+
+            const profileCode = getProfileCode(percentages);
+            document.getElementById('profile-code').textContent = profileCode;
+
+            const sorted = Object.entries(percentages).sort((a, b) => b[1] - a[1]);
+            const roleNames = { D: 'Dominance', I: 'Influence', S: 'Steadiness', C: 'Conscientiousness' };
+            document.getElementById('profile-title').textContent = `Profil Dominant: ${roleNames[sorted[0][0]]}`;
+            document.getElementById('profile-text').textContent = getProfileDescription(percentages);
+        }
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            currentQuestion = 0;
+            answers = [];
+            scores = { D: 0, I: 0, S: 0, C: 0 };
+            quizContainer.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+            renderQuestion();
+        });
+
+        // Initialize
+        renderQuestion();
+
+        // === PLAYGROUND SIMULATOR ===
+        const sliders = {
+            D: document.getElementById('slider-D'),
+            I: document.getElementById('slider-I'),
+            S: document.getElementById('slider-S'),
+            C: document.getElementById('slider-C')
+        };
+
+        const presets = {
+            driver: { D: 85, I: 45, S: 25, C: 40 },
+            influencer: { D: 55, I: 90, S: 35, C: 25 },
+            supporter: { D: 30, I: 50, S: 85, C: 45 },
+            analyst: { D: 35, I: 25, S: 50, C: 90 },
+            salesman: { D: 70, I: 85, S: 30, C: 35 },
+            balanced: { D: 50, I: 50, S: 50, C: 50 }
+        };
+
+        const profileAnalysis = {
+            getCommunication: (vals) => {
+                const dominant = Object.entries(vals).sort((a, b) => b[1] - a[1])[0];
+                const communications = {
+                    D: 'Comunici direct și la obiect. Preferi conversații scurte, focusate pe rezultate. Poți părea abrupt pentru stilurile S și C.',
+                    I: 'Ești expresiv și entuziast în comunicare. Preferi interacțiunea față în față și povestiri. Stilurile D și C te pot percepe ca prea vorbăreț.',
+                    S: 'Comunici calm și atent. Ești un bun ascultător și preferi discuții liniștite. Stilurile D și I te pot percepe ca prea lent.',
+                    C: 'Comunici precis și bazat pe fapte. Preferi documentare scrisă și detalii. Stilurile I și D te pot percepe ca prea rece.'
+                };
+                return communications[dominant[0]];
+            },
+            getStrengths: (vals) => {
+                const sorted = Object.entries(vals).sort((a, b) => b[1] - a[1]);
+                const dominant = sorted[0][0];
+                const strengths = {
+                    D: 'Capacitatea de a lua decizii rapide, orientarea spre rezultate, asumarea provocărilor.',
+                    I: 'Abilitatea de a motiva pe ceilalți, optimismul contagios, networkingul natural.',
+                    S: 'Răbdarea, loialitatea, capacitatea de a menține armonia și stabilitatea.',
+                    C: 'Atenția la detalii, gândirea analitică, urmărirea standardelor înalte.'
+                };
+                return strengths[dominant];
+            },
+            getChallenges: (vals) => {
+                const sorted = Object.entries(vals).sort((a, b) => b[1] - a[1]);
+                const dominant = sorted[0][0];
+                const challenges = {
+                    D: 'Poate fi perceput ca agresiv sau lipsit de răbdare. Poate ignora sentimentele celorlalți.',
+                    I: 'Poate fi dezorganizat sau prea optimist. Poate evita detaliile și follow-up-ul.',
+                    S: 'Poate fi rezistent la schimbare. Poate evita conflictele necesare.',
+                    C: 'Poate fi prea critic sau perfecționist. Poate întârzia deciziile prin analiză excesivă.'
+                };
+                return challenges[dominant];
+            },
+            getProfileName: (vals) => {
+                const sorted = Object.entries(vals).sort((a, b) => b[1] - a[1]);
+                const top = sorted[0][0];
+                const second = sorted[1][0];
+
+                if (sorted[0][1] < 30) return 'Profil Nedefinit';
+
+                const names = {
+                    'DI': 'Inspirator / Driver',
+                    'DС': 'Realizator / Challenger',
+                    'DS': 'Rezultator',
+                    'ID': 'Promotor',
+                    'IS': 'Suporter Entuziast',
+                    'IC': 'Comunicator Precis',
+                    'SD': 'Agent Stabil',
+                    'SI': 'Coleg de Încredere',
+                    'SC': 'Specialist Dedicat',
+                    'CD': 'Editor / Analist',
+                    'CI': 'Prezentator Tehnic',
+                    'CS': 'Expert Metodic'
+                };
+
+                return names[top + second] || 'Profil Mixt';
+            }
+        };
+
+        function updatePlayground() {
+            const vals = {
+                D: parseInt(sliders.D.value),
+                I: parseInt(sliders.I.value),
+                S: parseInt(sliders.S.value),
+                C: parseInt(sliders.C.value)
+            };
+
+            // Update value displays
+            Object.keys(vals).forEach(key => {
+                document.getElementById(`val-${key}`).textContent = vals[key];
+            });
+
+            // Update radar chart
+            const center = 200;
+            const maxRadius = 150;
+
+            const points = {
+                D: { x: center, y: center - (vals.D / 100) * maxRadius },
+                I: { x: center + (vals.I / 100) * maxRadius, y: center },
+                S: { x: center, y: center + (vals.S / 100) * maxRadius },
+                C: { x: center - (vals.C / 100) * maxRadius, y: center }
+            };
+
+            document.getElementById('radar-polygon').setAttribute('points',
+                `${points.D.x},${points.D.y} ${points.I.x},${points.I.y} ${points.S.x},${points.S.y} ${points.C.x},${points.C.y}`
+            );
+
+            Object.keys(points).forEach(key => {
+                const point = document.getElementById(`point-${key}`);
+                point.setAttribute('cx', points[key].x);
+                point.setAttribute('cy', points[key].y);
+            });
+
+            // Update code display
+            Object.keys(vals).forEach(key => {
+                const codeEl = document.getElementById(`code-${key}`);
+                codeEl.classList.remove('dim', 'absent');
+                if (vals[key] < 25) {
+                    codeEl.classList.add('absent');
+                } else if (vals[key] < 50) {
+                    codeEl.classList.add('dim');
+                }
+            });
+
+            // Update analysis
+            document.getElementById('profile-name').textContent = profileAnalysis.getProfileName(vals);
+            document.getElementById('communication').textContent = profileAnalysis.getCommunication(vals);
+            document.getElementById('strengths').textContent = profileAnalysis.getStrengths(vals);
+            document.getElementById('challenges').textContent = profileAnalysis.getChallenges(vals);
+        }
+
+        // Attach slider listeners
+        Object.values(sliders).forEach(slider => {
+            slider.addEventListener('input', updatePlayground);
+        });
+
+        // Preset buttons
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const preset = presets[btn.dataset.preset];
+                Object.keys(preset).forEach(key => {
+                    sliders[key].value = preset[key];
+                });
+                updatePlayground();
+            });
+        });
+
+        // Initialize playground
+        updatePlayground();
+    </script>
+</body>
+</html>

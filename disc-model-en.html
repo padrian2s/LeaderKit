@@ -1,0 +1,1729 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DISC Model | Interactive Learning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --dominance: #DC2626;
+            --influence: #F59E0B;
+            --steadiness: #10B981;
+            --conscientiousness: #3B82F6;
+            --bg-dark: #1a1a2e;
+            --bg-card: #16213e;
+            --text-light: #edf2f7;
+            --text-muted: #a0aec0;
+            --accent-glow: rgba(220, 38, 38, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 2rem 2rem;
+            position: relative;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--text-light) 0%, var(--dominance) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 2rem auto;
+            padding: 0.5rem;
+            background: var(--bg-card);
+            border-radius: 50px;
+            max-width: 500px;
+        }
+
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-light);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--dominance) 0%, var(--influence) 100%);
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === VISUAL MODEL === */
+        .model-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        @media (max-width: 900px) {
+            .model-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .quadrant-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            aspect-ratio: 1;
+        }
+
+        .quadrant-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .quadrant {
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quadrant::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .quadrant:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+
+        .quadrant:hover::before {
+            opacity: 1;
+        }
+
+        .quadrant.active {
+            transform: scale(1.08);
+            z-index: 10;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .q-dominance { background: linear-gradient(135deg, var(--dominance), #991b1b); }
+        .q-influence { background: linear-gradient(135deg, var(--influence), #d97706); }
+        .q-steadiness { background: linear-gradient(135deg, var(--steadiness), #059669); }
+        .q-conscientiousness { background: linear-gradient(135deg, var(--conscientiousness), #1d4ed8); }
+
+        .quadrant-letter {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            opacity: 0.9;
+        }
+
+        .quadrant-name {
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 0.5rem;
+            text-align: center;
+        }
+
+        .axis-labels {
+            position: absolute;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .axis-top { top: -30px; left: 50%; transform: translateX(-50%); }
+        .axis-bottom { bottom: -30px; left: 50%; transform: translateX(-50%); }
+        .axis-left { left: -70px; top: 50%; transform: translateY(-50%) rotate(-90deg); white-space: nowrap; }
+        .axis-right { right: -70px; top: 50%; transform: translateY(-50%) rotate(90deg); white-space: nowrap; }
+
+        .info-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            min-height: 400px;
+        }
+
+        .info-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .info-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .info-title h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-title span {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .info-content p {
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        .info-traits {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .trait-tag {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* === SIMULATOR === */
+        .simulator-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-card);
+            border-radius: 3px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--dominance), var(--influence));
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        .question-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .question-number {
+            color: var(--dominance);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            line-height: 1.5;
+            margin-bottom: 2rem;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .option {
+            padding: 1.2rem 1.5rem;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .option:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .option.selected {
+            border-color: var(--dominance);
+            background: rgba(220, 38, 38, 0.15);
+        }
+
+        .option-letter {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .option.selected .option-letter {
+            background: var(--dominance);
+            color: white;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-light);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--dominance), var(--influence));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--accent-glow);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* === RESULTS === */
+        .results-container {
+            text-align: center;
+        }
+
+        .results-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .results-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+        }
+
+        .profile-chart {
+            max-width: 500px;
+            margin: 0 auto 3rem;
+        }
+
+        .chart-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .chart-label {
+            width: 140px;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .chart-track {
+            flex: 1;
+            height: 40px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chart-fill {
+            height: 100%;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 1rem;
+            font-weight: 600;
+            transition: width 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .chart-fill.d { background: linear-gradient(90deg, var(--dominance), #991b1b); }
+        .chart-fill.i { background: linear-gradient(90deg, var(--influence), #d97706); }
+        .chart-fill.s { background: linear-gradient(90deg, var(--steadiness), #059669); }
+        .chart-fill.c { background: linear-gradient(90deg, var(--conscientiousness), #1d4ed8); }
+
+        .profile-code {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            letter-spacing: 0.2em;
+            margin-bottom: 2rem;
+        }
+
+        .profile-description {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .profile-description h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .profile-description p {
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .restart-btn {
+            margin-top: 2rem;
+        }
+
+        /* === THEORY === */
+        .theory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .theory-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border-left: 4px solid;
+            transition: transform 0.3s ease;
+        }
+
+        .theory-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .theory-card.tc-d { border-color: var(--dominance); }
+        .theory-card.tc-i { border-color: var(--influence); }
+        .theory-card.tc-s { border-color: var(--steadiness); }
+        .theory-card.tc-c { border-color: var(--conscientiousness); }
+
+        .theory-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .theory-card p {
+            color: var(--text-muted);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        .matrix-section {
+            margin-top: 3rem;
+        }
+
+        .matrix-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 4px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+
+        .matrix-table th, .matrix-table td {
+            padding: 1rem;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        .matrix-table th {
+            background: rgba(255,255,255,0.05);
+            font-weight: 600;
+        }
+
+        .matrix-table td {
+            background: rgba(255,255,255,0.02);
+            color: var(--text-muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* === PLAYGROUND === */
+        .playground-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .playground-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .playground-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .playground-header p {
+            color: var(--text-muted);
+        }
+
+        .playground-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .playground-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sliders-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .slider-group {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .slider-group:last-of-type {
+            border-bottom: none;
+            margin-bottom: 1rem;
+        }
+
+        .slider-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .slider-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .slider-info {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slider-title {
+            font-weight: 600;
+        }
+
+        .slider-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .disc-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        .disc-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .disc-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .slider-d::-webkit-slider-thumb { background: var(--dominance); box-shadow: 0 0 15px var(--dominance); }
+        .slider-i::-webkit-slider-thumb { background: var(--influence); box-shadow: 0 0 15px var(--influence); }
+        .slider-s::-webkit-slider-thumb { background: var(--steadiness); box-shadow: 0 0 15px var(--steadiness); }
+        .slider-c::-webkit-slider-thumb { background: var(--conscientiousness); box-shadow: 0 0 15px var(--conscientiousness); }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .preset-label {
+            width: 100%;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .preset-btn {
+            padding: 0.5rem 0.8rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: var(--text-light);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Source Sans 3', sans-serif;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--dominance);
+        }
+
+        .visualization-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .radar-container {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            aspect-ratio: 1;
+            max-width: 400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .radar-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .radar-polygon {
+            fill: rgba(220, 38, 38, 0.2);
+            stroke: var(--dominance);
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+
+        .radar-point {
+            transition: all 0.3s ease;
+        }
+
+        .point-d { fill: var(--dominance); }
+        .point-i { fill: var(--influence); }
+        .point-s { fill: var(--steadiness); }
+        .point-c { fill: var(--conscientiousness); }
+
+        .radar-label {
+            fill: var(--text-muted);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .profile-display {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .code-display {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            letter-spacing: 0.15em;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        .code-letter {
+            transition: all 0.3s ease;
+            min-width: 60px;
+        }
+
+        .code-letter.dim {
+            opacity: 0.3;
+            text-transform: lowercase;
+        }
+
+        .code-letter.absent {
+            opacity: 0.15;
+        }
+
+        .profile-name {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+        }
+
+        .analysis-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .analysis-section {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .analysis-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .analysis-section h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+
+        .analysis-section p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="noise-overlay"></div>
+
+    <header>
+        <h1>DISC Model</h1>
+        <p class="subtitle">Framework for Communication and Behavior</p>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="model">Model</button>
+        <button class="tab-btn" data-tab="theory">Theory</button>
+        <button class="tab-btn" data-tab="playground">Playground</button>
+        <button class="tab-btn" data-tab="simulator">Quiz</button>
+    </div>
+
+    <div class="container">
+        <!-- TAB MODEL -->
+        <div id="model" class="tab-content active">
+            <div class="model-section">
+                <div class="quadrant-container">
+                    <span class="axis-labels axis-top">Task-Oriented</span>
+                    <span class="axis-labels axis-bottom">People-Oriented</span>
+                    <span class="axis-labels axis-left">Active / Fast</span>
+                    <span class="axis-labels axis-right">Reflective / Methodical</span>
+
+                    <div class="quadrant-grid">
+                        <div class="quadrant q-dominance" data-role="dominance">
+                            <span class="quadrant-letter">D</span>
+                            <span class="quadrant-name">Dominance</span>
+                        </div>
+                        <div class="quadrant q-conscientiousness" data-role="conscientiousness">
+                            <span class="quadrant-letter">C</span>
+                            <span class="quadrant-name">Conscientiousness</span>
+                        </div>
+                        <div class="quadrant q-influence" data-role="influence">
+                            <span class="quadrant-letter">I</span>
+                            <span class="quadrant-name">Influence</span>
+                        </div>
+                        <div class="quadrant q-steadiness" data-role="steadiness">
+                            <span class="quadrant-letter">S</span>
+                            <span class="quadrant-name">Steadiness</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-panel" id="info-panel">
+                    <div class="info-header">
+                        <div class="info-icon" id="info-icon" style="background: var(--dominance);">D</div>
+                        <div class="info-title">
+                            <h2 id="info-name">Dominance</h2>
+                            <span id="info-focus">Direct, Results-Oriented</span>
+                        </div>
+                    </div>
+                    <div class="info-content">
+                        <p id="info-description">People with a D style are direct, decisive, and results-oriented. They prefer to make quick decisions and take risks. They are motivated by challenges and competition.</p>
+                        <p id="info-details">In communication, they prefer short, to-the-point messages. They focus on "what" not "how". They may seem abrupt or impatient to others.</p>
+                    </div>
+                    <div class="info-traits" id="info-traits">
+                        <span class="trait-tag">Direct</span>
+                        <span class="trait-tag">Decisive</span>
+                        <span class="trait-tag">Competitive</span>
+                        <span class="trait-tag">Results-oriented</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB THEORY -->
+        <div id="theory" class="tab-content">
+            <div class="theory-grid">
+                <div class="theory-card tc-d">
+                    <h3><span style="color: var(--dominance);">D</span> Dominance</h3>
+                    <p>The D style focuses on results and action. D people are direct, decisive, and goal-oriented. They take control, accept challenges, and solve problems quickly. They may be perceived as demanding or impatient.</p>
+                </div>
+                <div class="theory-card tc-i">
+                    <h3><span style="color: var(--influence);">I</span> Influence</h3>
+                    <p>The I style focuses on interactions and enthusiasm. I people are sociable, optimistic, and collaborative. They excel at persuasion and networking. They may be perceived as disorganized or overly optimistic.</p>
+                </div>
+                <div class="theory-card tc-s">
+                    <h3><span style="color: var(--steadiness);">S</span> Steadiness</h3>
+                    <p>The S style focuses on cooperation and stability. S people are patient, reliable, and team-oriented. They prefer predictable environments and harmonious relationships. They may be resistant to change.</p>
+                </div>
+                <div class="theory-card tc-c">
+                    <h3><span style="color: var(--conscientiousness);">C</span> Conscientiousness</h3>
+                    <p>The C style focuses on accuracy and quality. C people are analytical, systematic, and detail-oriented. They seek data and evidence before making decisions. They may be perceived as overly critical or perfectionist.</p>
+                </div>
+            </div>
+
+            <div class="matrix-section">
+                <h2>DISC Styles Matrix</h2>
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Task-Oriented</th>
+                            <th>People-Oriented</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Active / Extroverted</strong></td>
+                            <td style="background: rgba(220, 38, 38, 0.2);"><strong style="color: var(--dominance);">D</strong> - Dominance<br>Control, Results</td>
+                            <td style="background: rgba(245, 158, 11, 0.2);"><strong style="color: var(--influence);">I</strong> - Influence<br>Persuasion, Enthusiasm</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Reflective / Introverted</strong></td>
+                            <td style="background: rgba(59, 130, 246, 0.2);"><strong style="color: var(--conscientiousness);">C</strong> - Conscientiousness<br>Precision, Analysis</td>
+                            <td style="background: rgba(16, 185, 129, 0.2);"><strong style="color: var(--steadiness);">S</strong> - Steadiness<br>Stability, Support</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="matrix-section">
+                <h2>Communicating with Each Style</h2>
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th>Style</th>
+                            <th>What to Do</th>
+                            <th>What to Avoid</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td style="color: var(--dominance);"><strong>D</strong></td>
+                            <td>Be direct, focus on results, offer options</td>
+                            <td>Too many details, indecision, wasting their time</td>
+                        </tr>
+                        <tr>
+                            <td style="color: var(--influence);"><strong>I</strong></td>
+                            <td>Be enthusiastic, allow socializing, acknowledge their ideas</td>
+                            <td>Too much data, rigidity, ignoring them</td>
+                        </tr>
+                        <tr>
+                            <td style="color: var(--steadiness);"><strong>S</strong></td>
+                            <td>Be sincere, provide security, give them time to process</td>
+                            <td>Pressure, sudden changes, confrontations</td>
+                        </tr>
+                        <tr>
+                            <td style="color: var(--conscientiousness);"><strong>C</strong></td>
+                            <td>Provide data, be specific, allow time for analysis</td>
+                            <td>Generalizations, emotional pressure, lack of preparation</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB PLAYGROUND -->
+        <div id="playground" class="tab-content">
+            <div class="playground-container">
+                <div class="playground-header">
+                    <h2>DISC Profile Simulator</h2>
+                    <p>Adjust the level of each dimension and observe how the profile changes</p>
+                </div>
+
+                <div class="playground-grid">
+                    <div class="sliders-panel">
+                        <div class="slider-group" data-role="D">
+                            <div class="slider-header">
+                                <div class="slider-icon" style="background: var(--dominance);">D</div>
+                                <div class="slider-info">
+                                    <span class="slider-title">Dominance</span>
+                                    <span class="slider-value" id="val-D">50</span>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="disc-slider slider-d" id="slider-D">
+                            <div class="slider-labels">
+                                <span>Low</span>
+                                <span>Moderate</span>
+                                <span>High</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-group" data-role="I">
+                            <div class="slider-header">
+                                <div class="slider-icon" style="background: var(--influence);">I</div>
+                                <div class="slider-info">
+                                    <span class="slider-title">Influence</span>
+                                    <span class="slider-value" id="val-I">50</span>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="disc-slider slider-i" id="slider-I">
+                            <div class="slider-labels">
+                                <span>Low</span>
+                                <span>Moderate</span>
+                                <span>High</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-group" data-role="S">
+                            <div class="slider-header">
+                                <div class="slider-icon" style="background: var(--steadiness);">S</div>
+                                <div class="slider-info">
+                                    <span class="slider-title">Steadiness</span>
+                                    <span class="slider-value" id="val-S">50</span>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="disc-slider slider-s" id="slider-S">
+                            <div class="slider-labels">
+                                <span>Low</span>
+                                <span>Moderate</span>
+                                <span>High</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-group" data-role="C">
+                            <div class="slider-header">
+                                <div class="slider-icon" style="background: var(--conscientiousness);">C</div>
+                                <div class="slider-info">
+                                    <span class="slider-title">Conscientiousness</span>
+                                    <span class="slider-value" id="val-C">50</span>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="disc-slider slider-c" id="slider-C">
+                            <div class="slider-labels">
+                                <span>Low</span>
+                                <span>Moderate</span>
+                                <span>High</span>
+                            </div>
+                        </div>
+
+                        <div class="preset-buttons">
+                            <span class="preset-label">Preset Profiles:</span>
+                            <button class="preset-btn" data-preset="driver">Driver (Di)</button>
+                            <button class="preset-btn" data-preset="influencer">Influencer (iD)</button>
+                            <button class="preset-btn" data-preset="supporter">Supporter (Si)</button>
+                            <button class="preset-btn" data-preset="analyst">Analyst (Cs)</button>
+                            <button class="preset-btn" data-preset="salesman">Salesperson (ID)</button>
+                            <button class="preset-btn" data-preset="balanced">Balanced</button>
+                        </div>
+                    </div>
+
+                    <div class="visualization-panel">
+                        <div class="radar-container">
+                            <svg viewBox="0 0 400 400" id="radar-chart" class="radar-svg">
+                                <!-- Background circles -->
+                                <circle cx="200" cy="200" r="150" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                                <circle cx="200" cy="200" r="100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                                <circle cx="200" cy="200" r="50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+                                <!-- Axis lines -->
+                                <line x1="200" y1="50" x2="200" y2="350" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                                <line x1="50" y1="200" x2="350" y2="200" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+                                <!-- Radar polygon -->
+                                <polygon id="radar-polygon" class="radar-polygon" points="200,125 275,200 200,275 125,200"/>
+
+                                <!-- Data points -->
+                                <circle id="point-D" cx="200" cy="125" r="8" class="radar-point point-d"/>
+                                <circle id="point-I" cx="275" cy="200" r="8" class="radar-point point-i"/>
+                                <circle id="point-S" cx="200" cy="275" r="8" class="radar-point point-s"/>
+                                <circle id="point-C" cx="125" cy="200" r="8" class="radar-point point-c"/>
+
+                                <!-- Labels -->
+                                <text x="200" y="30" text-anchor="middle" class="radar-label">D</text>
+                                <text x="370" y="205" text-anchor="middle" class="radar-label">I</text>
+                                <text x="200" y="385" text-anchor="middle" class="radar-label">S</text>
+                                <text x="30" y="205" text-anchor="middle" class="radar-label">C</text>
+                            </svg>
+                        </div>
+
+                        <div class="profile-display">
+                            <div class="code-display">
+                                <span class="code-letter" id="code-D" style="color: var(--dominance);">D</span>
+                                <span class="code-letter" id="code-I" style="color: var(--influence);">I</span>
+                                <span class="code-letter" id="code-S" style="color: var(--steadiness);">S</span>
+                                <span class="code-letter" id="code-C" style="color: var(--conscientiousness);">C</span>
+                            </div>
+                            <div class="profile-name" id="profile-name">Balanced Profile</div>
+                        </div>
+
+                        <div class="analysis-panel" id="analysis-panel">
+                            <div class="analysis-section">
+                                <h4>Communication Style</h4>
+                                <p id="communication">With a balanced profile, you easily adapt to different communication styles.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Strengths</h4>
+                                <p id="strengths">Versatility and adaptability in various contexts.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Potential Challenges</h4>
+                                <p id="challenges">It may be difficult to identify a clear dominant style.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB SIMULATOR -->
+        <div id="simulator" class="tab-content">
+            <div class="simulator-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+
+                <div id="quiz-container">
+                    <div class="question-card">
+                        <div class="question-number" id="question-number">Question 1 of 12</div>
+                        <div class="question-text" id="question-text">In a group discussion, you prefer to:</div>
+                        <div class="options" id="options"></div>
+                    </div>
+
+                    <div class="nav-buttons">
+                        <button class="btn btn-secondary" id="prev-btn" disabled>Back</button>
+                        <button class="btn btn-primary" id="next-btn" disabled>Next</button>
+                    </div>
+                </div>
+
+                <div id="results-container" class="results-container hidden">
+                    <h2 class="results-title">Your DISC Profile</h2>
+                    <p class="results-subtitle">Based on your answers</p>
+
+                    <div class="profile-chart">
+                        <div class="chart-bar">
+                            <span class="chart-label">Dominance</span>
+                            <div class="chart-track">
+                                <div class="chart-fill d" id="bar-d" style="width: 0%"><span id="score-d">0%</span></div>
+                            </div>
+                        </div>
+                        <div class="chart-bar">
+                            <span class="chart-label">Influence</span>
+                            <div class="chart-track">
+                                <div class="chart-fill i" id="bar-i" style="width: 0%"><span id="score-i">0%</span></div>
+                            </div>
+                        </div>
+                        <div class="chart-bar">
+                            <span class="chart-label">Steadiness</span>
+                            <div class="chart-track">
+                                <div class="chart-fill s" id="bar-s" style="width: 0%"><span id="score-s">0%</span></div>
+                            </div>
+                        </div>
+                        <div class="chart-bar">
+                            <span class="chart-label">Conscientiousness</span>
+                            <div class="chart-track">
+                                <div class="chart-fill c" id="bar-c" style="width: 0%"><span id="score-c">0%</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-code" id="profile-code">----</div>
+
+                    <div class="profile-description">
+                        <h3 id="profile-title">Your Profile</h3>
+                        <p id="profile-text">Your profile description will appear here.</p>
+                    </div>
+
+                    <button class="btn btn-primary restart-btn" id="restart-btn">Retake Test</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === TAB NAVIGATION ===
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // === INTERACTIVE MODEL ===
+        const roleData = {
+            dominance: {
+                letter: 'D',
+                name: 'Dominance',
+                focus: 'Direct, Results-Oriented',
+                color: 'var(--dominance)',
+                description: 'People with a D style are direct, decisive, and results-oriented. They prefer to make quick decisions and take risks. They are motivated by challenges and competition.',
+                details: 'In communication, they prefer short, to-the-point messages. They focus on "what" not "how". They may seem abrupt or impatient to others.',
+                traits: ['Direct', 'Decisive', 'Competitive', 'Results-oriented', 'Risk-taker']
+            },
+            influence: {
+                letter: 'I',
+                name: 'Influence',
+                focus: 'Enthusiastic, Relationship-Oriented',
+                color: 'var(--influence)',
+                description: 'People with an I style are sociable, optimistic, and persuasive. They enjoy being the center of attention and excel at building relationships.',
+                details: 'In communication, they are expressive and enthusiastic. They prefer face-to-face interaction and informal discussions. They may be perceived as too talkative or superficial.',
+                traits: ['Enthusiastic', 'Sociable', 'Optimistic', 'Persuasive', 'Collaborative']
+            },
+            steadiness: {
+                letter: 'S',
+                name: 'Steadiness',
+                focus: 'Patient, Stability-Oriented',
+                color: 'var(--steadiness)',
+                description: 'People with an S style are patient, reliable, and team-oriented. They prefer stability and harmony in the work environment.',
+                details: 'In communication, they are good listeners and provide support. They prefer gradual changes and need time to adapt. They may be perceived as too passive.',
+                traits: ['Patient', 'Reliable', 'Loyal', 'Calm', 'Supportive']
+            },
+            conscientiousness: {
+                letter: 'C',
+                name: 'Conscientiousness',
+                focus: 'Analytical, Quality-Oriented',
+                color: 'var(--conscientiousness)',
+                description: 'People with a C style are analytical, systematic, and quality-oriented. They seek precision and accuracy in everything they do.',
+                details: 'In communication, they prefer concrete facts and data. They ask detailed questions and need time to analyze information. They may be perceived as too critical or distant.',
+                traits: ['Analytical', 'Precise', 'Systematic', 'Reserved', 'Logical']
+            }
+        };
+
+        const quadrants = document.querySelectorAll('.quadrant');
+
+        function updateInfoPanel(role) {
+            const data = roleData[role];
+            document.getElementById('info-icon').textContent = data.letter;
+            document.getElementById('info-icon').style.background = data.color;
+            document.getElementById('info-name').textContent = data.name;
+            document.getElementById('info-focus').textContent = data.focus;
+            document.getElementById('info-description').textContent = data.description;
+            document.getElementById('info-details').textContent = data.details;
+
+            const traitsContainer = document.getElementById('info-traits');
+            traitsContainer.innerHTML = data.traits.map(t => `<span class="trait-tag">${t}</span>`).join('');
+        }
+
+        quadrants.forEach(q => {
+            q.addEventListener('click', () => {
+                quadrants.forEach(quad => quad.classList.remove('active'));
+                q.classList.add('active');
+                updateInfoPanel(q.dataset.role);
+            });
+
+            q.addEventListener('mouseenter', () => {
+                updateInfoPanel(q.dataset.role);
+            });
+        });
+
+        // === SIMULATOR ===
+        const questions = [
+            {
+                text: "In a group discussion, you prefer to:",
+                options: [
+                    { text: "Lead the discussion and make quick decisions", type: 'D' },
+                    { text: "Motivate the team and bring energy", type: 'I' },
+                    { text: "Listen and support others' ideas", type: 'S' },
+                    { text: "Analyze information before speaking", type: 'C' }
+                ]
+            },
+            {
+                text: "When you encounter a problem, your first reaction is to:",
+                options: [
+                    { text: "Act immediately to solve it", type: 'D' },
+                    { text: "Discuss possible solutions with others", type: 'I' },
+                    { text: "Look for a solution that maintains harmony", type: 'S' },
+                    { text: "Research all aspects before acting", type: 'C' }
+                ]
+            },
+            {
+                text: "What motivates you most at work?",
+                options: [
+                    { text: "Challenges and opportunities to win", type: 'D' },
+                    { text: "Recognition and social interaction", type: 'I' },
+                    { text: "Stability and trusting relationships", type: 'S' },
+                    { text: "The opportunity to do things right", type: 'C' }
+                ]
+            },
+            {
+                text: "How do you prefer to receive feedback?",
+                options: [
+                    { text: "Direct and to the point, without too many explanations", type: 'D' },
+                    { text: "In a positive way, acknowledging efforts", type: 'I' },
+                    { text: "In a private setting, with patience and understanding", type: 'S' },
+                    { text: "With concrete data and specific examples", type: 'C' }
+                ]
+            },
+            {
+                text: "In stressful situations, you tend to:",
+                options: [
+                    { text: "Become more direct and demanding", type: 'D' },
+                    { text: "Become more talkative and seek emotional support", type: 'I' },
+                    { text: "Withdraw and avoid conflict", type: 'S' },
+                    { text: "Become more critical and perfectionist", type: 'C' }
+                ]
+            },
+            {
+                text: "What type of work environment do you prefer?",
+                options: [
+                    { text: "Dynamic, competitive, results-oriented", type: 'D' },
+                    { text: "Open, collaborative, with lots of interaction", type: 'I' },
+                    { text: "Stable, predictable, with long-term relationships", type: 'S' },
+                    { text: "Structured, with clear standards and defined processes", type: 'C' }
+                ]
+            },
+            {
+                text: "When working in a team, you are the one who:",
+                options: [
+                    { text: "Sets the pace and makes difficult decisions", type: 'D' },
+                    { text: "Keeps morale high and motivates the team", type: 'I' },
+                    { text: "Ensures cohesion and resolves conflicts", type: 'S' },
+                    { text: "Checks details and ensures quality", type: 'C' }
+                ]
+            },
+            {
+                text: "What do you enjoy most in a project?",
+                options: [
+                    { text: "Taking initiative and seeing things through", type: 'D' },
+                    { text: "Presenting ideas and convincing others", type: 'I' },
+                    { text: "Supporting the team and maintaining a pleasant environment", type: 'S' },
+                    { text: "Planning in detail and ensuring accuracy", type: 'C' }
+                ]
+            },
+            {
+                text: "How do you react to unexpected changes?",
+                options: [
+                    { text: "I see them as challenges and adapt quickly", type: 'D' },
+                    { text: "I try to find the positive side and help others adapt", type: 'I' },
+                    { text: "I need time to process and prefer gradual transitions", type: 'S' },
+                    { text: "I analyze the implications and plan how to manage them", type: 'C' }
+                ]
+            },
+            {
+                text: "What frustrates you the most?",
+                options: [
+                    { text: "Lack of efficiency and wasting time", type: 'D' },
+                    { text: "Being ignored or working in isolation", type: 'I' },
+                    { text: "Conflicts and sudden changes", type: 'S' },
+                    { text: "Sloppy work and lack of standards", type: 'C' }
+                ]
+            },
+            {
+                text: "When communicating with others, you are:",
+                options: [
+                    { text: "Concise and to the point", type: 'D' },
+                    { text: "Expressive and enthusiastic", type: 'I' },
+                    { text: "Calm and attentive to their needs", type: 'S' },
+                    { text: "Precise and fact-based", type: 'C' }
+                ]
+            },
+            {
+                text: "What characteristic describes you best?",
+                options: [
+                    { text: "Decisive and goal-oriented", type: 'D' },
+                    { text: "Optimistic and sociable", type: 'I' },
+                    { text: "Patient and reliable", type: 'S' },
+                    { text: "Analytical and detail-oriented", type: 'C' }
+                ]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let answers = [];
+        let scores = { D: 0, I: 0, S: 0, C: 0 };
+
+        const questionText = document.getElementById('question-text');
+        const questionNumber = document.getElementById('question-number');
+        const optionsContainer = document.getElementById('options');
+        const progressFill = document.getElementById('progress-fill');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            questionNumber.textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            questionText.textContent = q.text;
+            progressFill.style.width = `${((currentQuestion) / questions.length) * 100}%`;
+
+            const shuffledOptions = shuffleArray(q.options);
+            const letters = ['A', 'B', 'C', 'D'];
+
+            optionsContainer.innerHTML = shuffledOptions.map((opt, i) => `
+                <div class="option ${answers[currentQuestion] === opt.type ? 'selected' : ''}" data-type="${opt.type}">
+                    <span class="option-letter">${letters[i]}</span>
+                    <span>${opt.text}</span>
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.addEventListener('click', () => selectOption(opt.dataset.type));
+            });
+
+            prevBtn.disabled = currentQuestion === 0;
+            nextBtn.disabled = !answers[currentQuestion];
+            nextBtn.textContent = currentQuestion === questions.length - 1 ? 'See Results' : 'Next';
+        }
+
+        function selectOption(type) {
+            answers[currentQuestion] = type;
+            document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+            document.querySelector(`[data-type="${type}"]`).classList.add('selected');
+            nextBtn.disabled = false;
+        }
+
+        function calculateResults() {
+            scores = { D: 0, I: 0, S: 0, C: 0 };
+            answers.forEach(a => scores[a]++);
+
+            const total = questions.length;
+            const percentages = {
+                D: Math.round((scores.D / total) * 100),
+                I: Math.round((scores.I / total) * 100),
+                S: Math.round((scores.S / total) * 100),
+                C: Math.round((scores.C / total) * 100)
+            };
+
+            return percentages;
+        }
+
+        function getProfileCode(percentages) {
+            const sorted = Object.entries(percentages).sort((a, b) => b[1] - a[1]);
+            return sorted.map(([role, pct]) => {
+                if (pct >= 25) return role;
+                if (pct >= 12) return role.toLowerCase();
+                return '-';
+            }).join('');
+        }
+
+        function getProfileDescription(percentages) {
+            const sorted = Object.entries(percentages).sort((a, b) => b[1] - a[1]);
+            const dominant = sorted[0][0];
+            const secondary = sorted[1][0];
+
+            const descriptions = {
+                'D': 'You are strongly oriented toward results and direct action.',
+                'I': 'You excel at influencing and building relationships.',
+                'S': 'You provide stability and constant support to the team.',
+                'C': 'You bring precision and analysis to everything you do.'
+            };
+
+            const combinations = {
+                'DI': 'You combine decision-making power with the ability to persuade - you are a charismatic leader who achieves results through people.',
+                'DC': 'You are oriented toward results but also quality - you not only deliver fast, you deliver well.',
+                'DS': 'You combine determination with patience - you are decisive but also consider the team\'s needs.',
+                'ID': 'You are a powerful communicator who can also execute - you influence and deliver.',
+                'IS': 'You create positive and stable work environments - people follow you because you make them feel good.',
+                'IC': 'You combine enthusiasm with attention to detail - you present ideas convincingly but with solid foundation.',
+                'SD': 'You provide stability but can also make tough decisions when necessary.',
+                'SI': 'You are a sociable supporter - you maintain harmony and build lasting relationships.',
+                'SC': 'You combine loyalty with precision - you are reliable and attentive to details.',
+                'CD': 'You analyze before acting, but when you act, you are decisive.',
+                'CI': 'You present data in an accessible way - you make technical information easy to understand.',
+                'CS': 'You are methodical and patient - quality and consistency are your priorities.'
+            };
+
+            const combo = dominant + secondary;
+            return combinations[combo] || `${descriptions[dominant]} ${descriptions[secondary]}`;
+        }
+
+        function showResults() {
+            const percentages = calculateResults();
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            progressFill.style.width = '100%';
+
+            setTimeout(() => {
+                document.getElementById('bar-d').style.width = `${percentages.D}%`;
+                document.getElementById('bar-i').style.width = `${percentages.I}%`;
+                document.getElementById('bar-s').style.width = `${percentages.S}%`;
+                document.getElementById('bar-c').style.width = `${percentages.C}%`;
+
+                document.getElementById('score-d').textContent = `${percentages.D}%`;
+                document.getElementById('score-i').textContent = `${percentages.I}%`;
+                document.getElementById('score-s').textContent = `${percentages.S}%`;
+                document.getElementById('score-c').textContent = `${percentages.C}%`;
+            }, 100);
+
+            const profileCode = getProfileCode(percentages);
+            document.getElementById('profile-code').textContent = profileCode;
+
+            const sorted = Object.entries(percentages).sort((a, b) => b[1] - a[1]);
+            const roleNames = { D: 'Dominance', I: 'Influence', S: 'Steadiness', C: 'Conscientiousness' };
+            document.getElementById('profile-title').textContent = `Dominant Profile: ${roleNames[sorted[0][0]]}`;
+            document.getElementById('profile-text').textContent = getProfileDescription(percentages);
+        }
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            currentQuestion = 0;
+            answers = [];
+            scores = { D: 0, I: 0, S: 0, C: 0 };
+            quizContainer.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+            renderQuestion();
+        });
+
+        // Initialize
+        renderQuestion();
+
+        // === PLAYGROUND SIMULATOR ===
+        const sliders = {
+            D: document.getElementById('slider-D'),
+            I: document.getElementById('slider-I'),
+            S: document.getElementById('slider-S'),
+            C: document.getElementById('slider-C')
+        };
+
+        const presets = {
+            driver: { D: 85, I: 45, S: 25, C: 40 },
+            influencer: { D: 55, I: 90, S: 35, C: 25 },
+            supporter: { D: 30, I: 50, S: 85, C: 45 },
+            analyst: { D: 35, I: 25, S: 50, C: 90 },
+            salesman: { D: 70, I: 85, S: 30, C: 35 },
+            balanced: { D: 50, I: 50, S: 50, C: 50 }
+        };
+
+        const profileAnalysis = {
+            getCommunication: (vals) => {
+                const dominant = Object.entries(vals).sort((a, b) => b[1] - a[1])[0];
+                const communications = {
+                    D: 'You communicate directly and to the point. You prefer short, results-focused conversations. You may seem abrupt to S and C styles.',
+                    I: 'You are expressive and enthusiastic in communication. You prefer face-to-face interaction and storytelling. D and C styles may perceive you as too talkative.',
+                    S: 'You communicate calmly and attentively. You are a good listener and prefer quiet discussions. D and I styles may perceive you as too slow.',
+                    C: 'You communicate precisely and fact-based. You prefer written documentation and details. I and D styles may perceive you as too cold.'
+                };
+                return communications[dominant[0]];
+            },
+            getStrengths: (vals) => {
+                const sorted = Object.entries(vals).sort((a, b) => b[1] - a[1]);
+                const dominant = sorted[0][0];
+                const strengths = {
+                    D: 'The ability to make quick decisions, results orientation, embracing challenges.',
+                    I: 'The ability to motivate others, contagious optimism, natural networking.',
+                    S: 'Patience, loyalty, the ability to maintain harmony and stability.',
+                    C: 'Attention to detail, analytical thinking, pursuit of high standards.'
+                };
+                return strengths[dominant];
+            },
+            getChallenges: (vals) => {
+                const sorted = Object.entries(vals).sort((a, b) => b[1] - a[1]);
+                const dominant = sorted[0][0];
+                const challenges = {
+                    D: 'May be perceived as aggressive or impatient. May ignore others\' feelings.',
+                    I: 'May be disorganized or overly optimistic. May avoid details and follow-up.',
+                    S: 'May be resistant to change. May avoid necessary conflicts.',
+                    C: 'May be too critical or perfectionist. May delay decisions through excessive analysis.'
+                };
+                return challenges[dominant];
+            },
+            getProfileName: (vals) => {
+                const sorted = Object.entries(vals).sort((a, b) => b[1] - a[1]);
+                const top = sorted[0][0];
+                const second = sorted[1][0];
+
+                if (sorted[0][1] < 30) return 'Undefined Profile';
+
+                const names = {
+                    'DI': 'Inspirator / Driver',
+                    'DC': 'Achiever / Challenger',
+                    'DS': 'Results-Getter',
+                    'ID': 'Promoter',
+                    'IS': 'Enthusiastic Supporter',
+                    'IC': 'Precise Communicator',
+                    'SD': 'Stable Agent',
+                    'SI': 'Trusted Colleague',
+                    'SC': 'Dedicated Specialist',
+                    'CD': 'Editor / Analyst',
+                    'CI': 'Technical Presenter',
+                    'CS': 'Methodical Expert'
+                };
+
+                return names[top + second] || 'Mixed Profile';
+            }
+        };
+
+        function updatePlayground() {
+            const vals = {
+                D: parseInt(sliders.D.value),
+                I: parseInt(sliders.I.value),
+                S: parseInt(sliders.S.value),
+                C: parseInt(sliders.C.value)
+            };
+
+            // Update value displays
+            Object.keys(vals).forEach(key => {
+                document.getElementById(`val-${key}`).textContent = vals[key];
+            });
+
+            // Update radar chart
+            const center = 200;
+            const maxRadius = 150;
+
+            const points = {
+                D: { x: center, y: center - (vals.D / 100) * maxRadius },
+                I: { x: center + (vals.I / 100) * maxRadius, y: center },
+                S: { x: center, y: center + (vals.S / 100) * maxRadius },
+                C: { x: center - (vals.C / 100) * maxRadius, y: center }
+            };
+
+            document.getElementById('radar-polygon').setAttribute('points',
+                `${points.D.x},${points.D.y} ${points.I.x},${points.I.y} ${points.S.x},${points.S.y} ${points.C.x},${points.C.y}`
+            );
+
+            Object.keys(points).forEach(key => {
+                const point = document.getElementById(`point-${key}`);
+                point.setAttribute('cx', points[key].x);
+                point.setAttribute('cy', points[key].y);
+            });
+
+            // Update code display
+            Object.keys(vals).forEach(key => {
+                const codeEl = document.getElementById(`code-${key}`);
+                codeEl.classList.remove('dim', 'absent');
+                if (vals[key] < 25) {
+                    codeEl.classList.add('absent');
+                } else if (vals[key] < 50) {
+                    codeEl.classList.add('dim');
+                }
+            });
+
+            // Update analysis
+            document.getElementById('profile-name').textContent = profileAnalysis.getProfileName(vals);
+            document.getElementById('communication').textContent = profileAnalysis.getCommunication(vals);
+            document.getElementById('strengths').textContent = profileAnalysis.getStrengths(vals);
+            document.getElementById('challenges').textContent = profileAnalysis.getChallenges(vals);
+        }
+
+        // Attach slider listeners
+        Object.values(sliders).forEach(slider => {
+            slider.addEventListener('input', updatePlayground);
+        });
+
+        // Preset buttons
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const preset = presets[btn.dataset.preset];
+                Object.keys(preset).forEach(key => {
+                    sliders[key].value = preset[key];
+                });
+                updatePlayground();
+            });
+        });
+
+        // Initialize playground
+        updatePlayground();
+    </script>
+</body>
+</html>

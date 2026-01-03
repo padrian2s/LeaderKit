@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PAEI Model - Adizes | Interactive Learning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --producer: #E63946;
+            --administrator: #457B9D;
+            --entrepreneur: #F4A261;
+            --integrator: #2A9D8F;
+            --bg-dark: #1a1a2e;
+            --bg-card: #16213e;
+            --text-light: #edf2f7;
+            --text-muted: #a0aec0;
+            --accent-glow: rgba(244, 162, 97, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 2rem 2rem;
+            position: relative;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--text-light) 0%, var(--entrepreneur) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 2rem auto;
+            padding: 0.5rem;
+            background: var(--bg-card);
+            border-radius: 50px;
+            max-width: 500px;
+        }
+
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-light);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--entrepreneur) 0%, var(--producer) 100%);
+            color: var(--bg-dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === VISUAL MODEL === */
+        .model-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        @media (max-width: 900px) {
+            .model-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .quadrant-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            aspect-ratio: 1;
+        }
+
+        .quadrant-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .quadrant {
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quadrant::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .quadrant:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+
+        .quadrant:hover::before {
+            opacity: 1;
+        }
+
+        .quadrant.active {
+            transform: scale(1.08);
+            z-index: 10;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .q-producer { background: linear-gradient(135deg, var(--producer), #c1121f); }
+        .q-administrator { background: linear-gradient(135deg, var(--administrator), #1d3557); }
+        .q-entrepreneur { background: linear-gradient(135deg, var(--entrepreneur), #e76f51); }
+        .q-integrator { background: linear-gradient(135deg, var(--integrator), #264653); }
+
+        .quadrant-letter {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            opacity: 0.9;
+        }
+
+        .quadrant-name {
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 0.5rem;
+        }
+
+        .axis-labels {
+            position: absolute;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .axis-top { top: -30px; left: 50%; transform: translateX(-50%); }
+        .axis-bottom { bottom: -30px; left: 50%; transform: translateX(-50%); }
+        .axis-left { left: -60px; top: 50%; transform: translateY(-50%) rotate(-90deg); white-space: nowrap; }
+        .axis-right { right: -60px; top: 50%; transform: translateY(-50%) rotate(90deg); white-space: nowrap; }
+
+        .info-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            min-height: 400px;
+        }
+
+        .info-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .info-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .info-title h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-title span {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .info-content p {
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        .info-traits {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .trait-tag {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* === SIMULATOR === */
+        .simulator-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-card);
+            border-radius: 3px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--producer), var(--entrepreneur));
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        .question-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .question-number {
+            color: var(--entrepreneur);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            line-height: 1.5;
+            margin-bottom: 2rem;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .option {
+            padding: 1.2rem 1.5rem;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .option:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .option.selected {
+            border-color: var(--entrepreneur);
+            background: rgba(244, 162, 97, 0.15);
+        }
+
+        .option-letter {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .option.selected .option-letter {
+            background: var(--entrepreneur);
+            color: var(--bg-dark);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-light);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--entrepreneur), var(--producer));
+            color: var(--bg-dark);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--accent-glow);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* === RESULTS === */
+        .results-container {
+            text-align: center;
+        }
+
+        .results-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .results-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+        }
+
+        .profile-chart {
+            max-width: 500px;
+            margin: 0 auto 3rem;
+        }
+
+        .chart-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .chart-label {
+            width: 140px;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .chart-track {
+            flex: 1;
+            height: 40px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chart-fill {
+            height: 100%;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 1rem;
+            font-weight: 600;
+            transition: width 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .chart-fill.p { background: linear-gradient(90deg, var(--producer), #c1121f); }
+        .chart-fill.a { background: linear-gradient(90deg, var(--administrator), #1d3557); }
+        .chart-fill.e { background: linear-gradient(90deg, var(--entrepreneur), #e76f51); }
+        .chart-fill.i { background: linear-gradient(90deg, var(--integrator), #264653); }
+
+        .profile-code {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            letter-spacing: 0.2em;
+            margin-bottom: 2rem;
+        }
+
+        .profile-description {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .profile-description h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .profile-description p {
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .restart-btn {
+            margin-top: 2rem;
+        }
+
+        /* === THEORY === */
+        .theory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .theory-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border-left: 4px solid;
+            transition: transform 0.3s ease;
+        }
+
+        .theory-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .theory-card.tc-p { border-color: var(--producer); }
+        .theory-card.tc-a { border-color: var(--administrator); }
+        .theory-card.tc-e { border-color: var(--entrepreneur); }
+        .theory-card.tc-i { border-color: var(--integrator); }
+
+        .theory-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .theory-card p {
+            color: var(--text-muted);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        .matrix-section {
+            margin-top: 3rem;
+        }
+
+        .matrix-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 4px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+
+        .matrix-table th, .matrix-table td {
+            padding: 1rem;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        .matrix-table th {
+            background: rgba(255,255,255,0.05);
+            font-weight: 600;
+        }
+
+        .matrix-table td {
+            background: rgba(255,255,255,0.02);
+            color: var(--text-muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* === PLAYGROUND === */
+        .playground-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .playground-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .playground-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .playground-header p {
+            color: var(--text-muted);
+        }
+
+        .playground-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .playground-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sliders-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .slider-group {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .slider-group:last-of-type {
+            border-bottom: none;
+            margin-bottom: 1rem;
+        }
+
+        .slider-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .slider-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .slider-info {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slider-title {
+            font-weight: 600;
+        }
+
+        .slider-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .paei-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        .paei-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .paei-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .slider-p::-webkit-slider-thumb { background: var(--producer); box-shadow: 0 0 15px var(--producer); }
+        .slider-a::-webkit-slider-thumb { background: var(--administrator); box-shadow: 0 0 15px var(--administrator); }
+        .slider-e::-webkit-slider-thumb { background: var(--entrepreneur); box-shadow: 0 0 15px var(--entrepreneur); }
+        .slider-i::-webkit-slider-thumb { background: var(--integrator); box-shadow: 0 0 15px var(--integrator); }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .preset-label {
+            width: 100%;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .preset-btn {
+            padding: 0.5rem 0.8rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: var(--text-light);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Source Sans 3', sans-serif;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--entrepreneur);
+        }
+
+        .visualization-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .radar-container {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            aspect-ratio: 1;
+            max-width: 400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .radar-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .radar-polygon {
+            fill: rgba(244, 162, 97, 0.2);
+            stroke: var(--entrepreneur);
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+
+        .radar-point {
+            transition: all 0.3s ease;
+        }
+
+        .point-p { fill: var(--producer); }
+        .point-a { fill: var(--administrator); }
+        .point-e { fill: var(--entrepreneur); }
+        .point-i { fill: var(--integrator); }
+
+        .radar-label {
+            fill: var(--text-muted);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .profile-display {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .code-display {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            letter-spacing: 0.15em;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        .code-letter {
+            transition: all 0.3s ease;
+            min-width: 60px;
+        }
+
+        .code-letter.dim {
+            opacity: 0.3;
+            text-transform: lowercase;
+        }
+
+        .code-letter.absent {
+            opacity: 0.15;
+        }
+
+        .profile-name {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+        }
+
+        .analysis-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .analysis-section {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .analysis-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .analysis-section h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+
+        .analysis-section p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="noise-overlay"></div>
+
+    <header>
+        <h1>The PAEI Model</h1>
+        <p class="subtitle">Adizes Framework for Management and Leadership</p>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="model">Model</button>
+        <button class="tab-btn" data-tab="theory">Theory</button>
+        <button class="tab-btn" data-tab="playground">Playground</button>
+        <button class="tab-btn" data-tab="simulator">Quiz</button>
+    </div>
+
+    <div class="container">
+        <!-- TAB MODEL -->
+        <div id="model" class="tab-content active">
+            <div class="model-section">
+                <div class="quadrant-container">
+                    <span class="axis-labels axis-top">Short Term</span>
+                    <span class="axis-labels axis-bottom">Long Term</span>
+                    <span class="axis-labels axis-left">Effectiveness</span>
+                    <span class="axis-labels axis-right">Efficiency</span>
+
+                    <div class="quadrant-grid">
+                        <div class="quadrant q-producer" data-role="producer">
+                            <span class="quadrant-letter">P</span>
+                            <span class="quadrant-name">Producer</span>
+                        </div>
+                        <div class="quadrant q-administrator" data-role="administrator">
+                            <span class="quadrant-letter">A</span>
+                            <span class="quadrant-name">Administrator</span>
+                        </div>
+                        <div class="quadrant q-entrepreneur" data-role="entrepreneur">
+                            <span class="quadrant-letter">E</span>
+                            <span class="quadrant-name">Entrepreneur</span>
+                        </div>
+                        <div class="quadrant q-integrator" data-role="integrator">
+                            <span class="quadrant-letter">I</span>
+                            <span class="quadrant-name">Integrator</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-panel" id="info-panel">
+                    <div class="info-header">
+                        <div class="info-icon" id="info-icon" style="background: var(--producer);">P</div>
+                        <div class="info-title">
+                            <h2 id="info-name">Producer</h2>
+                            <span id="info-focus">Short-Term Effectiveness</span>
+                        </div>
+                    </div>
+                    <div class="info-content">
+                        <p id="info-description">The Producer focuses on immediate and tangible results. They are the executor who brings energy, output, and execution to the organization. They answer the fundamental question: "WHAT needs to be done?"</p>
+                        <p id="info-details">P-dominant managers are action-oriented, pragmatic, and focused on achieving goals. They are the driving force that transforms plans into reality.</p>
+                    </div>
+                    <div class="info-traits" id="info-traits">
+                        <span class="trait-tag">Results-oriented</span>
+                        <span class="trait-tag">Pragmatic</span>
+                        <span class="trait-tag">Energetic</span>
+                        <span class="trait-tag">Executor</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB THEORY -->
+        <div id="theory" class="tab-content">
+            <div class="theory-grid">
+                <div class="theory-card tc-p">
+                    <h3><span style="color: var(--producer);">P</span> Producer</h3>
+                    <p>Answers "WHAT do we do?" Ensures the organization produces results, meets customer needs, and achieves short-term goals. Without P, the organization doesn't deliver value.</p>
+                </div>
+                <div class="theory-card tc-a">
+                    <h3><span style="color: var(--administrator);">A</span> Administrator</h3>
+                    <p>Answers "HOW do we do it?" Creates systems, processes, and procedures for efficiency and consistency. Without A, the organization becomes chaotic and unpredictable.</p>
+                </div>
+                <div class="theory-card tc-e">
+                    <h3><span style="color: var(--entrepreneur);">E</span> Entrepreneur</h3>
+                    <p>Answers "WHEN and WHY?" Identifies opportunities, initiates change, and adapts the organization to the environment. Without E, the organization stagnates and becomes irrelevant.</p>
+                </div>
+                <div class="theory-card tc-i">
+                    <h3><span style="color: var(--integrator);">I</span> Integrator</h3>
+                    <p>Answers "WHO?" Builds cohesion, culture, and collaboration. Transforms a group of individuals into a team. Without I, the organization fragments.</p>
+                </div>
+            </div>
+
+            <div class="matrix-section">
+                <h2>Time and Function Matrix</h2>
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Effectiveness<br><small>(doing the right things)</small></th>
+                            <th>Efficiency<br><small>(doing things right)</small></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Short Term</strong></td>
+                            <td style="background: rgba(230, 57, 70, 0.2);"><strong style="color: var(--producer);">P</strong> - Producer<br>Immediate results</td>
+                            <td style="background: rgba(69, 123, 157, 0.2);"><strong style="color: var(--administrator);">A</strong> - Administrator<br>Optimized processes</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Long Term</strong></td>
+                            <td style="background: rgba(244, 162, 97, 0.2);"><strong style="color: var(--entrepreneur);">E</strong> - Entrepreneur<br>Vision and innovation</td>
+                            <td style="background: rgba(42, 157, 143, 0.2);"><strong style="color: var(--integrator);">I</strong> - Integrator<br>Organic cohesion</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB PLAYGROUND -->
+        <div id="playground" class="tab-content">
+            <div class="playground-container">
+                <div class="playground-header">
+                    <h2>PAEI Profile Simulator</h2>
+                    <p>Adjust the level of each dimension and observe how the profile changes in real time</p>
+                </div>
+
+                <div class="playground-grid">
+                    <div class="sliders-panel">
+                        <div class="slider-group" data-role="P">
+                            <div class="slider-header">
+                                <div class="slider-icon" style="background: var(--producer);">P</div>
+                                <div class="slider-info">
+                                    <span class="slider-title">Producer</span>
+                                    <span class="slider-value" id="val-P">50</span>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="paei-slider slider-p" id="slider-P">
+                            <div class="slider-labels">
+                                <span>Absent</span>
+                                <span>Moderate</span>
+                                <span>Dominant</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-group" data-role="A">
+                            <div class="slider-header">
+                                <div class="slider-icon" style="background: var(--administrator);">A</div>
+                                <div class="slider-info">
+                                    <span class="slider-title">Administrator</span>
+                                    <span class="slider-value" id="val-A">50</span>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="paei-slider slider-a" id="slider-A">
+                            <div class="slider-labels">
+                                <span>Absent</span>
+                                <span>Moderate</span>
+                                <span>Dominant</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-group" data-role="E">
+                            <div class="slider-header">
+                                <div class="slider-icon" style="background: var(--entrepreneur);">E</div>
+                                <div class="slider-info">
+                                    <span class="slider-title">Entrepreneur</span>
+                                    <span class="slider-value" id="val-E">50</span>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="paei-slider slider-e" id="slider-E">
+                            <div class="slider-labels">
+                                <span>Absent</span>
+                                <span>Moderate</span>
+                                <span>Dominant</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-group" data-role="I">
+                            <div class="slider-header">
+                                <div class="slider-icon" style="background: var(--integrator);">I</div>
+                                <div class="slider-info">
+                                    <span class="slider-title">Integrator</span>
+                                    <span class="slider-value" id="val-I">50</span>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="paei-slider slider-i" id="slider-I">
+                            <div class="slider-labels">
+                                <span>Absent</span>
+                                <span>Moderate</span>
+                                <span>Dominant</span>
+                            </div>
+                        </div>
+
+                        <div class="preset-buttons">
+                            <span class="preset-label">Preset Profiles:</span>
+                            <button class="preset-btn" data-preset="founder">Founder (PaEi)</button>
+                            <button class="preset-btn" data-preset="manager">Manager (pAeI)</button>
+                            <button class="preset-btn" data-preset="bureaucrat">Bureaucrat (-A--)</button>
+                            <button class="preset-btn" data-preset="arsonist">Arsonist (--E-)</button>
+                            <button class="preset-btn" data-preset="deadwood">Deadwood (----)</button>
+                            <button class="preset-btn" data-preset="balanced">Balanced</button>
+                        </div>
+                    </div>
+
+                    <div class="visualization-panel">
+                        <div class="radar-container">
+                            <svg viewBox="0 0 400 400" id="radar-chart" class="radar-svg">
+                                <!-- Background circles -->
+                                <circle cx="200" cy="200" r="150" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                                <circle cx="200" cy="200" r="100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                                <circle cx="200" cy="200" r="50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+                                <!-- Axis lines -->
+                                <line x1="200" y1="50" x2="200" y2="350" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                                <line x1="50" y1="200" x2="350" y2="200" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+                                <!-- Radar polygon -->
+                                <polygon id="radar-polygon" class="radar-polygon" points="200,125 275,200 200,275 125,200"/>
+
+                                <!-- Data points -->
+                                <circle id="point-P" cx="200" cy="125" r="8" class="radar-point point-p"/>
+                                <circle id="point-A" cx="275" cy="200" r="8" class="radar-point point-a"/>
+                                <circle id="point-E" cx="200" cy="275" r="8" class="radar-point point-e"/>
+                                <circle id="point-I" cx="125" cy="200" r="8" class="radar-point point-i"/>
+
+                                <!-- Labels -->
+                                <text x="200" y="30" text-anchor="middle" class="radar-label">P</text>
+                                <text x="370" y="205" text-anchor="middle" class="radar-label">A</text>
+                                <text x="200" y="385" text-anchor="middle" class="radar-label">E</text>
+                                <text x="30" y="205" text-anchor="middle" class="radar-label">I</text>
+                            </svg>
+                        </div>
+
+                        <div class="profile-display">
+                            <div class="code-display">
+                                <span class="code-letter" id="code-P" style="color: var(--producer);">P</span>
+                                <span class="code-letter" id="code-A" style="color: var(--administrator);">A</span>
+                                <span class="code-letter" id="code-E" style="color: var(--entrepreneur);">E</span>
+                                <span class="code-letter" id="code-I" style="color: var(--integrator);">I</span>
+                            </div>
+                            <div class="profile-name" id="profile-name">Balanced Profile</div>
+                        </div>
+
+                        <div class="analysis-panel" id="analysis-panel">
+                            <div class="analysis-section">
+                                <h4>Strengths</h4>
+                                <p id="strengths">With a balanced profile, you have versatility across all management domains.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Areas of Attention</h4>
+                                <p id="weaknesses">Balance may indicate lack of clear specialization or stylistic indecision.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Team Compatibility</h4>
+                                <p id="team-fit">You can integrate into various roles, but need clarity on responsibilities.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB SIMULATOR -->
+        <div id="simulator" class="tab-content">
+            <div class="simulator-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+
+                <div id="quiz-container">
+                    <div class="question-card">
+                        <div class="question-number" id="question-number">Question 1 of 8</div>
+                        <div class="question-text" id="question-text">When an important project is delayed, your first instinct is to:</div>
+                        <div class="options" id="options"></div>
+                    </div>
+
+                    <div class="nav-buttons">
+                        <button class="btn btn-secondary" id="prev-btn" disabled>← Back</button>
+                        <button class="btn btn-primary" id="next-btn" disabled>Next →</button>
+                    </div>
+                </div>
+
+                <div id="results-container" class="results-container hidden">
+                    <h2 class="results-title">Your PAEI Profile</h2>
+                    <p class="results-subtitle">Based on your answers</p>
+
+                    <div class="profile-chart">
+                        <div class="chart-bar">
+                            <span class="chart-label">Producer</span>
+                            <div class="chart-track">
+                                <div class="chart-fill p" id="bar-p" style="width: 0%"><span id="score-p">0%</span></div>
+                            </div>
+                        </div>
+                        <div class="chart-bar">
+                            <span class="chart-label">Administrator</span>
+                            <div class="chart-track">
+                                <div class="chart-fill a" id="bar-a" style="width: 0%"><span id="score-a">0%</span></div>
+                            </div>
+                        </div>
+                        <div class="chart-bar">
+                            <span class="chart-label">Entrepreneur</span>
+                            <div class="chart-track">
+                                <div class="chart-fill e" id="bar-e" style="width: 0%"><span id="score-e">0%</span></div>
+                            </div>
+                        </div>
+                        <div class="chart-bar">
+                            <span class="chart-label">Integrator</span>
+                            <div class="chart-track">
+                                <div class="chart-fill i" id="bar-i" style="width: 0%"><span id="score-i">0%</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-code" id="profile-code">----</div>
+
+                    <div class="profile-description">
+                        <h3 id="profile-title">Your Profile</h3>
+                        <p id="profile-text">Your profile description will appear here.</p>
+                    </div>
+
+                    <button class="btn btn-primary restart-btn" id="restart-btn">Restart Quiz</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === TAB NAVIGATION ===
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // === INTERACTIVE MODEL ===
+        const roleData = {
+            producer: {
+                letter: 'P',
+                name: 'Producer',
+                focus: 'Short-Term Effectiveness',
+                color: 'var(--producer)',
+                description: 'The Producer focuses on immediate and tangible results. They are the executor who brings energy, output, and execution to the organization. They answer the fundamental question: "WHAT needs to be done?"',
+                details: 'P-dominant managers are action-oriented, pragmatic, and focused on achieving goals. They are the driving force that transforms plans into reality.',
+                traits: ['Results-oriented', 'Pragmatic', 'Energetic', 'Executor', 'Focused']
+            },
+            administrator: {
+                letter: 'A',
+                name: 'Administrator',
+                focus: 'Short-Term Efficiency',
+                color: 'var(--administrator)',
+                description: 'The Administrator brings structure and order. They design processes, optimize systems, and manage policies for consistency and predictability.',
+                details: 'A-dominant managers excel in organization, planning, and control. They create the framework needed for things to run smoothly and efficiently.',
+                traits: ['Methodical', 'Organized', 'Analytical', 'Systematic', 'Precise']
+            },
+            entrepreneur: {
+                letter: 'E',
+                name: 'Entrepreneur',
+                focus: 'Long-Term Effectiveness',
+                color: 'var(--entrepreneur)',
+                description: 'The Entrepreneur seeks and recognizes new opportunities. They initiate change, adapt the organization, and create visions for the future.',
+                details: 'E-dominant managers are visionaries, creative, and innovation-oriented. They see possibilities where others see obstacles.',
+                traits: ['Visionary', 'Creative', 'Risk-taker', 'Innovator', 'Proactive']
+            },
+            integrator: {
+                letter: 'I',
+                name: 'Integrator',
+                focus: 'Long-Term Efficiency',
+                color: 'var(--integrator)',
+                description: 'The Integrator coordinates and creates cohesion. They build relationships, facilitate collaboration, and keep the organization united functionally and socially.',
+                details: 'I-dominant managers are empathetic, diplomatic, and people-oriented. They transform groups of individuals into high-performing teams.',
+                traits: ['Empathetic', 'Diplomatic', 'Collaborative', 'Communicative', 'Harmonizer']
+            }
+        };
+
+        const quadrants = document.querySelectorAll('.quadrant');
+
+        function updateInfoPanel(role) {
+            const data = roleData[role];
+            document.getElementById('info-icon').textContent = data.letter;
+            document.getElementById('info-icon').style.background = data.color;
+            document.getElementById('info-name').textContent = data.name;
+            document.getElementById('info-focus').textContent = data.focus;
+            document.getElementById('info-description').textContent = data.description;
+            document.getElementById('info-details').textContent = data.details;
+
+            const traitsContainer = document.getElementById('info-traits');
+            traitsContainer.innerHTML = data.traits.map(t => `<span class="trait-tag">${t}</span>`).join('');
+        }
+
+        quadrants.forEach(q => {
+            q.addEventListener('click', () => {
+                quadrants.forEach(quad => quad.classList.remove('active'));
+                q.classList.add('active');
+                updateInfoPanel(q.dataset.role);
+            });
+
+            q.addEventListener('mouseenter', () => {
+                updateInfoPanel(q.dataset.role);
+            });
+        });
+
+        // === SIMULATOR ===
+        const questions = [
+            {
+                text: "When an important project is delayed, your first instinct is to:",
+                options: [
+                    { text: "Get to work immediately to make up for lost time", type: 'P' },
+                    { text: "Analyze processes to identify where things went wrong", type: 'A' },
+                    { text: "Look for a completely new approach to accelerate things", type: 'E' },
+                    { text: "Gather the team to discuss and find solutions together", type: 'I' }
+                ]
+            },
+            {
+                text: "What motivates you most at work?",
+                options: [
+                    { text: "Seeing concrete and measurable results", type: 'P' },
+                    { text: "Having clear and well-defined processes", type: 'A' },
+                    { text: "Exploring new ideas and innovating", type: 'E' },
+                    { text: "Building relationships and helping the team grow", type: 'I' }
+                ]
+            },
+            {
+                text: "How do you approach an important decision?",
+                options: [
+                    { text: "I think about what concrete actions I can take now", type: 'P' },
+                    { text: "I analyze data and follow established procedures", type: 'A' },
+                    { text: "I evaluate long-term risks and opportunities", type: 'E' },
+                    { text: "I consult the team and seek consensus", type: 'I' }
+                ]
+            },
+            {
+                text: "What frustrates you most at work?",
+                options: [
+                    { text: "Lack of progress and tangible results", type: 'P' },
+                    { text: "Chaos and lack of organization", type: 'A' },
+                    { text: "Stagnation and resistance to change", type: 'E' },
+                    { text: "Conflicts and lack of collaboration", type: 'I' }
+                ]
+            },
+            {
+                text: "In a team meeting, your natural role is to:",
+                options: [
+                    { text: "Set concrete actions and deadlines", type: 'P' },
+                    { text: "Take notes and follow the agenda", type: 'A' },
+                    { text: "Propose new ideas and alternatives", type: 'E' },
+                    { text: "Facilitate discussion and mediate differences", type: 'I' }
+                ]
+            },
+            {
+                text: "How would you describe your leadership style?",
+                options: [
+                    { text: "I lead by example and sustained effort", type: 'P' },
+                    { text: "I set clear rules and precise expectations", type: 'A' },
+                    { text: "I inspire through vision and enthusiasm", type: 'E' },
+                    { text: "I develop people and build trust", type: 'I' }
+                ]
+            },
+            {
+                text: "What type of challenges do you enjoy solving?",
+                options: [
+                    { text: "Practical problems requiring quick action", type: 'P' },
+                    { text: "Complex problems requiring detailed analysis", type: 'A' },
+                    { text: "New problems requiring creative thinking", type: 'E' },
+                    { text: "Interpersonal problems requiring diplomacy", type: 'I' }
+                ]
+            },
+            {
+                text: "How do you define success in your career?",
+                options: [
+                    { text: "Concrete achievements and goals reached", type: 'P' },
+                    { text: "Efficient systems created and processes improved", type: 'A' },
+                    { text: "Innovations brought and opportunities created", type: 'E' },
+                    { text: "Strong teams built and people developed", type: 'I' }
+                ]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let answers = [];
+        let scores = { P: 0, A: 0, E: 0, I: 0 };
+
+        const questionText = document.getElementById('question-text');
+        const questionNumber = document.getElementById('question-number');
+        const optionsContainer = document.getElementById('options');
+        const progressFill = document.getElementById('progress-fill');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            questionNumber.textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            questionText.textContent = q.text;
+            progressFill.style.width = `${((currentQuestion) / questions.length) * 100}%`;
+
+            const shuffledOptions = shuffleArray(q.options);
+            const letters = ['A', 'B', 'C', 'D'];
+
+            optionsContainer.innerHTML = shuffledOptions.map((opt, i) => `
+                <div class="option ${answers[currentQuestion] === opt.type ? 'selected' : ''}" data-type="${opt.type}">
+                    <span class="option-letter">${letters[i]}</span>
+                    <span>${opt.text}</span>
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.addEventListener('click', () => selectOption(opt.dataset.type));
+            });
+
+            prevBtn.disabled = currentQuestion === 0;
+            nextBtn.disabled = !answers[currentQuestion];
+            nextBtn.textContent = currentQuestion === questions.length - 1 ? 'See Results' : 'Next →';
+        }
+
+        function selectOption(type) {
+            answers[currentQuestion] = type;
+            document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+            document.querySelector(`[data-type="${type}"]`).classList.add('selected');
+            nextBtn.disabled = false;
+        }
+
+        function calculateResults() {
+            scores = { P: 0, A: 0, E: 0, I: 0 };
+            answers.forEach(a => scores[a]++);
+
+            const total = questions.length;
+            const percentages = {
+                P: Math.round((scores.P / total) * 100),
+                A: Math.round((scores.A / total) * 100),
+                E: Math.round((scores.E / total) * 100),
+                I: Math.round((scores.I / total) * 100)
+            };
+
+            return percentages;
+        }
+
+        function getProfileCode(percentages) {
+            const sorted = Object.entries(percentages).sort((a, b) => b[1] - a[1]);
+            return sorted.map(([role, pct]) => {
+                if (pct >= 25) return role;
+                if (pct >= 12) return role.toLowerCase();
+                return '-';
+            }).join('');
+        }
+
+        function getProfileDescription(percentages) {
+            const sorted = Object.entries(percentages).sort((a, b) => b[1] - a[1]);
+            const dominant = sorted[0][0];
+            const secondary = sorted[1][0];
+
+            const descriptions = {
+                'P': 'You are strongly oriented toward results and action.',
+                'A': 'You excel at organization and systematization.',
+                'E': 'You have a strong inclination toward innovation and vision.',
+                'I': 'You build connections and maintain harmony in teams.'
+            };
+
+            const combinations = {
+                'PA': 'You combine execution with organization - you are an efficient manager who delivers results systematically.',
+                'PE': 'You are an active entrepreneur - you see opportunities and quickly turn them into reality.',
+                'PI': 'You are a practical leader who achieves results through collaboration and team motivation.',
+                'AP': 'You create systems that produce results - your efficiency comes from structure and discipline.',
+                'AE': 'You plan innovation - you can turn creative ideas into scalable processes.',
+                'AI': 'You build harmonious organizations with clear processes and strong culture.',
+                'EP': 'Visionary with execution - you don\'t just dream, you deliver.',
+                'EA': 'Methodical innovator - your big ideas have concrete implementation plans.',
+                'EI': 'Visionary leader who inspires and unites people around a common mission.',
+                'IP': 'Executive coach - you develop high-performing people.',
+                'IA': 'You create harmonious and functional organizational structures.',
+                'IE': 'You inspire change through connections - you transform organizations through relationships and vision.'
+            };
+
+            const combo = dominant + secondary;
+            return combinations[combo] || `${descriptions[dominant]} ${descriptions[secondary]}`;
+        }
+
+        function showResults() {
+            const percentages = calculateResults();
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            progressFill.style.width = '100%';
+
+            setTimeout(() => {
+                document.getElementById('bar-p').style.width = `${percentages.P}%`;
+                document.getElementById('bar-a').style.width = `${percentages.A}%`;
+                document.getElementById('bar-e').style.width = `${percentages.E}%`;
+                document.getElementById('bar-i').style.width = `${percentages.I}%`;
+
+                document.getElementById('score-p').textContent = `${percentages.P}%`;
+                document.getElementById('score-a').textContent = `${percentages.A}%`;
+                document.getElementById('score-e').textContent = `${percentages.E}%`;
+                document.getElementById('score-i').textContent = `${percentages.I}%`;
+            }, 100);
+
+            const profileCode = getProfileCode(percentages);
+            document.getElementById('profile-code').textContent = profileCode;
+
+            const sorted = Object.entries(percentages).sort((a, b) => b[1] - a[1]);
+            document.getElementById('profile-title').textContent = `Dominant Profile: ${roleData[sorted[0][0].toLowerCase() === 'p' ? 'producer' : sorted[0][0].toLowerCase() === 'a' ? 'administrator' : sorted[0][0].toLowerCase() === 'e' ? 'entrepreneur' : 'integrator'].name}`;
+            document.getElementById('profile-text').textContent = getProfileDescription(percentages);
+        }
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            currentQuestion = 0;
+            answers = [];
+            scores = { P: 0, A: 0, E: 0, I: 0 };
+            quizContainer.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+            renderQuestion();
+        });
+
+        // Initialize
+        renderQuestion();
+
+        // === PLAYGROUND SIMULATOR ===
+        const sliders = {
+            P: document.getElementById('slider-P'),
+            A: document.getElementById('slider-A'),
+            E: document.getElementById('slider-E'),
+            I: document.getElementById('slider-I')
+        };
+
+        const presets = {
+            founder: { P: 75, A: 35, E: 85, I: 45 },
+            manager: { P: 40, A: 80, E: 35, I: 70 },
+            bureaucrat: { P: 15, A: 95, E: 10, I: 20 },
+            arsonist: { P: 20, A: 15, E: 95, I: 15 },
+            deadwood: { P: 10, A: 10, E: 10, I: 10 },
+            balanced: { P: 50, A: 50, E: 50, I: 50 }
+        };
+
+        const profileAnalysis = {
+            getStrengths: (vals) => {
+                const dominant = Object.entries(vals).sort((a, b) => b[1] - a[1])[0];
+                const strengths = {
+                    P: 'You excel at getting results. You are action-oriented and deliver consistently.',
+                    A: 'You have a talent for creating order and systems. Your processes are efficient and scalable.',
+                    E: 'Your vision is your strength. You see opportunities where others see obstacles.',
+                    I: 'You build strong teams. People follow you and collaborate well under your leadership.'
+                };
+                if (dominant[1] < 30) return 'Your profile has no clear dominant dimensions. This may indicate adaptability or a need for development.';
+                return strengths[dominant[0]];
+            },
+            getWeaknesses: (vals) => {
+                const weakest = Object.entries(vals).sort((a, b) => a[1] - b[1])[0];
+                const weaknesses = {
+                    P: 'You risk being too focused on vision without execution. Concrete results may suffer.',
+                    A: 'Lack of structure can lead to chaos. You need clearer systems.',
+                    E: 'You may miss growth opportunities. Strategic thinking needs development.',
+                    I: 'Team relationships may suffer. Focus more on people and collaboration.'
+                };
+                if (weakest[1] > 40) return 'You have no major obvious weaknesses. Maintain balance and continue developing.';
+                return weaknesses[weakest[0]];
+            },
+            getTeamFit: (vals) => {
+                const sorted = Object.entries(vals).sort((a, b) => b[1] - a[1]);
+                const top = sorted[0][0];
+                const second = sorted[1][0];
+
+                const fits = {
+                    'PE': 'You are an ideal starter - you initiate projects and take them to first results. You need A and I in the team for sustainability.',
+                    'PA': 'You combine execution with organization. You complement E (visionaries) and I (facilitators) well.',
+                    'PI': 'Natural team leader who gets results through people. Look for an A and E for balance.',
+                    'EP': 'Active entrepreneur - you see and execute. You need A for systems and I for stability.',
+                    'EA': 'Strategic planner - you can scale ideas. Complement with P (execution) and I (cohesion).',
+                    'EI': 'Transformational leader - you inspire change. You need P and A for implementation.',
+                    'AP': 'Solid operational manager. Look for E for innovation and I for relationships.',
+                    'AE': 'Systems architect - you build infrastructure for growth. You need P and I.',
+                    'AI': 'You build stable organizations. Complement with P (results) and E (vision).',
+                    'IP': 'Executive coach - you develop high performers. You need A and E for direction.',
+                    'IE': 'Cultural catalyst - you transform through relationships. Look for P and A for execution.',
+                    'IA': 'Strategic HR - you create structures for people. You need P and E for dynamism.'
+                };
+
+                return fits[top + second] || 'Your profile is unique. Analyze what complementary roles you need on the team.';
+            },
+            getProfileName: (vals) => {
+                const sorted = Object.entries(vals).sort((a, b) => b[1] - a[1]);
+                const dominant = sorted[0];
+                const second = sorted[1];
+
+                if (dominant[1] < 25) return 'Undefined Profile';
+                if (dominant[1] > 80 && second[1] < 30) {
+                    const names = { P: 'Lone Wolf', A: 'Bureaucrat', E: 'Arsonist', I: 'Super-Follower' };
+                    return names[dominant[0]] + ' (unbalanced)';
+                }
+
+                const combos = {
+                    'PE': 'Founder / Active Entrepreneur',
+                    'PA': 'Production Manager',
+                    'PI': 'Team Leader',
+                    'EP': 'Executing Visionary',
+                    'EA': 'Systematic Strategist',
+                    'EI': 'Transformational Leader',
+                    'AP': 'Operational Manager',
+                    'AE': 'Organizational Architect',
+                    'AI': 'Personnel Administrator',
+                    'IP': 'Performance Coach',
+                    'IE': 'Change Catalyst',
+                    'IA': 'HR Manager'
+                };
+
+                return combos[dominant[0] + second[0]] || 'Mixed Profile';
+            }
+        };
+
+        function updatePlayground() {
+            const vals = {
+                P: parseInt(sliders.P.value),
+                A: parseInt(sliders.A.value),
+                E: parseInt(sliders.E.value),
+                I: parseInt(sliders.I.value)
+            };
+
+            // Update value displays
+            Object.keys(vals).forEach(key => {
+                document.getElementById(`val-${key}`).textContent = vals[key];
+            });
+
+            // Update radar chart
+            const center = 200;
+            const maxRadius = 150;
+
+            const points = {
+                P: { x: center, y: center - (vals.P / 100) * maxRadius },
+                A: { x: center + (vals.A / 100) * maxRadius, y: center },
+                E: { x: center, y: center + (vals.E / 100) * maxRadius },
+                I: { x: center - (vals.I / 100) * maxRadius, y: center }
+            };
+
+            document.getElementById('radar-polygon').setAttribute('points',
+                `${points.P.x},${points.P.y} ${points.A.x},${points.A.y} ${points.E.x},${points.E.y} ${points.I.x},${points.I.y}`
+            );
+
+            Object.keys(points).forEach(key => {
+                const point = document.getElementById(`point-${key}`);
+                point.setAttribute('cx', points[key].x);
+                point.setAttribute('cy', points[key].y);
+            });
+
+            // Update code display
+            Object.keys(vals).forEach(key => {
+                const codeEl = document.getElementById(`code-${key}`);
+                codeEl.classList.remove('dim', 'absent');
+                if (vals[key] < 25) {
+                    codeEl.classList.add('absent');
+                } else if (vals[key] < 50) {
+                    codeEl.classList.add('dim');
+                }
+            });
+
+            // Update analysis
+            document.getElementById('profile-name').textContent = profileAnalysis.getProfileName(vals);
+            document.getElementById('strengths').textContent = profileAnalysis.getStrengths(vals);
+            document.getElementById('weaknesses').textContent = profileAnalysis.getWeaknesses(vals);
+            document.getElementById('team-fit').textContent = profileAnalysis.getTeamFit(vals);
+        }
+
+        // Attach slider listeners
+        Object.values(sliders).forEach(slider => {
+            slider.addEventListener('input', updatePlayground);
+        });
+
+        // Preset buttons
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const preset = presets[btn.dataset.preset];
+                Object.keys(preset).forEach(key => {
+                    sliders[key].value = preset[key];
+                });
+                updatePlayground();
+            });
+        });
+
+        // Initialize playground
+        updatePlayground();
+    </script>
+</body>
+</html>

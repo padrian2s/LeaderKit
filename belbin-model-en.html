@@ -1,0 +1,1770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Belbin Team Roles | Interactive Learning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --action: #EF4444;
+            --people: #10B981;
+            --thinking: #3B82F6;
+            --shaper: #DC2626;
+            --implementer: #F97316;
+            --completer: #FBBF24;
+            --coordinator: #10B981;
+            --teamworker: #14B8A6;
+            --investigator: #06B6D4;
+            --plant: #8B5CF6;
+            --monitor: #6366F1;
+            --specialist: #3B82F6;
+            --bg-dark: #1a1a2e;
+            --bg-card: #16213e;
+            --text-light: #edf2f7;
+            --text-muted: #a0aec0;
+            --accent-glow: rgba(59, 130, 246, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 2rem 2rem;
+            position: relative;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--text-light) 0%, var(--thinking) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 2rem auto;
+            padding: 0.5rem;
+            background: var(--bg-card);
+            border-radius: 50px;
+            max-width: 500px;
+        }
+
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-light);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--action), var(--thinking));
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === MODEL === */
+        .roles-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .roles-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .roles-header p {
+            color: var(--text-muted);
+        }
+
+        .category-section {
+            margin-bottom: 2rem;
+        }
+
+        .category-label {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .category-label.action { background: rgba(239, 68, 68, 0.15); color: var(--action); }
+        .category-label.people { background: rgba(16, 185, 129, 0.15); color: var(--people); }
+        .category-label.thinking { background: rgba(59, 130, 246, 0.15); color: var(--thinking); }
+
+        .category-icon {
+            font-size: 1.2rem;
+        }
+
+        .roles-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 900px) {
+            .roles-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .role-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .role-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .role-card.active {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .role-card[data-role="shaper"] { border-color: var(--shaper); }
+        .role-card[data-role="implementer"] { border-color: var(--implementer); }
+        .role-card[data-role="completer"] { border-color: var(--completer); }
+        .role-card[data-role="coordinator"] { border-color: var(--coordinator); }
+        .role-card[data-role="teamworker"] { border-color: var(--teamworker); }
+        .role-card[data-role="investigator"] { border-color: var(--investigator); }
+        .role-card[data-role="plant"] { border-color: var(--plant); }
+        .role-card[data-role="monitor"] { border-color: var(--monitor); }
+        .role-card[data-role="specialist"] { border-color: var(--specialist); }
+
+        .role-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .role-abbr {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: white;
+        }
+
+        .role-card[data-role="shaper"] .role-abbr { background: var(--shaper); }
+        .role-card[data-role="implementer"] .role-abbr { background: var(--implementer); }
+        .role-card[data-role="completer"] .role-abbr { background: var(--completer); }
+        .role-card[data-role="coordinator"] .role-abbr { background: var(--coordinator); }
+        .role-card[data-role="teamworker"] .role-abbr { background: var(--teamworker); }
+        .role-card[data-role="investigator"] .role-abbr { background: var(--investigator); }
+        .role-card[data-role="plant"] .role-abbr { background: var(--plant); }
+        .role-card[data-role="monitor"] .role-abbr { background: var(--monitor); }
+        .role-card[data-role="specialist"] .role-abbr { background: var(--specialist); }
+
+        .role-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+        }
+
+        .role-brief {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .info-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .info-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .info-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.3rem;
+            color: white;
+        }
+
+        .info-title h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-title span {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-box {
+            padding: 1rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+        }
+
+        .info-box h4 {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+
+        .info-box p, .info-box ul {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-box li {
+            padding: 0.25rem 0;
+            padding-left: 1rem;
+            position: relative;
+        }
+
+        .info-box li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--thinking);
+        }
+
+        /* === THEORY === */
+        .theory-intro {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .theory-intro h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .theory-intro p {
+            color: var(--text-muted);
+            line-height: 1.8;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .theory-categories {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .theory-categories {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .theory-category {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border-top: 4px solid;
+        }
+
+        .theory-category.action { border-color: var(--action); }
+        .theory-category.people { border-color: var(--people); }
+        .theory-category.thinking { border-color: var(--thinking); }
+
+        .theory-category h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .theory-category.action h3 { color: var(--action); }
+        .theory-category.people h3 { color: var(--people); }
+        .theory-category.thinking h3 { color: var(--thinking); }
+
+        .theory-category p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .theory-role-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .theory-role-list li {
+            padding: 0.5rem;
+            margin: 0.25rem 0;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.03);
+            font-size: 0.9rem;
+        }
+
+        /* === PLAYGROUND === */
+        .playground-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .playground-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .playground-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .playground-header p {
+            color: var(--text-muted);
+        }
+
+        .playground-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .playground-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sliders-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .slider-category {
+            margin-bottom: 1.5rem;
+        }
+
+        .slider-category-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .slider-category-label.action { background: rgba(239, 68, 68, 0.2); color: var(--action); }
+        .slider-category-label.people { background: rgba(16, 185, 129, 0.2); color: var(--people); }
+        .slider-category-label.thinking { background: rgba(59, 130, 246, 0.2); color: var(--thinking); }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+            padding: 0.5rem;
+            background: rgba(255,255,255,0.02);
+            border-radius: 8px;
+        }
+
+        .slider-abbr {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        .slider-content {
+            flex: 1;
+        }
+
+        .slider-label {
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .belbin-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.1);
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        .belbin-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .belbin-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .slider-value {
+            width: 35px;
+            text-align: right;
+            font-weight: 600;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+        }
+
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .preset-label {
+            width: 100%;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .preset-btn {
+            padding: 0.4rem 0.7rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: var(--text-light);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Source Sans 3', sans-serif;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .visualization-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .radar-container {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .radar-svg {
+            width: 100%;
+            max-width: 400px;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .radar-polygon {
+            fill: rgba(59, 130, 246, 0.2);
+            stroke: var(--thinking);
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+
+        .radar-grid {
+            fill: none;
+            stroke: rgba(255,255,255,0.1);
+            stroke-width: 1;
+        }
+
+        .radar-label {
+            fill: var(--text-muted);
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .profile-display {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .profile-display h4 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .top-roles {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .top-role-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+        }
+
+        .top-role-rank {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .top-role-rank.first { background: linear-gradient(135deg, #FFD700, #FFA500); color: #1a1a2e; }
+        .top-role-rank.second { background: linear-gradient(135deg, #C0C0C0, #A0A0A0); color: #1a1a2e; }
+        .top-role-rank.third { background: linear-gradient(135deg, #CD7F32, #A0522D); color: white; }
+
+        .top-role-info {
+            flex: 1;
+        }
+
+        .top-role-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .top-role-category {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .top-role-score {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .analysis-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .analysis-section {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .analysis-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .analysis-section h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+
+        .analysis-section p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* === QUIZ === */
+        .simulator-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-card);
+            border-radius: 3px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--action), var(--thinking));
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        .question-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .question-number {
+            color: var(--thinking);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            line-height: 1.5;
+            margin-bottom: 2rem;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .option {
+            padding: 1rem 1.25rem;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+
+        .option:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .option.selected {
+            border-color: var(--thinking);
+            background: rgba(59, 130, 246, 0.15);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-light);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--action), var(--thinking));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--accent-glow);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results-container {
+            text-align: center;
+        }
+
+        .results-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .results-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        @media (max-width: 600px) {
+            .results-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .result-role {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.25rem;
+            border-top: 3px solid;
+        }
+
+        .result-role-abbr {
+            font-weight: 700;
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .result-role-name {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .result-role-score {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .profile-description {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .profile-description h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .profile-description p {
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .restart-btn {
+            margin-top: 2rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="noise-overlay"></div>
+
+    <header>
+        <h1>Belbin Roles</h1>
+        <p class="subtitle">9 Roles for High-Performing Teams</p>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="model">The 9 Roles</button>
+        <button class="tab-btn" data-tab="theory">Theory</button>
+        <button class="tab-btn" data-tab="playground">Playground</button>
+        <button class="tab-btn" data-tab="simulator">Quiz</button>
+    </div>
+
+    <div class="container">
+        <!-- TAB MODEL -->
+        <div id="model" class="tab-content active">
+            <div class="roles-header">
+                <h2>The 9 Team Roles</h2>
+                <p>Click on a role for details</p>
+            </div>
+
+            <div class="category-section">
+                <div class="category-label action">
+                    <span class="category-icon">⚡</span>
+                    Action-Oriented
+                </div>
+                <div class="roles-grid">
+                    <div class="role-card" data-role="shaper">
+                        <div class="role-header">
+                            <div class="role-abbr">SH</div>
+                            <div class="role-title">Shaper</div>
+                        </div>
+                        <div class="role-brief">Dynamic, challenging, thrives under pressure</div>
+                    </div>
+                    <div class="role-card" data-role="implementer">
+                        <div class="role-header">
+                            <div class="role-abbr">IMP</div>
+                            <div class="role-title">Implementer</div>
+                        </div>
+                        <div class="role-brief">Practical, reliable, efficient</div>
+                    </div>
+                    <div class="role-card" data-role="completer">
+                        <div class="role-header">
+                            <div class="role-abbr">CF</div>
+                            <div class="role-title">Completer Finisher</div>
+                        </div>
+                        <div class="role-brief">Conscientious, perfectionist, detail-oriented</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category-section">
+                <div class="category-label people">
+                    <span class="category-icon">👥</span>
+                    People-Oriented
+                </div>
+                <div class="roles-grid">
+                    <div class="role-card" data-role="coordinator">
+                        <div class="role-header">
+                            <div class="role-abbr">CO</div>
+                            <div class="role-title">Coordinator</div>
+                        </div>
+                        <div class="role-brief">Mature, confident, identifies talent</div>
+                    </div>
+                    <div class="role-card" data-role="teamworker">
+                        <div class="role-header">
+                            <div class="role-abbr">TW</div>
+                            <div class="role-title">Teamworker</div>
+                        </div>
+                        <div class="role-brief">Cooperative, diplomatic, avoids friction</div>
+                    </div>
+                    <div class="role-card" data-role="investigator">
+                        <div class="role-header">
+                            <div class="role-abbr">RI</div>
+                            <div class="role-title">Resource Investigator</div>
+                        </div>
+                        <div class="role-brief">Enthusiastic, communicative, explores opportunities</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="category-section">
+                <div class="category-label thinking">
+                    <span class="category-icon">💡</span>
+                    Thinking-Oriented
+                </div>
+                <div class="roles-grid">
+                    <div class="role-card" data-role="plant">
+                        <div class="role-header">
+                            <div class="role-abbr">PL</div>
+                            <div class="role-title">Plant</div>
+                        </div>
+                        <div class="role-brief">Creative, unconventional, solves difficult problems</div>
+                    </div>
+                    <div class="role-card" data-role="monitor">
+                        <div class="role-header">
+                            <div class="role-abbr">ME</div>
+                            <div class="role-title">Monitor Evaluator</div>
+                        </div>
+                        <div class="role-brief">Sober, strategic, objective discernment</div>
+                    </div>
+                    <div class="role-card" data-role="specialist">
+                        <div class="role-header">
+                            <div class="role-abbr">SP</div>
+                            <div class="role-title">Specialist</div>
+                        </div>
+                        <div class="role-brief">Dedicated, self-starting, deep knowledge</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-panel" id="info-panel">
+                <div class="info-header">
+                    <div class="info-icon" id="info-icon" style="background: var(--shaper);">SH</div>
+                    <div class="info-title">
+                        <h2 id="info-name">Shaper</h2>
+                        <span id="info-category">Action-Oriented</span>
+                    </div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-box">
+                        <h4>Contribution</h4>
+                        <p id="info-contribution">Challenging, dynamic, thrives under pressure. Has the courage to overcome obstacles.</p>
+                    </div>
+                    <div class="info-box">
+                        <h4>Allowable Weaknesses</h4>
+                        <p id="info-weaknesses">Can be provocative and may hurt people's feelings.</p>
+                    </div>
+                    <div class="info-box">
+                        <h4>Strengths</h4>
+                        <ul id="info-strengths">
+                            <li>Drives and sets direction</li>
+                            <li>Thrives under pressure</li>
+                            <li>Courage and determination</li>
+                        </ul>
+                    </div>
+                    <div class="info-box">
+                        <h4>Don't Expect Them To...</h4>
+                        <p id="info-dontexpect">Always be diplomatic or sensitive to feelings.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB THEORY -->
+        <div id="theory" class="tab-content">
+            <div class="theory-intro">
+                <h2>Belbin Team Role Theory</h2>
+                <p>Dr. Meredith Belbin discovered that high-performing teams need a balanced combination of different behaviors. He identified 9 distinct roles that people adopt in teams, grouped into 3 categories.</p>
+            </div>
+
+            <div class="theory-categories">
+                <div class="theory-category action">
+                    <h3>Action-Oriented</h3>
+                    <p>These roles transform ideas into concrete actions and ensure task completion.</p>
+                    <ul class="theory-role-list">
+                        <li><strong>Shaper (SH)</strong> - Sets the pace and direction</li>
+                        <li><strong>Implementer (IMP)</strong> - Transforms ideas into practical actions</li>
+                        <li><strong>Completer Finisher (CF)</strong> - Ensures quality and completion</li>
+                    </ul>
+                </div>
+
+                <div class="theory-category people">
+                    <h3>People-Oriented</h3>
+                    <p>These roles facilitate collaboration, communication, and harmony within the team.</p>
+                    <ul class="theory-role-list">
+                        <li><strong>Coordinator (CO)</strong> - Clarifies objectives and delegates</li>
+                        <li><strong>Teamworker (TW)</strong> - Maintains harmony and cooperation</li>
+                        <li><strong>Resource Investigator (RI)</strong> - Explores and brings external resources</li>
+                    </ul>
+                </div>
+
+                <div class="theory-category thinking">
+                    <h3>Thinking-Oriented</h3>
+                    <p>These roles bring new ideas, objective evaluation, and technical expertise.</p>
+                    <ul class="theory-role-list">
+                        <li><strong>Plant (PL)</strong> - Generates creative and unconventional ideas</li>
+                        <li><strong>Monitor Evaluator (ME)</strong> - Objectively analyzes options</li>
+                        <li><strong>Specialist (SP)</strong> - Brings deep technical knowledge</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="theory-intro">
+                <h2>Team Balance</h2>
+                <p>There is no "good" or "bad" role. A high-performing team needs all roles covered. People typically have 2-3 preferred roles and may also have avoided roles. Understanding these roles helps form complementary teams and reduce conflicts.</p>
+            </div>
+        </div>
+
+        <!-- TAB PLAYGROUND -->
+        <div id="playground" class="tab-content">
+            <div class="playground-container">
+                <div class="playground-header">
+                    <h2>Belbin Profile Simulator</h2>
+                    <p>Adjust each role's level and observe the team profile</p>
+                </div>
+
+                <div class="playground-grid">
+                    <div class="sliders-panel">
+                        <div class="slider-category">
+                            <div class="slider-category-label action">Action</div>
+                            <div class="slider-group">
+                                <div class="slider-abbr" style="background: var(--shaper);">SH</div>
+                                <div class="slider-content">
+                                    <div class="slider-label">Shaper</div>
+                                    <input type="range" min="0" max="100" value="50" class="belbin-slider" id="slider-SH" style="background: linear-gradient(90deg, rgba(220,38,38,0.3), var(--shaper));">
+                                </div>
+                                <div class="slider-value" id="val-SH">50</div>
+                            </div>
+                            <div class="slider-group">
+                                <div class="slider-abbr" style="background: var(--implementer);">IMP</div>
+                                <div class="slider-content">
+                                    <div class="slider-label">Implementer</div>
+                                    <input type="range" min="0" max="100" value="50" class="belbin-slider" id="slider-IMP" style="background: linear-gradient(90deg, rgba(249,115,22,0.3), var(--implementer));">
+                                </div>
+                                <div class="slider-value" id="val-IMP">50</div>
+                            </div>
+                            <div class="slider-group">
+                                <div class="slider-abbr" style="background: var(--completer);">CF</div>
+                                <div class="slider-content">
+                                    <div class="slider-label">Completer Finisher</div>
+                                    <input type="range" min="0" max="100" value="50" class="belbin-slider" id="slider-CF" style="background: linear-gradient(90deg, rgba(251,191,36,0.3), var(--completer));">
+                                </div>
+                                <div class="slider-value" id="val-CF">50</div>
+                            </div>
+                        </div>
+
+                        <div class="slider-category">
+                            <div class="slider-category-label people">People</div>
+                            <div class="slider-group">
+                                <div class="slider-abbr" style="background: var(--coordinator);">CO</div>
+                                <div class="slider-content">
+                                    <div class="slider-label">Coordinator</div>
+                                    <input type="range" min="0" max="100" value="50" class="belbin-slider" id="slider-CO" style="background: linear-gradient(90deg, rgba(16,185,129,0.3), var(--coordinator));">
+                                </div>
+                                <div class="slider-value" id="val-CO">50</div>
+                            </div>
+                            <div class="slider-group">
+                                <div class="slider-abbr" style="background: var(--teamworker);">TW</div>
+                                <div class="slider-content">
+                                    <div class="slider-label">Teamworker</div>
+                                    <input type="range" min="0" max="100" value="50" class="belbin-slider" id="slider-TW" style="background: linear-gradient(90deg, rgba(20,184,166,0.3), var(--teamworker));">
+                                </div>
+                                <div class="slider-value" id="val-TW">50</div>
+                            </div>
+                            <div class="slider-group">
+                                <div class="slider-abbr" style="background: var(--investigator);">RI</div>
+                                <div class="slider-content">
+                                    <div class="slider-label">Resource Investigator</div>
+                                    <input type="range" min="0" max="100" value="50" class="belbin-slider" id="slider-RI" style="background: linear-gradient(90deg, rgba(6,182,212,0.3), var(--investigator));">
+                                </div>
+                                <div class="slider-value" id="val-RI">50</div>
+                            </div>
+                        </div>
+
+                        <div class="slider-category">
+                            <div class="slider-category-label thinking">Thinking</div>
+                            <div class="slider-group">
+                                <div class="slider-abbr" style="background: var(--plant);">PL</div>
+                                <div class="slider-content">
+                                    <div class="slider-label">Plant</div>
+                                    <input type="range" min="0" max="100" value="50" class="belbin-slider" id="slider-PL" style="background: linear-gradient(90deg, rgba(139,92,246,0.3), var(--plant));">
+                                </div>
+                                <div class="slider-value" id="val-PL">50</div>
+                            </div>
+                            <div class="slider-group">
+                                <div class="slider-abbr" style="background: var(--monitor);">ME</div>
+                                <div class="slider-content">
+                                    <div class="slider-label">Monitor Evaluator</div>
+                                    <input type="range" min="0" max="100" value="50" class="belbin-slider" id="slider-ME" style="background: linear-gradient(90deg, rgba(99,102,241,0.3), var(--monitor));">
+                                </div>
+                                <div class="slider-value" id="val-ME">50</div>
+                            </div>
+                            <div class="slider-group">
+                                <div class="slider-abbr" style="background: var(--specialist);">SP</div>
+                                <div class="slider-content">
+                                    <div class="slider-label">Specialist</div>
+                                    <input type="range" min="0" max="100" value="50" class="belbin-slider" id="slider-SP" style="background: linear-gradient(90deg, rgba(59,130,246,0.3), var(--specialist));">
+                                </div>
+                                <div class="slider-value" id="val-SP">50</div>
+                            </div>
+                        </div>
+
+                        <div class="preset-buttons">
+                            <span class="preset-label">Preset Profiles:</span>
+                            <button class="preset-btn" data-preset="leader">Natural Leader</button>
+                            <button class="preset-btn" data-preset="creative">Creative</button>
+                            <button class="preset-btn" data-preset="executor">Executor</button>
+                            <button class="preset-btn" data-preset="analyst">Analyst</button>
+                            <button class="preset-btn" data-preset="networker">Networker</button>
+                            <button class="preset-btn" data-preset="balanced">Balanced</button>
+                        </div>
+                    </div>
+
+                    <div class="visualization-panel">
+                        <div class="radar-container">
+                            <svg viewBox="0 0 400 400" class="radar-svg" id="radar-chart">
+                                <!-- Background grid -->
+                                <polygon class="radar-grid" points="200,50 320,95 355,200 320,305 200,350 80,305 45,200 80,95" />
+                                <polygon class="radar-grid" points="200,100 270,130 295,200 270,270 200,300 130,270 105,200 130,130" transform="scale(0.66) translate(100,100)" />
+                                <polygon class="radar-grid" points="200,100 270,130 295,200 270,270 200,300 130,270 105,200 130,130" transform="scale(0.33) translate(300,300)" />
+
+                                <!-- Data polygon -->
+                                <polygon id="radar-polygon" class="radar-polygon" />
+
+                                <!-- Labels -->
+                                <text x="200" y="35" text-anchor="middle" class="radar-label">SH</text>
+                                <text x="335" y="90" text-anchor="start" class="radar-label">IMP</text>
+                                <text x="370" y="205" text-anchor="start" class="radar-label">CF</text>
+                                <text x="335" y="320" text-anchor="start" class="radar-label">CO</text>
+                                <text x="200" y="375" text-anchor="middle" class="radar-label">TW</text>
+                                <text x="65" y="320" text-anchor="end" class="radar-label">RI</text>
+                                <text x="30" y="205" text-anchor="end" class="radar-label">PL</text>
+                                <text x="65" y="90" text-anchor="end" class="radar-label">ME</text>
+                                <text x="200" y="55" text-anchor="middle" class="radar-label" style="display:none;">SP</text>
+                            </svg>
+                        </div>
+
+                        <div class="profile-display">
+                            <h4>Dominant Roles</h4>
+                            <div class="top-roles" id="top-roles">
+                                <div class="top-role-item">
+                                    <div class="top-role-rank first">1</div>
+                                    <div class="top-role-info">
+                                        <div class="top-role-name">Shaper</div>
+                                        <div class="top-role-category">Action</div>
+                                    </div>
+                                    <div class="top-role-score">50</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="analysis-panel">
+                            <div class="analysis-section">
+                                <h4>Work Style</h4>
+                                <p id="work-style">A balanced profile that can contribute to the team in multiple ways.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>In the Team</h4>
+                                <p id="team-contribution">Versatile, you can adapt to different roles depending on team needs.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Recommendations</h4>
+                                <p id="recommendations">Identify 2-3 roles where you excel and focus on them.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB QUIZ -->
+        <div id="simulator" class="tab-content">
+            <div class="simulator-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+
+                <div id="quiz-container">
+                    <div class="question-card">
+                        <div class="question-number" id="question-number">Question 1 of 18</div>
+                        <div class="question-text" id="question-text">In a team project, what is your natural contribution?</div>
+                        <div class="options" id="options"></div>
+                    </div>
+
+                    <div class="nav-buttons">
+                        <button class="btn btn-secondary" id="prev-btn" disabled>Back</button>
+                        <button class="btn btn-primary" id="next-btn" disabled>Next</button>
+                    </div>
+                </div>
+
+                <div id="results-container" class="results-container hidden">
+                    <h2 class="results-title">Your Belbin Roles</h2>
+                    <p class="results-subtitle">Based on your answers</p>
+
+                    <div class="results-grid" id="results-grid"></div>
+
+                    <div class="profile-description">
+                        <h3 id="profile-title">Your Profile</h3>
+                        <p id="profile-text">Your profile description will appear here.</p>
+                    </div>
+
+                    <button class="btn btn-primary restart-btn" id="restart-btn">Retake Quiz</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === DATA ===
+        const roleData = {
+            shaper: {
+                abbr: 'SH', name: 'Shaper', category: 'Action', color: 'var(--shaper)',
+                contribution: 'Challenging, dynamic, thrives under pressure. Has the courage to overcome obstacles.',
+                weaknesses: 'Can be provocative and may hurt people\'s feelings.',
+                strengths: ['Drives and sets direction', 'Thrives under pressure', 'Courage and determination'],
+                dontExpect: 'Always be diplomatic or sensitive to feelings.'
+            },
+            implementer: {
+                abbr: 'IMP', name: 'Implementer', category: 'Action', color: 'var(--implementer)',
+                contribution: 'Disciplined, reliable, conservative and efficient. Transforms ideas into practical actions.',
+                weaknesses: 'Can be inflexible and slow to respond to new possibilities.',
+                strengths: ['Organization and structure', 'Practical and realistic', 'Executes plans'],
+                dontExpect: 'Be very creative or accept rapid changes.'
+            },
+            completer: {
+                abbr: 'CF', name: 'Completer Finisher', category: 'Action', color: 'var(--completer)',
+                contribution: 'Conscientious, anxious, searches for errors. Delivers on time and to high quality.',
+                weaknesses: 'Can be inclined to worry excessively and reluctant to delegate.',
+                strengths: ['Attention to detail', 'Maintains standards', 'Completes tasks'],
+                dontExpect: 'Be relaxed about quality or deadlines.'
+            },
+            coordinator: {
+                abbr: 'CO', name: 'Coordinator', category: 'People', color: 'var(--coordinator)',
+                contribution: 'Mature, confident, clarifies objectives, promotes decision-making, delegates well.',
+                weaknesses: 'Can be seen as manipulative and may delegate personal work.',
+                strengths: ['Clarifies objectives', 'Identifies talents', 'Delegates effectively'],
+                dontExpect: 'Be a direct executor or very creative.'
+            },
+            teamworker: {
+                abbr: 'TW', name: 'Teamworker', category: 'People', color: 'var(--teamworker)',
+                contribution: 'Cooperative, mild, perceptive and diplomatic. Listens and avoids friction.',
+                weaknesses: 'Can be indecisive in crisis situations and avoids confrontations.',
+                strengths: ['Maintains harmony', 'Supportive of colleagues', 'Flexible and adaptable'],
+                dontExpect: 'Take tough positions or lead directly.'
+            },
+            investigator: {
+                abbr: 'RI', name: 'Resource Investigator', category: 'People', color: 'var(--investigator)',
+                contribution: 'Enthusiastic, communicative. Explores opportunities and develops contacts.',
+                weaknesses: 'Can be overly optimistic and may lose interest after initial enthusiasm.',
+                strengths: ['Excellent networking', 'Explores opportunities', 'Contagious enthusiasm'],
+                dontExpect: 'Always focus on details or completion.'
+            },
+            plant: {
+                abbr: 'PL', name: 'Plant', category: 'Thinking', color: 'var(--plant)',
+                contribution: 'Creative, imaginative, unorthodox. Solves difficult problems.',
+                weaknesses: 'Can ignore practical details and be too absorbed in thoughts to communicate.',
+                strengths: ['Original ideas', 'Solves complex problems', 'Unconventional thinking'],
+                dontExpect: 'Be practical or good at implementation.'
+            },
+            monitor: {
+                abbr: 'ME', name: 'Monitor Evaluator', category: 'Thinking', color: 'var(--monitor)',
+                contribution: 'Sober, strategic and discerning. Sees all options and judges accurately.',
+                weaknesses: 'Can be overly critical and lack the ability to inspire others.',
+                strengths: ['Objective evaluation', 'Strategic thinking', 'Sound judgment'],
+                dontExpect: 'Be enthusiastic or emotionally motivating.'
+            },
+            specialist: {
+                abbr: 'SP', name: 'Specialist', category: 'Thinking', color: 'var(--specialist)',
+                contribution: 'Dedicated, self-starting, with rare knowledge and skills. Contributes expertise.',
+                weaknesses: 'Can contribute only on a narrow front and get lost in technicalities.',
+                strengths: ['Deep knowledge', 'Domain expert', 'Professional dedication'],
+                dontExpect: 'Be a generalist or contribute outside their domain.'
+            }
+        };
+
+        const categoryColors = {
+            'Action': 'var(--action)',
+            'People': 'var(--people)',
+            'Thinking': 'var(--thinking)'
+        };
+
+        // === TAB NAVIGATION ===
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // === MODEL ===
+        const roleCards = document.querySelectorAll('.role-card');
+
+        function updateInfoPanel(role) {
+            const data = roleData[role];
+            document.getElementById('info-icon').textContent = data.abbr;
+            document.getElementById('info-icon').style.background = data.color;
+            document.getElementById('info-name').textContent = data.name;
+            document.getElementById('info-category').textContent = data.category;
+            document.getElementById('info-contribution').textContent = data.contribution;
+            document.getElementById('info-weaknesses').textContent = data.weaknesses;
+            document.getElementById('info-strengths').innerHTML = data.strengths.map(s => `<li>${s}</li>`).join('');
+            document.getElementById('info-dontexpect').textContent = data.dontExpect;
+        }
+
+        roleCards.forEach(card => {
+            card.addEventListener('click', () => {
+                roleCards.forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                updateInfoPanel(card.dataset.role);
+            });
+        });
+
+        // === PLAYGROUND ===
+        const roles = ['SH', 'IMP', 'CF', 'CO', 'TW', 'RI', 'PL', 'ME', 'SP'];
+        const sliders = {};
+        roles.forEach(role => {
+            sliders[role] = document.getElementById(`slider-${role}`);
+        });
+
+        const presets = {
+            leader: { SH: 75, IMP: 40, CF: 30, CO: 90, TW: 50, RI: 60, PL: 40, ME: 55, SP: 35 },
+            creative: { SH: 35, IMP: 25, CF: 30, CO: 40, TW: 45, RI: 55, PL: 95, ME: 50, SP: 45 },
+            executor: { SH: 50, IMP: 90, CF: 85, CO: 40, TW: 55, RI: 35, PL: 25, ME: 45, SP: 40 },
+            analyst: { SH: 30, IMP: 45, CF: 65, CO: 35, TW: 40, RI: 30, PL: 55, ME: 95, SP: 70 },
+            networker: { SH: 45, IMP: 35, CF: 25, CO: 60, TW: 70, RI: 95, PL: 40, ME: 30, SP: 35 },
+            balanced: { SH: 50, IMP: 50, CF: 50, CO: 50, TW: 50, RI: 50, PL: 50, ME: 50, SP: 50 }
+        };
+
+        const roleInfo = {
+            SH: { name: 'Shaper', category: 'Action' },
+            IMP: { name: 'Implementer', category: 'Action' },
+            CF: { name: 'Completer Finisher', category: 'Action' },
+            CO: { name: 'Coordinator', category: 'People' },
+            TW: { name: 'Teamworker', category: 'People' },
+            RI: { name: 'Resource Investigator', category: 'People' },
+            PL: { name: 'Plant', category: 'Thinking' },
+            ME: { name: 'Monitor Evaluator', category: 'Thinking' },
+            SP: { name: 'Specialist', category: 'Thinking' }
+        };
+
+        function getRadarPoints(vals) {
+            const center = 200;
+            const maxRadius = 150;
+            const angles = [270, 315, 0, 45, 90, 135, 180, 225]; // degrees for 8 points (SP merged with thinking)
+
+            const orderedRoles = ['SH', 'IMP', 'CF', 'CO', 'TW', 'RI', 'PL', 'ME'];
+            const points = orderedRoles.map((role, i) => {
+                const angle = angles[i] * Math.PI / 180;
+                const radius = (vals[role] / 100) * maxRadius;
+                return {
+                    x: center + radius * Math.cos(angle),
+                    y: center + radius * Math.sin(angle)
+                };
+            });
+
+            return points.map(p => `${p.x},${p.y}`).join(' ');
+        }
+
+        function updatePlayground() {
+            const vals = {};
+            roles.forEach(role => {
+                vals[role] = parseInt(sliders[role].value);
+                document.getElementById(`val-${role}`).textContent = vals[role];
+            });
+
+            // Update radar
+            document.getElementById('radar-polygon').setAttribute('points', getRadarPoints(vals));
+
+            // Get top 3 roles
+            const sorted = Object.entries(vals).sort((a, b) => b[1] - a[1]).slice(0, 3);
+
+            const topRolesHtml = sorted.map(([ role, score], i) => {
+                const info = roleInfo[role];
+                const rankClass = i === 0 ? 'first' : i === 1 ? 'second' : 'third';
+                return `
+                    <div class="top-role-item">
+                        <div class="top-role-rank ${rankClass}">${i + 1}</div>
+                        <div class="top-role-info">
+                            <div class="top-role-name">${info.name}</div>
+                            <div class="top-role-category">${info.category}</div>
+                        </div>
+                        <div class="top-role-score">${score}</div>
+                    </div>
+                `;
+            }).join('');
+            document.getElementById('top-roles').innerHTML = topRolesHtml;
+
+            // Analysis
+            const dominant = sorted[0][0];
+            const secondary = sorted[1][0];
+
+            const workStyles = {
+                SH: 'You set the pace and direction. You are motivated by challenges and results.',
+                IMP: 'You transform ideas into concrete actions. You are practical and reliable.',
+                CF: 'You ensure everything is perfect. Your attention to detail is remarkable.',
+                CO: 'You coordinate the team and clarify objectives. You are a natural leader.',
+                TW: 'You maintain harmony in the team. You are supportive and diplomatic.',
+                RI: 'You bring external resources and contacts. You are enthusiastic and communicative.',
+                PL: 'You generate creative and unconventional ideas. You solve difficult problems.',
+                ME: 'You objectively evaluate options. Your strategic thinking is valuable.',
+                SP: 'You bring deep expertise in a specific domain.'
+            };
+
+            const teamContributions = {
+                SH: 'You push the team forward when others hesitate. You need partners who can execute.',
+                IMP: 'You transform vision into reality. You complement creatives well.',
+                CF: 'You ensure final quality. You need people who generate the initial material.',
+                CO: 'You bring structure and clarity. You work well with executors and creatives.',
+                TW: 'You maintain cohesion. You are essential in teams with strong personalities.',
+                RI: 'You bring external ideas and resources. You complement introspective teams.',
+                PL: 'You generate solutions to difficult problems. You need implementers.',
+                ME: 'You prevent strategic mistakes. You balance enthusiasm with realism.',
+                SP: 'You bring critical knowledge. You need generalists to contextualize.'
+            };
+
+            document.getElementById('work-style').textContent = workStyles[dominant];
+            document.getElementById('team-contribution').textContent = teamContributions[dominant];
+
+            const actionScore = vals.SH + vals.IMP + vals.CF;
+            const peopleScore = vals.CO + vals.TW + vals.RI;
+            const thinkingScore = vals.PL + vals.ME + vals.SP;
+
+            let recommendation = '';
+            if (actionScore > peopleScore && actionScore > thinkingScore) {
+                recommendation = 'Your profile is Action-oriented. Look for partners who bring new perspectives (Plant) and cohesion (Teamworker).';
+            } else if (peopleScore > actionScore && peopleScore > thinkingScore) {
+                recommendation = 'Your profile is People-oriented. You need executors (Implementer) and strategists (Monitor) to balance.';
+            } else {
+                recommendation = 'Your profile is Thinking-oriented. You need action people (Shaper, Implementer) to transform ideas into reality.';
+            }
+            document.getElementById('recommendations').textContent = recommendation;
+        }
+
+        roles.forEach(role => {
+            sliders[role].addEventListener('input', updatePlayground);
+        });
+
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const preset = presets[btn.dataset.preset];
+                roles.forEach(role => {
+                    sliders[role].value = preset[role];
+                });
+                updatePlayground();
+            });
+        });
+
+        updatePlayground();
+
+        // === QUIZ ===
+        const questions = [
+            { text: "In a team project, what is your natural contribution?",
+                options: [
+                    { text: "I set the pace and make sure we move forward", type: 'SH' },
+                    { text: "I transform ideas into concrete steps", type: 'IMP' },
+                    { text: "I check quality and finalize details", type: 'CF' }
+                ]},
+            { text: "How do you prefer to contribute to team success?",
+                options: [
+                    { text: "I coordinate efforts and clarify objectives", type: 'CO' },
+                    { text: "I maintain harmony and support colleagues", type: 'TW' },
+                    { text: "I bring contacts and external resources", type: 'RI' }
+                ]},
+            { text: "What is your intellectual strength?",
+                options: [
+                    { text: "I generate creative and unconventional ideas", type: 'PL' },
+                    { text: "I objectively evaluate all options", type: 'ME' },
+                    { text: "I have deep knowledge in a specific domain", type: 'SP' }
+                ]},
+            { text: "When the team is stuck, you:",
+                options: [
+                    { text: "Propose a bold solution", type: 'SH' },
+                    { text: "Come up with a completely new idea", type: 'PL' },
+                    { text: "Facilitate discussion to find consensus", type: 'TW' }
+                ]},
+            { text: "What motivates you the most?",
+                options: [
+                    { text: "Seeing things completed correctly", type: 'CF' },
+                    { text: "Discovering new opportunities", type: 'RI' },
+                    { text: "Contributing with my expertise", type: 'SP' }
+                ]},
+            { text: "Facing an important decision, you:",
+                options: [
+                    { text: "Analyze all strategic implications", type: 'ME' },
+                    { text: "Make sure everyone has been consulted", type: 'CO' },
+                    { text: "Take initiative and propose the direction", type: 'SH' }
+                ]},
+            { text: "Colleagues appreciate you because:",
+                options: [
+                    { text: "You are reliable and practical", type: 'IMP' },
+                    { text: "You are creative and original", type: 'PL' },
+                    { text: "You are diplomatic and supportive", type: 'TW' }
+                ]},
+            { text: "In a meeting, your natural role is to:",
+                options: [
+                    { text: "Coordinate discussion and clarify objectives", type: 'CO' },
+                    { text: "Bring external perspectives and contacts", type: 'RI' },
+                    { text: "Evaluate ideas and offer objective feedback", type: 'ME' }
+                ]},
+            { text: "What frustrates you most at work?",
+                options: [
+                    { text: "Lack of action and progress", type: 'SH' },
+                    { text: "Poor quality or incomplete work", type: 'CF' },
+                    { text: "Unresolved conflicts in the team", type: 'TW' }
+                ]},
+            { text: "When a project starts, you:",
+                options: [
+                    { text: "Explore opportunities and possibilities", type: 'RI' },
+                    { text: "Create the implementation plan", type: 'IMP' },
+                    { text: "Generate ideas for the approach", type: 'PL' }
+                ]},
+            { text: "You feel most comfortable when:",
+                options: [
+                    { text: "Working on details and finishing touches", type: 'CF' },
+                    { text: "Applying your specialized knowledge", type: 'SP' },
+                    { text: "Leading and directing the team", type: 'SH' }
+                ]},
+            { text: "In crisis situations, you:",
+                options: [
+                    { text: "Take control and set direction", type: 'SH' },
+                    { text: "Stay calm and support the team", type: 'TW' },
+                    { text: "Analyze the situation and propose rational solutions", type: 'ME' }
+                ]},
+            { text: "What role would you have in a startup?",
+                options: [
+                    { text: "Executive - I implement and deliver", type: 'IMP' },
+                    { text: "Visionary - I generate the big ideas", type: 'PL' },
+                    { text: "Networker - I build partnerships", type: 'RI' }
+                ]},
+            { text: "You prefer to work:",
+                options: [
+                    { text: "On complex problems requiring expertise", type: 'SP' },
+                    { text: "With people, facilitating collaboration", type: 'CO' },
+                    { text: "On finalizing and quality of deliverables", type: 'CF' }
+                ]},
+            { text: "Others may sometimes see you as:",
+                options: [
+                    { text: "Too demanding or pushy", type: 'SH' },
+                    { text: "Too critical or distant", type: 'ME' },
+                    { text: "Too focused on your domain", type: 'SP' }
+                ]},
+            { text: "Your contribution in a team is:",
+                options: [
+                    { text: "To transform ideas into reality", type: 'IMP' },
+                    { text: "To bring new perspectives and contacts", type: 'RI' },
+                    { text: "To maintain group cohesion", type: 'TW' }
+                ]},
+            { text: "When evaluating a new idea:",
+                options: [
+                    { text: "I judge it objectively on its merits", type: 'ME' },
+                    { text: "I see how it can be practically implemented", type: 'IMP' },
+                    { text: "I get excited and want to explore it", type: 'RI' }
+                ]},
+            { text: "Success for you means:",
+                options: [
+                    { text: "Projects completed impeccably", type: 'CF' },
+                    { text: "Teams that function harmoniously", type: 'TW' },
+                    { text: "Innovative ideas implemented", type: 'PL' }
+                ]}
+        ];
+
+        let currentQuestion = 0;
+        let answers = [];
+        let quizScores = { SH: 0, IMP: 0, CF: 0, CO: 0, TW: 0, RI: 0, PL: 0, ME: 0, SP: 0 };
+
+        const questionText = document.getElementById('question-text');
+        const questionNumber = document.getElementById('question-number');
+        const optionsContainer = document.getElementById('options');
+        const progressFill = document.getElementById('progress-fill');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            questionNumber.textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            questionText.textContent = q.text;
+            progressFill.style.width = `${((currentQuestion) / questions.length) * 100}%`;
+
+            optionsContainer.innerHTML = q.options.map((opt, i) => `
+                <div class="option ${answers[currentQuestion] === opt.type ? 'selected' : ''}" data-type="${opt.type}">
+                    ${opt.text}
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.addEventListener('click', () => selectOption(opt.dataset.type));
+            });
+
+            prevBtn.disabled = currentQuestion === 0;
+            nextBtn.disabled = !answers[currentQuestion];
+            nextBtn.textContent = currentQuestion === questions.length - 1 ? 'See Results' : 'Next';
+        }
+
+        function selectOption(type) {
+            answers[currentQuestion] = type;
+            document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+            document.querySelector(`[data-type="${type}"]`).classList.add('selected');
+            nextBtn.disabled = false;
+        }
+
+        function showQuizResults() {
+            quizScores = { SH: 0, IMP: 0, CF: 0, CO: 0, TW: 0, RI: 0, PL: 0, ME: 0, SP: 0 };
+            answers.forEach(a => quizScores[a]++);
+
+            const maxScore = Math.max(...Object.values(quizScores));
+            const percentages = {};
+            Object.keys(quizScores).forEach(role => {
+                percentages[role] = maxScore > 0 ? Math.round((quizScores[role] / maxScore) * 100) : 0;
+            });
+
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            progressFill.style.width = '100%';
+
+            const sorted = Object.entries(quizScores).sort((a, b) => b[1] - a[1]).slice(0, 3);
+
+            const roleColors = {
+                SH: 'var(--shaper)', IMP: 'var(--implementer)', CF: 'var(--completer)',
+                CO: 'var(--coordinator)', TW: 'var(--teamworker)', RI: 'var(--investigator)',
+                PL: 'var(--plant)', ME: 'var(--monitor)', SP: 'var(--specialist)'
+            };
+
+            document.getElementById('results-grid').innerHTML = sorted.map(([role, score]) => `
+                <div class="result-role" style="border-color: ${roleColors[role]};">
+                    <div class="result-role-abbr" style="color: ${roleColors[role]};">${role}</div>
+                    <div class="result-role-name">${roleInfo[role].name}</div>
+                    <div class="result-role-score">${score}</div>
+                </div>
+            `).join('');
+
+            const topRole = sorted[0][0];
+            document.getElementById('profile-title').textContent = `Primary Role: ${roleInfo[topRole].name}`;
+
+            const descriptions = {
+                SH: 'You are a Shaper - the driving force that pushes the team forward. You thrive under pressure and have the courage to overcome obstacles.',
+                IMP: 'You are an Implementer - you transform ideas into concrete actions. You are practical, reliable and efficient in execution.',
+                CF: 'You are a Completer Finisher - you ensure everything is perfect. Your attention to detail and quality is remarkable.',
+                CO: 'You are a Coordinator - you clarify objectives and coordinate team efforts. You are a natural leader who knows how to delegate.',
+                TW: 'You are a Teamworker - you maintain harmony and team cohesion. You are diplomatic, supportive and avoid friction.',
+                RI: 'You are a Resource Investigator - you explore opportunities and bring external resources. You are enthusiastic and communicative.',
+                PL: 'You are a Plant - you generate creative and unconventional ideas. You solve difficult problems with original thinking.',
+                ME: 'You are a Monitor Evaluator - you objectively evaluate all options. Your strategic thinking prevents costly mistakes.',
+                SP: 'You are a Specialist - you bring deep knowledge and expertise in a specific domain. You are dedicated and professional.'
+            };
+
+            document.getElementById('profile-text').textContent = descriptions[topRole];
+        }
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                showQuizResults();
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            currentQuestion = 0;
+            answers = [];
+            quizScores = { SH: 0, IMP: 0, CF: 0, CO: 0, TW: 0, RI: 0, PL: 0, ME: 0, SP: 0 };
+            quizContainer.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+            renderQuestion();
+        });
+
+        renderQuestion();
+    </script>
+</body>
+</html>

@@ -1,0 +1,1738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBTI Myers-Briggs Model | Interactive Learning</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --analyst: #8B5CF6;
+            --diplomat: #10B981;
+            --sentinel: #3B82F6;
+            --explorer: #F59E0B;
+            --extraversion: #EC4899;
+            --introversion: #6366F1;
+            --sensing: #14B8A6;
+            --intuition: #A855F7;
+            --thinking: #EF4444;
+            --feeling: #22C55E;
+            --judging: #3B82F6;
+            --perceiving: #F97316;
+            --bg-dark: #1a1a2e;
+            --bg-card: #16213e;
+            --text-light: #edf2f7;
+            --text-muted: #a0aec0;
+            --accent-glow: rgba(139, 92, 246, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 2rem 2rem;
+            position: relative;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--text-light) 0%, var(--analyst) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 2rem auto;
+            padding: 0.5rem;
+            background: var(--bg-card);
+            border-radius: 50px;
+            max-width: 500px;
+        }
+
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-light);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--analyst) 0%, var(--diplomat) 100%);
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === VISUAL MODEL - 16 TYPES GRID === */
+        .types-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .types-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .types-header p {
+            color: var(--text-muted);
+        }
+
+        .types-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .types-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .type-group-label {
+            grid-column: span 4;
+            text-align: center;
+            padding: 0.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            font-size: 0.85rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 900px) {
+            .type-group-label {
+                grid-column: span 2;
+            }
+        }
+
+        .type-group-label.analysts { background: rgba(139, 92, 246, 0.2); color: var(--analyst); }
+        .type-group-label.diplomats { background: rgba(16, 185, 129, 0.2); color: var(--diplomat); }
+        .type-group-label.sentinels { background: rgba(59, 130, 246, 0.2); color: var(--sentinel); }
+        .type-group-label.explorers { background: rgba(245, 158, 11, 0.2); color: var(--explorer); }
+
+        .type-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            text-align: center;
+        }
+
+        .type-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .type-card.active {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .type-card.analyst { border-color: var(--analyst); }
+        .type-card.diplomat { border-color: var(--diplomat); }
+        .type-card.sentinel { border-color: var(--sentinel); }
+        .type-card.explorer { border-color: var(--explorer); }
+
+        .type-code {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .type-card.analyst .type-code { color: var(--analyst); }
+        .type-card.diplomat .type-code { color: var(--diplomat); }
+        .type-card.sentinel .type-code { color: var(--sentinel); }
+        .type-card.explorer .type-code { color: var(--explorer); }
+
+        .type-name {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .info-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .info-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .info-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .info-title h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-title span {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .info-content p {
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        .info-traits {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .trait-tag {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* === THEORY === */
+        .axes-section {
+            margin-bottom: 3rem;
+        }
+
+        .axes-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .axis-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .axis-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .axis-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            position: relative;
+        }
+
+        .axis-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .axis-pole {
+            text-align: center;
+            flex: 1;
+        }
+
+        .axis-pole h4 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .axis-pole span {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .axis-vs {
+            padding: 0 1rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .axis-description {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .pole-desc {
+            padding: 0.75rem;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.03);
+        }
+
+        .pole-desc h5 {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .pole-desc p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .theory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .theory-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border-left: 4px solid;
+        }
+
+        .theory-card.tc-analyst { border-color: var(--analyst); }
+        .theory-card.tc-diplomat { border-color: var(--diplomat); }
+        .theory-card.tc-sentinel { border-color: var(--sentinel); }
+        .theory-card.tc-explorer { border-color: var(--explorer); }
+
+        .theory-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .theory-card p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* === PLAYGROUND === */
+        .playground-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .playground-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .playground-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .playground-header p {
+            color: var(--text-muted);
+        }
+
+        .playground-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .playground-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sliders-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .slider-group {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .slider-group:last-of-type {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .slider-poles {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .pole-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .pole-letter {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .mbti-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            margin: 0.75rem 0;
+        }
+
+        .mbti-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            background: var(--text-light);
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
+        .mbti-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .slider-ei { background: linear-gradient(90deg, var(--introversion), var(--extraversion)); }
+        .slider-sn { background: linear-gradient(90deg, var(--sensing), var(--intuition)); }
+        .slider-tf { background: linear-gradient(90deg, var(--thinking), var(--feeling)); }
+        .slider-jp { background: linear-gradient(90deg, var(--judging), var(--perceiving)); }
+
+        .slider-value {
+            text-align: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .preset-label {
+            width: 100%;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .preset-btn {
+            padding: 0.4rem 0.6rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: var(--text-light);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Source Sans 3', sans-serif;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .preset-btn.analyst { border-color: var(--analyst); }
+        .preset-btn.diplomat { border-color: var(--diplomat); }
+        .preset-btn.sentinel { border-color: var(--sentinel); }
+        .preset-btn.explorer { border-color: var(--explorer); }
+
+        .visualization-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .type-display {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            text-align: center;
+        }
+
+        .type-display-code {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            letter-spacing: 0.1em;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        .type-letter {
+            min-width: 60px;
+            transition: all 0.3s ease;
+        }
+
+        .type-display-name {
+            font-size: 1.5rem;
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 0.25rem;
+        }
+
+        .type-display-subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+        }
+
+        .functions-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .functions-panel h4 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            color: var(--text-light);
+        }
+
+        .function-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .function-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 8px;
+        }
+
+        .function-position {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            width: 60px;
+        }
+
+        .function-name {
+            flex: 1;
+            font-size: 0.9rem;
+        }
+
+        .analysis-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .analysis-section {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .analysis-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .analysis-section h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+
+        .analysis-section p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* === QUIZ === */
+        .simulator-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-card);
+            border-radius: 3px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--analyst), var(--diplomat));
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        .question-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .question-number {
+            color: var(--analyst);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            line-height: 1.5;
+            margin-bottom: 2rem;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .option {
+            padding: 1.2rem 1.5rem;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .option:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .option.selected {
+            border-color: var(--analyst);
+            background: rgba(139, 92, 246, 0.15);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-light);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--analyst), var(--diplomat));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--accent-glow);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results-container {
+            text-align: center;
+        }
+
+        .results-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .results-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .result-type-display {
+            font-family: 'Playfair Display', serif;
+            font-size: 5rem;
+            letter-spacing: 0.15em;
+            margin-bottom: 1rem;
+        }
+
+        .result-type-name {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .axes-results {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+            max-width: 600px;
+            margin: 0 auto 2rem;
+        }
+
+        @media (max-width: 600px) {
+            .axes-results {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .axis-result {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1rem;
+        }
+
+        .axis-result-letter {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .axis-result-name {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .axis-result-percent {
+            font-size: 0.9rem;
+            margin-top: 0.25rem;
+        }
+
+        .profile-description {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .profile-description h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .profile-description p {
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .restart-btn {
+            margin-top: 2rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="noise-overlay"></div>
+
+    <header>
+        <h1>The MBTI Model</h1>
+        <p class="subtitle">Myers-Briggs Type Indicator - 16 Personality Types</p>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="model">The 16 Types</button>
+        <button class="tab-btn" data-tab="theory">Theory</button>
+        <button class="tab-btn" data-tab="playground">Playground</button>
+        <button class="tab-btn" data-tab="simulator">Quiz</button>
+    </div>
+
+    <div class="container">
+        <!-- MODEL TAB -->
+        <div id="model" class="tab-content active">
+            <div class="types-header">
+                <h2>The 16 Personality Types</h2>
+                <p>Click on a type to see details</p>
+            </div>
+
+            <div class="types-grid">
+                <div class="type-group-label analysts">Analysts (NT)</div>
+                <div class="type-card analyst" data-type="INTJ">
+                    <div class="type-code">INTJ</div>
+                    <div class="type-name">The Architect</div>
+                </div>
+                <div class="type-card analyst" data-type="INTP">
+                    <div class="type-code">INTP</div>
+                    <div class="type-name">The Logician</div>
+                </div>
+                <div class="type-card analyst" data-type="ENTJ">
+                    <div class="type-code">ENTJ</div>
+                    <div class="type-name">The Commander</div>
+                </div>
+                <div class="type-card analyst" data-type="ENTP">
+                    <div class="type-code">ENTP</div>
+                    <div class="type-name">The Debater</div>
+                </div>
+
+                <div class="type-group-label diplomats">Diplomats (NF)</div>
+                <div class="type-card diplomat" data-type="INFJ">
+                    <div class="type-code">INFJ</div>
+                    <div class="type-name">The Advocate</div>
+                </div>
+                <div class="type-card diplomat" data-type="INFP">
+                    <div class="type-code">INFP</div>
+                    <div class="type-name">The Mediator</div>
+                </div>
+                <div class="type-card diplomat" data-type="ENFJ">
+                    <div class="type-code">ENFJ</div>
+                    <div class="type-name">The Protagonist</div>
+                </div>
+                <div class="type-card diplomat" data-type="ENFP">
+                    <div class="type-code">ENFP</div>
+                    <div class="type-name">The Campaigner</div>
+                </div>
+
+                <div class="type-group-label sentinels">Sentinels (SJ)</div>
+                <div class="type-card sentinel" data-type="ISTJ">
+                    <div class="type-code">ISTJ</div>
+                    <div class="type-name">The Logistician</div>
+                </div>
+                <div class="type-card sentinel" data-type="ISFJ">
+                    <div class="type-code">ISFJ</div>
+                    <div class="type-name">The Defender</div>
+                </div>
+                <div class="type-card sentinel" data-type="ESTJ">
+                    <div class="type-code">ESTJ</div>
+                    <div class="type-name">The Executive</div>
+                </div>
+                <div class="type-card sentinel" data-type="ESFJ">
+                    <div class="type-code">ESFJ</div>
+                    <div class="type-name">The Consul</div>
+                </div>
+
+                <div class="type-group-label explorers">Explorers (SP)</div>
+                <div class="type-card explorer" data-type="ISTP">
+                    <div class="type-code">ISTP</div>
+                    <div class="type-name">The Virtuoso</div>
+                </div>
+                <div class="type-card explorer" data-type="ISFP">
+                    <div class="type-code">ISFP</div>
+                    <div class="type-name">The Adventurer</div>
+                </div>
+                <div class="type-card explorer" data-type="ESTP">
+                    <div class="type-code">ESTP</div>
+                    <div class="type-name">The Entrepreneur</div>
+                </div>
+                <div class="type-card explorer" data-type="ESFP">
+                    <div class="type-code">ESFP</div>
+                    <div class="type-name">The Entertainer</div>
+                </div>
+            </div>
+
+            <div class="info-panel" id="info-panel">
+                <div class="info-header">
+                    <div class="info-icon" id="info-icon" style="background: var(--analyst);">INTJ</div>
+                    <div class="info-title">
+                        <h2 id="info-name">The Architect</h2>
+                        <span id="info-subtitle">Introverted, Intuitive, Thinking, Judging</span>
+                    </div>
+                </div>
+                <div class="info-content">
+                    <p id="info-description">INTJs are strategic thinkers with a plan for everything. They are architects of their own lives, always seeking to improve the systems and ideas around them.</p>
+                    <p id="info-details">They are independent, determined, and seek efficiency in everything. They prefer to work alone or in small groups of competent people.</p>
+                </div>
+                <div class="info-traits" id="info-traits">
+                    <span class="trait-tag">Strategic</span>
+                    <span class="trait-tag">Independent</span>
+                    <span class="trait-tag">Visionary</span>
+                    <span class="trait-tag">Perfectionist</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- THEORY TAB -->
+        <div id="theory" class="tab-content">
+            <div class="axes-section">
+                <h2>The 4 Preference Axes</h2>
+                <div class="axis-grid">
+                    <div class="axis-card">
+                        <div class="axis-header">
+                            <div class="axis-pole">
+                                <h4 style="color: var(--extraversion);">E</h4>
+                                <span>Extraversion</span>
+                            </div>
+                            <span class="axis-vs">vs</span>
+                            <div class="axis-pole">
+                                <h4 style="color: var(--introversion);">I</h4>
+                                <span>Introversion</span>
+                            </div>
+                        </div>
+                        <div class="axis-description">
+                            <div class="pole-desc">
+                                <h5 style="color: var(--extraversion);">Extraversion</h5>
+                                <p>Energy from outside, prefers action, sociable, thinks while talking</p>
+                            </div>
+                            <div class="pole-desc">
+                                <h5 style="color: var(--introversion);">Introversion</h5>
+                                <p>Energy from within, prefers reflection, reserved, thinks before speaking</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="axis-card">
+                        <div class="axis-header">
+                            <div class="axis-pole">
+                                <h4 style="color: var(--sensing);">S</h4>
+                                <span>Sensing</span>
+                            </div>
+                            <span class="axis-vs">vs</span>
+                            <div class="axis-pole">
+                                <h4 style="color: var(--intuition);">N</h4>
+                                <span>Intuition</span>
+                            </div>
+                        </div>
+                        <div class="axis-description">
+                            <div class="pole-desc">
+                                <h5 style="color: var(--sensing);">Sensing</h5>
+                                <p>Focus on present, practical, detailed, experience-based</p>
+                            </div>
+                            <div class="pole-desc">
+                                <h5 style="color: var(--intuition);">Intuition</h5>
+                                <p>Focus on future, abstract, sees the big picture, possibilities</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="axis-card">
+                        <div class="axis-header">
+                            <div class="axis-pole">
+                                <h4 style="color: var(--thinking);">T</h4>
+                                <span>Thinking</span>
+                            </div>
+                            <span class="axis-vs">vs</span>
+                            <div class="axis-pole">
+                                <h4 style="color: var(--feeling);">F</h4>
+                                <span>Feeling</span>
+                            </div>
+                        </div>
+                        <div class="axis-description">
+                            <div class="pole-desc">
+                                <h5 style="color: var(--thinking);">Thinking</h5>
+                                <p>Logical decisions, objective, analytical, seeks truth</p>
+                            </div>
+                            <div class="pole-desc">
+                                <h5 style="color: var(--feeling);">Feeling</h5>
+                                <p>Value-based decisions, empathetic, harmony, seeks consensus</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="axis-card">
+                        <div class="axis-header">
+                            <div class="axis-pole">
+                                <h4 style="color: var(--judging);">J</h4>
+                                <span>Judging</span>
+                            </div>
+                            <span class="axis-vs">vs</span>
+                            <div class="axis-pole">
+                                <h4 style="color: var(--perceiving);">P</h4>
+                                <span>Perceiving</span>
+                            </div>
+                        </div>
+                        <div class="axis-description">
+                            <div class="pole-desc">
+                                <h5 style="color: var(--judging);">Judging</h5>
+                                <p>Structured, planned, organized, prefers closure</p>
+                            </div>
+                            <div class="pole-desc">
+                                <h5 style="color: var(--perceiving);">Perceiving</h5>
+                                <p>Flexible, spontaneous, adaptable, prefers open options</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style="font-family: 'Playfair Display', serif; font-size: 1.8rem; text-align: center; margin-bottom: 2rem;">The 4 Temperament Groups</h2>
+            <div class="theory-grid">
+                <div class="theory-card tc-analyst">
+                    <h3 style="color: var(--analyst);">Analysts (NT)</h3>
+                    <p>INTJ, INTP, ENTJ, ENTP - Rational and independent. Seek knowledge, competence, and deep understanding. They are strategic and oriented toward solving complex problems.</p>
+                </div>
+                <div class="theory-card tc-diplomat">
+                    <h3 style="color: var(--diplomat);">Diplomats (NF)</h3>
+                    <p>INFJ, INFP, ENFJ, ENFP - Empathetic and idealistic. Seek authenticity, meaning, and deep connections. They are oriented toward personal development and harmony.</p>
+                </div>
+                <div class="theory-card tc-sentinel">
+                    <h3 style="color: var(--sentinel);">Sentinels (SJ)</h3>
+                    <p>ISTJ, ISFJ, ESTJ, ESFJ - Responsible and traditional. Seek stability, order, and belonging. They are reliable and duty-oriented.</p>
+                </div>
+                <div class="theory-card tc-explorer">
+                    <h3 style="color: var(--explorer);">Explorers (SP)</h3>
+                    <p>ISTP, ISFP, ESTP, ESFP - Spontaneous and energetic. Seek freedom, variety, and experiences. They are adaptable and action-oriented.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- PLAYGROUND TAB -->
+        <div id="playground" class="tab-content">
+            <div class="playground-container">
+                <div class="playground-header">
+                    <h2>MBTI Type Explorer</h2>
+                    <p>Adjust preferences on each axis to explore different personality types</p>
+                </div>
+
+                <div class="playground-grid">
+                    <div class="sliders-panel">
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <div class="slider-poles">
+                                    <div class="pole-label">
+                                        <span class="pole-letter" style="background: var(--introversion); color: white;">I</span>
+                                        <span>Introversion</span>
+                                    </div>
+                                    <div class="pole-label">
+                                        <span>Extraversion</span>
+                                        <span class="pole-letter" style="background: var(--extraversion); color: white;">E</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="mbti-slider slider-ei" id="slider-EI">
+                            <div class="slider-value" id="val-EI">Balanced</div>
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <div class="slider-poles">
+                                    <div class="pole-label">
+                                        <span class="pole-letter" style="background: var(--sensing); color: white;">S</span>
+                                        <span>Sensing</span>
+                                    </div>
+                                    <div class="pole-label">
+                                        <span>Intuition</span>
+                                        <span class="pole-letter" style="background: var(--intuition); color: white;">N</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="mbti-slider slider-sn" id="slider-SN">
+                            <div class="slider-value" id="val-SN">Balanced</div>
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <div class="slider-poles">
+                                    <div class="pole-label">
+                                        <span class="pole-letter" style="background: var(--thinking); color: white;">T</span>
+                                        <span>Thinking</span>
+                                    </div>
+                                    <div class="pole-label">
+                                        <span>Feeling</span>
+                                        <span class="pole-letter" style="background: var(--feeling); color: white;">F</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="mbti-slider slider-tf" id="slider-TF">
+                            <div class="slider-value" id="val-TF">Balanced</div>
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <div class="slider-poles">
+                                    <div class="pole-label">
+                                        <span class="pole-letter" style="background: var(--judging); color: white;">J</span>
+                                        <span>Judging</span>
+                                    </div>
+                                    <div class="pole-label">
+                                        <span>Perceiving</span>
+                                        <span class="pole-letter" style="background: var(--perceiving); color: white;">P</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="mbti-slider slider-jp" id="slider-JP">
+                            <div class="slider-value" id="val-JP">Balanced</div>
+                        </div>
+
+                        <div class="preset-buttons">
+                            <span class="preset-label">Popular Types:</span>
+                            <button class="preset-btn analyst" data-preset="INTJ">INTJ</button>
+                            <button class="preset-btn analyst" data-preset="INTP">INTP</button>
+                            <button class="preset-btn analyst" data-preset="ENTJ">ENTJ</button>
+                            <button class="preset-btn analyst" data-preset="ENTP">ENTP</button>
+                            <button class="preset-btn diplomat" data-preset="INFJ">INFJ</button>
+                            <button class="preset-btn diplomat" data-preset="INFP">INFP</button>
+                            <button class="preset-btn diplomat" data-preset="ENFJ">ENFJ</button>
+                            <button class="preset-btn diplomat" data-preset="ENFP">ENFP</button>
+                            <button class="preset-btn sentinel" data-preset="ISTJ">ISTJ</button>
+                            <button class="preset-btn sentinel" data-preset="ISFJ">ISFJ</button>
+                            <button class="preset-btn explorer" data-preset="ESTP">ESTP</button>
+                            <button class="preset-btn explorer" data-preset="ESFP">ESFP</button>
+                        </div>
+                    </div>
+
+                    <div class="visualization-panel">
+                        <div class="type-display" id="type-display">
+                            <div class="type-display-code" id="type-code-display">
+                                <span class="type-letter" id="letter-1">I</span>
+                                <span class="type-letter" id="letter-2">N</span>
+                                <span class="type-letter" id="letter-3">T</span>
+                                <span class="type-letter" id="letter-4">J</span>
+                            </div>
+                            <div class="type-display-name" id="type-name-display">The Architect</div>
+                            <div class="type-display-subtitle" id="type-subtitle">Strategic thinker with long-term vision</div>
+                        </div>
+
+                        <div class="analysis-panel">
+                            <div class="analysis-section">
+                                <h4>Description</h4>
+                                <p id="pg-description">INTJs are independent thinkers with a clear vision and the ability to create long-term plans.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Strengths</h4>
+                                <p id="pg-strengths">Strategic, independent, determined, competent, visionary.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Challenges</h4>
+                                <p id="pg-challenges">Can be perceived as arrogant or overly critical. May ignore others' emotions.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Suitable Careers</h4>
+                                <p id="pg-careers">Scientist, engineer, architect, lawyer, business strategist, consultant.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUIZ TAB -->
+        <div id="simulator" class="tab-content">
+            <div class="simulator-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+
+                <div id="quiz-container">
+                    <div class="question-card">
+                        <div class="question-number" id="question-number">Question 1 of 20</div>
+                        <div class="question-text" id="question-text">At a party, you prefer to:</div>
+                        <div class="options" id="options"></div>
+                    </div>
+
+                    <div class="nav-buttons">
+                        <button class="btn btn-secondary" id="prev-btn" disabled>Back</button>
+                        <button class="btn btn-primary" id="next-btn" disabled>Next</button>
+                    </div>
+                </div>
+
+                <div id="results-container" class="results-container hidden">
+                    <h2 class="results-title">Your Personality Type</h2>
+                    <p class="results-subtitle">Based on your answers</p>
+
+                    <div class="result-type-display" id="result-type"></div>
+                    <div class="result-type-name" id="result-name"></div>
+
+                    <div class="axes-results">
+                        <div class="axis-result">
+                            <div class="axis-result-letter" id="res-ei-letter">I</div>
+                            <div class="axis-result-name" id="res-ei-name">Introversion</div>
+                            <div class="axis-result-percent" id="res-ei-pct">60%</div>
+                        </div>
+                        <div class="axis-result">
+                            <div class="axis-result-letter" id="res-sn-letter">N</div>
+                            <div class="axis-result-name" id="res-sn-name">Intuition</div>
+                            <div class="axis-result-percent" id="res-sn-pct">70%</div>
+                        </div>
+                        <div class="axis-result">
+                            <div class="axis-result-letter" id="res-tf-letter">T</div>
+                            <div class="axis-result-name" id="res-tf-name">Thinking</div>
+                            <div class="axis-result-percent" id="res-tf-pct">55%</div>
+                        </div>
+                        <div class="axis-result">
+                            <div class="axis-result-letter" id="res-jp-letter">J</div>
+                            <div class="axis-result-name" id="res-jp-name">Judging</div>
+                            <div class="axis-result-percent" id="res-jp-pct">65%</div>
+                        </div>
+                    </div>
+
+                    <div class="profile-description">
+                        <h3 id="profile-title">About Your Type</h3>
+                        <p id="profile-text">Your profile description will appear here.</p>
+                    </div>
+
+                    <button class="btn btn-primary restart-btn" id="restart-btn">Retake Quiz</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === DATA ===
+        const typeData = {
+            INTJ: { name: 'The Architect', group: 'analyst', subtitle: 'Strategic thinker with long-term vision',
+                description: 'INTJs are independent thinkers with a clear vision. They are architects of their own lives, always seeking to improve the systems around them.',
+                strengths: 'Strategic, independent, determined, competent, visionary.',
+                challenges: 'Can be perceived as arrogant or overly critical. May ignore emotions.',
+                careers: 'Scientist, engineer, architect, lawyer, business strategist.',
+                traits: ['Strategic', 'Independent', 'Visionary', 'Perfectionist'] },
+            INTP: { name: 'The Logician', group: 'analyst', subtitle: 'Innovative thinker with thirst for knowledge',
+                description: 'INTPs are original thinkers with a powerful analytical mind. They seek to understand the universal principles behind things.',
+                strengths: 'Analytical, original, open-minded, objective, logical.',
+                challenges: 'Can be distracted, indecisive, and insensitive to emotions.',
+                careers: 'Researcher, programmer, analyst, professor, philosopher.',
+                traits: ['Analytical', 'Curious', 'Objective', 'Inventive'] },
+            ENTJ: { name: 'The Commander', group: 'analyst', subtitle: 'Determined leader with strategic vision',
+                description: 'ENTJs are born leaders. They see inefficiency and find solutions. They are determined and energetic in pursuing objectives.',
+                strengths: 'Determined, strategic, charismatic, efficient, confident.',
+                challenges: 'Can be dominant, impatient, and insensitive.',
+                careers: 'CEO, entrepreneur, lawyer, consultant, manager.',
+                traits: ['Leader', 'Strategic', 'Determined', 'Efficient'] },
+            ENTP: { name: 'The Debater', group: 'analyst', subtitle: 'Agile thinker who loves challenges',
+                description: 'ENTPs are quick and inventive thinkers. They enjoy deconstructing ideas and finding innovative solutions.',
+                strengths: 'Innovative, charismatic, energetic, strategic, open-minded.',
+                challenges: 'Can be argumentative, insensitive, and impatient with routine.',
+                careers: 'Entrepreneur, lawyer, consultant, inventor, journalist.',
+                traits: ['Innovative', 'Charismatic', 'Agile', 'Provocative'] },
+            INFJ: { name: 'The Advocate', group: 'diplomat', subtitle: 'Idealistic visionary with deep empathy',
+                description: 'INFJs are idealistic visionaries. They seek deep meaning and positive impact in the world. They are empathetic and principled.',
+                strengths: 'Empathetic, determined, creative, principled, visionary.',
+                challenges: 'Can be perfectionistic, withdrawn, and sensitive to criticism.',
+                careers: 'Counselor, writer, HR, psychologist, teacher.',
+                traits: ['Empathetic', 'Visionary', 'Principled', 'Inspiring'] },
+            INFP: { name: 'The Mediator', group: 'diplomat', subtitle: 'Creative idealist with deep values',
+                description: 'INFPs are creative idealists. They are guided by their own values and seek authenticity in everything.',
+                strengths: 'Empathetic, creative, passionate, open-minded, dedicated.',
+                challenges: 'Can be overly idealistic, withdrawn, and sensitive.',
+                careers: 'Writer, artist, counselor, HR, non-profit.',
+                traits: ['Idealistic', 'Creative', 'Empathetic', 'Authentic'] },
+            ENFJ: { name: 'The Protagonist', group: 'diplomat', subtitle: 'Charismatic leader who inspires others',
+                description: 'ENFJs are natural leaders and inspirers. They focus on developing others and creating harmony.',
+                strengths: 'Charismatic, empathetic, organized, inspiring, altruistic.',
+                challenges: 'Can be overly idealistic and sensitive to criticism.',
+                careers: 'Teacher, coach, HR, politician, counselor.',
+                traits: ['Charismatic', 'Inspiring', 'Empathetic', 'Organized'] },
+            ENFP: { name: 'The Campaigner', group: 'diplomat', subtitle: 'Free spirit with contagious enthusiasm',
+                description: 'ENFPs are enthusiastic and creative. They see possibilities everywhere and inspire others with their energy.',
+                strengths: 'Enthusiastic, creative, sociable, empathetic, versatile.',
+                challenges: 'Can be disorganized, unfocused, and overly optimistic.',
+                careers: 'Journalist, actor, consultant, entrepreneur, marketing.',
+                traits: ['Enthusiastic', 'Creative', 'Sociable', 'Optimistic'] },
+            ISTJ: { name: 'The Logistician', group: 'sentinel', subtitle: 'Reliable organizer with sense of duty',
+                description: 'ISTJs are reliable and responsible. They respect traditions and fulfill their duties with dedication.',
+                strengths: 'Reliable, responsible, organized, loyal, practical.',
+                challenges: 'Can be rigid, insensitive, and resistant to change.',
+                careers: 'Accountant, manager, engineer, military, lawyer.',
+                traits: ['Responsible', 'Organized', 'Loyal', 'Practical'] },
+            ISFJ: { name: 'The Defender', group: 'sentinel', subtitle: 'Dedicated protector with warm heart',
+                description: 'ISFJs are loyal protectors. They are attentive to others\' needs and dedicate their energy to helping them.',
+                strengths: 'Supportive, reliable, patient, observant, loyal.',
+                challenges: 'Can be withdrawn, resistant to change, and too modest.',
+                careers: 'Nurse, administrator, accountant, HR.',
+                traits: ['Supportive', 'Loyal', 'Patient', 'Caring'] },
+            ESTJ: { name: 'The Executive', group: 'sentinel', subtitle: 'Dedicated administrator with civic sense',
+                description: 'ESTJs are organizers and administrators. They bring order and structure, respecting rules and traditions.',
+                strengths: 'Organized, dedicated, determined, reliable, practical.',
+                challenges: 'Can be rigid, inflexible, and too focused on rules.',
+                careers: 'Manager, judge, military, administrator, entrepreneur.',
+                traits: ['Organized', 'Determined', 'Responsible', 'Direct'] },
+            ESFJ: { name: 'The Consul', group: 'sentinel', subtitle: 'Warm host who creates harmony',
+                description: 'ESFJs are sociable and caring. They focus on others\' needs and create harmonious environments.',
+                strengths: 'Caring, sociable, reliable, loyal, organized.',
+                challenges: 'Can be too concerned with others\' opinions and inflexible.',
+                careers: 'Nurse, teacher, HR, event planner.',
+                traits: ['Caring', 'Sociable', 'Loyal', 'Organized'] },
+            ISTP: { name: 'The Virtuoso', group: 'explorer', subtitle: 'Practical craftsman with explorer spirit',
+                description: 'ISTPs are craftsmen and problem solvers. They are curious and practical, preferring to learn through action.',
+                strengths: 'Practical, adaptable, analytical, independent, calm.',
+                challenges: 'Can be withdrawn, insensitive, and impulsive.',
+                careers: 'Engineer, mechanic, pilot, programmer, detective.',
+                traits: ['Practical', 'Adaptable', 'Analytical', 'Independent'] },
+            ISFP: { name: 'The Adventurer', group: 'explorer', subtitle: 'Sensitive artist with adventurous spirit',
+                description: 'ISFPs are artists and explorers. They are sensitive to beauty and prefer to live in the present.',
+                strengths: 'Creative, sensitive, friendly, spontaneous, dedicated.',
+                challenges: 'Can be withdrawn, unpredictable, and overly sensitive.',
+                careers: 'Artist, designer, nurse, veterinarian.',
+                traits: ['Creative', 'Sensitive', 'Spontaneous', 'Friendly'] },
+            ESTP: { name: 'The Entrepreneur', group: 'explorer', subtitle: 'Energetic and pragmatic in action',
+                description: 'ESTPs are energetic and pragmatic. They enjoy action and solve problems in real time.',
+                strengths: 'Energetic, pragmatic, observant, direct, adaptable.',
+                challenges: 'Can be impulsive, insensitive, and impatient.',
+                careers: 'Salesperson, entrepreneur, police officer, athlete, paramedic.',
+                traits: ['Energetic', 'Pragmatic', 'Direct', 'Adaptable'] },
+            ESFP: { name: 'The Entertainer', group: 'explorer', subtitle: 'Spontaneous entertainer who brings joy',
+                description: 'ESFPs are entertainers and optimists. They bring energy and joy to any situation.',
+                strengths: 'Enthusiastic, sociable, spontaneous, energetic, practical.',
+                challenges: 'Can be unfocused, sensitive to criticism, and impulsive.',
+                careers: 'Actor, event organizer, salesperson, trainer.',
+                traits: ['Enthusiastic', 'Sociable', 'Spontaneous', 'Optimistic'] }
+        };
+
+        const axisLabels = {
+            EI: { low: 'Introversion', high: 'Extraversion' },
+            SN: { low: 'Sensing', high: 'Intuition' },
+            TF: { low: 'Thinking', high: 'Feeling' },
+            JP: { low: 'Judging', high: 'Perceiving' }
+        };
+
+        // === TAB NAVIGATION ===
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // === MODEL - TYPE CARDS ===
+        const typeCards = document.querySelectorAll('.type-card');
+
+        function updateInfoPanelModel(type) {
+            const data = typeData[type];
+            const groupColors = { analyst: 'var(--analyst)', diplomat: 'var(--diplomat)', sentinel: 'var(--sentinel)', explorer: 'var(--explorer)' };
+
+            document.getElementById('info-icon').textContent = type;
+            document.getElementById('info-icon').style.background = groupColors[data.group];
+            document.getElementById('info-name').textContent = data.name;
+            document.getElementById('info-subtitle').textContent = data.subtitle;
+            document.getElementById('info-description').textContent = data.description;
+            document.getElementById('info-details').textContent = `Strengths: ${data.strengths}`;
+            document.getElementById('info-traits').innerHTML = data.traits.map(t => `<span class="trait-tag">${t}</span>`).join('');
+        }
+
+        typeCards.forEach(card => {
+            card.addEventListener('click', () => {
+                typeCards.forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                updateInfoPanelModel(card.dataset.type);
+            });
+        });
+
+        // === PLAYGROUND ===
+        const sliders = {
+            EI: document.getElementById('slider-EI'),
+            SN: document.getElementById('slider-SN'),
+            TF: document.getElementById('slider-TF'),
+            JP: document.getElementById('slider-JP')
+        };
+
+        const presets = {
+            INTJ: { EI: 20, SN: 80, TF: 20, JP: 20 },
+            INTP: { EI: 20, SN: 80, TF: 20, JP: 80 },
+            ENTJ: { EI: 80, SN: 80, TF: 20, JP: 20 },
+            ENTP: { EI: 80, SN: 80, TF: 20, JP: 80 },
+            INFJ: { EI: 20, SN: 80, TF: 80, JP: 20 },
+            INFP: { EI: 20, SN: 80, TF: 80, JP: 80 },
+            ENFJ: { EI: 80, SN: 80, TF: 80, JP: 20 },
+            ENFP: { EI: 80, SN: 80, TF: 80, JP: 80 },
+            ISTJ: { EI: 20, SN: 20, TF: 20, JP: 20 },
+            ISFJ: { EI: 20, SN: 20, TF: 80, JP: 20 },
+            ESTP: { EI: 80, SN: 20, TF: 20, JP: 80 },
+            ESFP: { EI: 80, SN: 20, TF: 80, JP: 80 }
+        };
+
+        function getTypeFromSliders() {
+            const ei = parseInt(sliders.EI.value);
+            const sn = parseInt(sliders.SN.value);
+            const tf = parseInt(sliders.TF.value);
+            const jp = parseInt(sliders.JP.value);
+
+            return (ei >= 50 ? 'E' : 'I') +
+                   (sn >= 50 ? 'N' : 'S') +
+                   (tf >= 50 ? 'F' : 'T') +
+                   (jp >= 50 ? 'P' : 'J');
+        }
+
+        function updatePlayground() {
+            const vals = {
+                EI: parseInt(sliders.EI.value),
+                SN: parseInt(sliders.SN.value),
+                TF: parseInt(sliders.TF.value),
+                JP: parseInt(sliders.JP.value)
+            };
+
+            // Update slider labels
+            Object.keys(vals).forEach(key => {
+                const val = vals[key];
+                let label = 'Balanced';
+                if (val < 35) label = 'Clear ' + axisLabels[key].low;
+                else if (val < 50) label = 'Slight ' + axisLabels[key].low;
+                else if (val > 65) label = 'Clear ' + axisLabels[key].high;
+                else if (val > 50) label = 'Slight ' + axisLabels[key].high;
+                document.getElementById(`val-${key}`).textContent = label;
+            });
+
+            // Get type
+            const type = getTypeFromSliders();
+            const data = typeData[type];
+            const groupColors = { analyst: 'var(--analyst)', diplomat: 'var(--diplomat)', sentinel: 'var(--sentinel)', explorer: 'var(--explorer)' };
+
+            // Update letters
+            document.getElementById('letter-1').textContent = type[0];
+            document.getElementById('letter-1').style.color = vals.EI >= 50 ? 'var(--extraversion)' : 'var(--introversion)';
+            document.getElementById('letter-2').textContent = type[1];
+            document.getElementById('letter-2').style.color = vals.SN >= 50 ? 'var(--intuition)' : 'var(--sensing)';
+            document.getElementById('letter-3').textContent = type[2];
+            document.getElementById('letter-3').style.color = vals.TF >= 50 ? 'var(--feeling)' : 'var(--thinking)';
+            document.getElementById('letter-4').textContent = type[3];
+            document.getElementById('letter-4').style.color = vals.JP >= 50 ? 'var(--perceiving)' : 'var(--judging)';
+
+            // Update display
+            document.getElementById('type-name-display').textContent = data.name;
+            document.getElementById('type-name-display').style.color = groupColors[data.group];
+            document.getElementById('type-subtitle').textContent = data.subtitle;
+            document.getElementById('type-display').style.borderTop = `4px solid ${groupColors[data.group]}`;
+
+            // Update analysis
+            document.getElementById('pg-description').textContent = data.description;
+            document.getElementById('pg-strengths').textContent = data.strengths;
+            document.getElementById('pg-challenges').textContent = data.challenges;
+            document.getElementById('pg-careers').textContent = data.careers;
+        }
+
+        Object.values(sliders).forEach(slider => {
+            slider.addEventListener('input', updatePlayground);
+        });
+
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const preset = presets[btn.dataset.preset];
+                if (preset) {
+                    Object.keys(preset).forEach(key => {
+                        sliders[key].value = preset[key];
+                    });
+                    updatePlayground();
+                }
+            });
+        });
+
+        updatePlayground();
+
+        // === QUIZ ===
+        const questions = [
+            { text: "At a party, you prefer to:", axis: 'EI',
+                options: [{ text: "Interact with many people, including strangers", type: 'E' },
+                         { text: "Interact with a few people you know", type: 'I' }] },
+            { text: "You consider yourself more:", axis: 'EI',
+                options: [{ text: "Realistic and practical", type: 'S' },
+                         { text: "Imaginative and innovative", type: 'N' }] },
+            { text: "When making important decisions, you rely on:", axis: 'TF',
+                options: [{ text: "Logic and objective analysis", type: 'T' },
+                         { text: "Personal values and impact on people", type: 'F' }] },
+            { text: "You prefer a lifestyle that is:", axis: 'JP',
+                options: [{ text: "Planned and organized", type: 'J' },
+                         { text: "Flexible and spontaneous", type: 'P' }] },
+            { text: "When working on a project, you prefer to:", axis: 'EI',
+                options: [{ text: "Collaborate and discuss ideas with others", type: 'E' },
+                         { text: "Work alone and reflect", type: 'I' }] },
+            { text: "You are more attracted to:", axis: 'SN',
+                options: [{ text: "Facts and concrete details", type: 'S' },
+                         { text: "Concepts and abstract possibilities", type: 'N' }] },
+            { text: "In conflict, you prioritize:", axis: 'TF',
+                options: [{ text: "Finding the correct and logical solution", type: 'T' },
+                         { text: "Maintaining harmony and relationships", type: 'F' }] },
+            { text: "You prefer to:", axis: 'JP',
+                options: [{ text: "Have things decided and settled", type: 'J' },
+                         { text: "Keep options open", type: 'P' }] },
+            { text: "After a long day, you recharge by:", axis: 'EI',
+                options: [{ text: "Going out with friends", type: 'E' },
+                         { text: "Having time alone", type: 'I' }] },
+            { text: "When reading a book, you prefer:", axis: 'SN',
+                options: [{ text: "Stories based on reality", type: 'S' },
+                         { text: "Fiction with abstract ideas", type: 'N' }] },
+            { text: "You are more:", axis: 'TF',
+                options: [{ text: "A cool-headed person", type: 'T' },
+                         { text: "A warm-hearted person", type: 'F' }] },
+            { text: "At work, you prefer:", axis: 'JP',
+                options: [{ text: "Clear deadlines and defined expectations", type: 'J' },
+                         { text: "Flexibility and adapting to situations", type: 'P' }] },
+            { text: "In new groups, you tend to:", axis: 'EI',
+                options: [{ text: "Initiate conversations", type: 'E' },
+                         { text: "Wait to be approached", type: 'I' }] },
+            { text: "When learning something new, you prefer:", axis: 'SN',
+                options: [{ text: "Practical steps and concrete examples", type: 'S' },
+                         { text: "Theory and underlying principles", type: 'N' }] },
+            { text: "It is more important to be:", axis: 'TF',
+                options: [{ text: "Fair and correct", type: 'T' },
+                         { text: "Compassionate and understanding", type: 'F' }] },
+            { text: "How do you organize your workspace?", axis: 'JP',
+                options: [{ text: "Everything has a set place", type: 'J' },
+                         { text: "More disorganized, but I know where everything is", type: 'P' }] },
+            { text: "When thinking, you prefer to:", axis: 'EI',
+                options: [{ text: "Talk and think at the same time", type: 'E' },
+                         { text: "Reflect before speaking", type: 'I' }] },
+            { text: "You focus more on:", axis: 'SN',
+                options: [{ text: "Present and current reality", type: 'S' },
+                         { text: "Future and possibilities", type: 'N' }] },
+            { text: "In feedback, you prefer:", axis: 'TF',
+                options: [{ text: "Direct and honest criticism", type: 'T' },
+                         { text: "Constructive and encouraging feedback", type: 'F' }] },
+            { text: "Deadlines are:", axis: 'JP',
+                options: [{ text: "Sacred and must be respected", type: 'J' },
+                         { text: "Guidelines that can be adjusted", type: 'P' }] }
+        ];
+
+        let currentQuestion = 0;
+        let answers = [];
+        let quizScores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+
+        const questionText = document.getElementById('question-text');
+        const questionNumber = document.getElementById('question-number');
+        const optionsContainer = document.getElementById('options');
+        const progressFill = document.getElementById('progress-fill');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            questionNumber.textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+            questionText.textContent = q.text;
+            progressFill.style.width = `${((currentQuestion) / questions.length) * 100}%`;
+
+            optionsContainer.innerHTML = q.options.map((opt, i) => `
+                <div class="option ${answers[currentQuestion] === opt.type ? 'selected' : ''}" data-type="${opt.type}">
+                    ${opt.text}
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.addEventListener('click', () => selectOption(opt.dataset.type));
+            });
+
+            prevBtn.disabled = currentQuestion === 0;
+            nextBtn.disabled = !answers[currentQuestion];
+            nextBtn.textContent = currentQuestion === questions.length - 1 ? 'See Result' : 'Next';
+        }
+
+        function selectOption(type) {
+            answers[currentQuestion] = type;
+            document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+            document.querySelector(`[data-type="${type}"]`).classList.add('selected');
+            nextBtn.disabled = false;
+        }
+
+        function calculateQuizResults() {
+            quizScores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+            answers.forEach(a => quizScores[a]++);
+
+            const type = (quizScores.E >= quizScores.I ? 'E' : 'I') +
+                        (quizScores.N >= quizScores.S ? 'N' : 'S') +
+                        (quizScores.F >= quizScores.T ? 'F' : 'T') +
+                        (quizScores.P >= quizScores.J ? 'P' : 'J');
+
+            const percentages = {
+                EI: Math.round((quizScores.E / (quizScores.E + quizScores.I || 1)) * 100),
+                SN: Math.round((quizScores.N / (quizScores.S + quizScores.N || 1)) * 100),
+                TF: Math.round((quizScores.F / (quizScores.T + quizScores.F || 1)) * 100),
+                JP: Math.round((quizScores.P / (quizScores.J + quizScores.P || 1)) * 100)
+            };
+
+            return { type, percentages };
+        }
+
+        function showQuizResults() {
+            const { type, percentages } = calculateQuizResults();
+            const data = typeData[type];
+            const groupColors = { analyst: 'var(--analyst)', diplomat: 'var(--diplomat)', sentinel: 'var(--sentinel)', explorer: 'var(--explorer)' };
+
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            progressFill.style.width = '100%';
+
+            document.getElementById('result-type').textContent = type;
+            document.getElementById('result-type').style.color = groupColors[data.group];
+            document.getElementById('result-name').textContent = data.name;
+
+            // Update axis results
+            document.getElementById('res-ei-letter').textContent = type[0];
+            document.getElementById('res-ei-name').textContent = type[0] === 'E' ? 'Extraversion' : 'Introversion';
+            document.getElementById('res-ei-pct').textContent = type[0] === 'E' ? `${percentages.EI}%` : `${100-percentages.EI}%`;
+
+            document.getElementById('res-sn-letter').textContent = type[1];
+            document.getElementById('res-sn-name').textContent = type[1] === 'N' ? 'Intuition' : 'Sensing';
+            document.getElementById('res-sn-pct').textContent = type[1] === 'N' ? `${percentages.SN}%` : `${100-percentages.SN}%`;
+
+            document.getElementById('res-tf-letter').textContent = type[2];
+            document.getElementById('res-tf-name').textContent = type[2] === 'F' ? 'Feeling' : 'Thinking';
+            document.getElementById('res-tf-pct').textContent = type[2] === 'F' ? `${percentages.TF}%` : `${100-percentages.TF}%`;
+
+            document.getElementById('res-jp-letter').textContent = type[3];
+            document.getElementById('res-jp-name').textContent = type[3] === 'P' ? 'Perceiving' : 'Judging';
+            document.getElementById('res-jp-pct').textContent = type[3] === 'P' ? `${percentages.JP}%` : `${100-percentages.JP}%`;
+
+            document.getElementById('profile-title').textContent = `${type} - ${data.name}`;
+            document.getElementById('profile-text').textContent = data.description;
+        }
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                showQuizResults();
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            currentQuestion = 0;
+            answers = [];
+            quizScores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+            quizContainer.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+            renderQuestion();
+        });
+
+        renderQuestion();
+    </script>
+</body>
+</html>

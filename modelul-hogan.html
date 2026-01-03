@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hogan Assessment | Învățare Interactivă</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --moving-away: #EF4444;
+            --moving-against: #F59E0B;
+            --moving-toward: #3B82F6;
+            --bright: #10B981;
+            --dark: #8B5CF6;
+            --values: #EC4899;
+            --bg-dark: #1a1a2e;
+            --bg-card: #16213e;
+            --text-light: #edf2f7;
+            --text-muted: #a0aec0;
+            --accent-glow: rgba(139, 92, 246, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 2rem 2rem;
+            position: relative;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--text-light) 0%, var(--dark) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(139, 92, 246, 0.2);
+            color: var(--dark);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 2rem auto;
+            padding: 0.5rem;
+            background: var(--bg-card);
+            border-radius: 50px;
+            max-width: 600px;
+        }
+
+        .tab-btn {
+            padding: 0.8rem 1.2rem;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-light);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--dark), var(--moving-against));
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === MODEL === */
+        .model-intro {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .model-intro h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .model-intro p {
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .assessment-types {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .assessment-types {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .assessment-type {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-top: 4px solid transparent;
+        }
+
+        .assessment-type:hover {
+            transform: translateY(-5px);
+        }
+
+        .assessment-type.active {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .assessment-type[data-type="bright"] { border-color: var(--bright); }
+        .assessment-type[data-type="dark"] { border-color: var(--dark); }
+        .assessment-type[data-type="values"] { border-color: var(--values); }
+
+        .assessment-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .assessment-type h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .assessment-type p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* Dark Side Clusters */
+        .clusters-section {
+            margin-top: 2rem;
+        }
+
+        .cluster-label {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+        }
+
+        .cluster-label.away { background: rgba(239, 68, 68, 0.2); color: var(--moving-away); }
+        .cluster-label.against { background: rgba(245, 158, 11, 0.2); color: var(--moving-against); }
+        .cluster-label.toward { background: rgba(59, 130, 246, 0.2); color: var(--moving-toward); }
+
+        .derailers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .derailer-card {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1.25rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .derailer-card:hover {
+            transform: translateX(5px);
+        }
+
+        .derailer-card.active {
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .derailer-card.away { border-color: var(--moving-away); }
+        .derailer-card.against { border-color: var(--moving-against); }
+        .derailer-card.toward { border-color: var(--moving-toward); }
+
+        .derailer-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .derailer-name {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .derailer-brief {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .info-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-top: 2rem;
+        }
+
+        .info-header {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .info-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.6rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-header span {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-box {
+            padding: 1rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+        }
+
+        .info-box h4 {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-box p, .info-box ul {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .info-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .info-box li {
+            padding: 0.25rem 0;
+        }
+
+        /* === TEORIE === */
+        .theory-section {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .theory-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .theory-section p {
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .three-columns {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .three-columns {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .column-card {
+            padding: 1.25rem;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.03);
+        }
+
+        .column-card h4 {
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .column-card ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .column-card li {
+            padding: 0.3rem 0;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        /* === PLAYGROUND === */
+        .playground-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .playground-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .playground-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .playground-header p {
+            color: var(--text-muted);
+        }
+
+        .playground-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .playground-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sliders-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .slider-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .slider-section-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.75rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            display: inline-block;
+        }
+
+        .slider-section-label.away { background: rgba(239, 68, 68, 0.2); color: var(--moving-away); }
+        .slider-section-label.against { background: rgba(245, 158, 11, 0.2); color: var(--moving-against); }
+        .slider-section-label.toward { background: rgba(59, 130, 246, 0.2); color: var(--moving-toward); }
+
+        .slider-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            padding: 0.5rem;
+            background: rgba(255,255,255,0.02);
+            border-radius: 8px;
+        }
+
+        .slider-name {
+            width: 100px;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        .hogan-slider {
+            flex: 1;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(255,255,255,0.1);
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        .hogan-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            cursor: pointer;
+            background: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+        }
+
+        .slider-value {
+            width: 30px;
+            text-align: right;
+            font-weight: 600;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .preset-label {
+            width: 100%;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .preset-btn {
+            padding: 0.4rem 0.7rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: var(--text-light);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Source Sans 3', sans-serif;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .visualization-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .risk-summary {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .risk-summary h4 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .risk-meters {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+        }
+
+        .risk-meter {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.03);
+        }
+
+        .risk-meter.away { border-top: 3px solid var(--moving-away); }
+        .risk-meter.against { border-top: 3px solid var(--moving-against); }
+        .risk-meter.toward { border-top: 3px solid var(--moving-toward); }
+
+        .risk-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .risk-score {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .risk-meter.away .risk-score { color: var(--moving-away); }
+        .risk-meter.against .risk-score { color: var(--moving-against); }
+        .risk-meter.toward .risk-score { color: var(--moving-toward); }
+
+        .top-derailers {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .top-derailers h4 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .top-derailer-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 10px;
+            margin-bottom: 0.5rem;
+        }
+
+        .top-derailer-rank {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.75rem;
+            background: rgba(255,255,255,0.1);
+        }
+
+        .top-derailer-info {
+            flex: 1;
+        }
+
+        .top-derailer-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .top-derailer-cluster {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .top-derailer-score {
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .analysis-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .analysis-section {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .analysis-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .analysis-section h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .analysis-section p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* === QUIZ === */
+        .simulator-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-card);
+            border-radius: 3px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--dark), var(--moving-against));
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        .question-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .question-number {
+            color: var(--dark);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            line-height: 1.5;
+            margin-bottom: 2rem;
+        }
+
+        .likert-scale {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .likert-option {
+            flex: 1;
+            padding: 1rem 0.5rem;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .likert-option:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .likert-option.selected {
+            border-color: var(--dark);
+            background: rgba(139, 92, 246, 0.15);
+        }
+
+        .likert-value {
+            font-size: 1.3rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .likert-label {
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-light);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--dark), var(--moving-against));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--accent-glow);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results-container {
+            text-align: center;
+        }
+
+        .results-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .results-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 1rem;
+            max-width: 700px;
+            margin: 0 auto 2rem;
+        }
+
+        .result-item {
+            background: var(--bg-card);
+            border-radius: 12px;
+            padding: 1rem;
+            border-left: 3px solid;
+        }
+
+        .result-item.away { border-color: var(--moving-away); }
+        .result-item.against { border-color: var(--moving-against); }
+        .result-item.toward { border-color: var(--moving-toward); }
+
+        .result-name {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .result-score {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .result-item.away .result-score { color: var(--moving-away); }
+        .result-item.against .result-score { color: var(--moving-against); }
+        .result-item.toward .result-score { color: var(--moving-toward); }
+
+        .profile-description {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .profile-description h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .profile-description p {
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .restart-btn {
+            margin-top: 2rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="noise-overlay"></div>
+
+    <header>
+        <h1>Hogan Assessment</h1>
+        <p class="subtitle">Predicția Performanței și a Riscurilor de Derailing</p>
+        <span class="badge">Standard în Corporate</span>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="model">Dark Side</button>
+        <button class="tab-btn" data-tab="theory">Teorie</button>
+        <button class="tab-btn" data-tab="playground">Playground</button>
+        <button class="tab-btn" data-tab="simulator">Quiz</button>
+    </div>
+
+    <div class="container">
+        <!-- TAB MODEL -->
+        <div id="model" class="tab-content active">
+            <div class="model-intro">
+                <h2>Cele 11 „Dark Side" Traits</h2>
+                <p>Trăsături care apar sub stres sau când nu ne mai monitorizăm comportamentul. Grupate în 3 clustere după modul în care afectează relațiile.</p>
+            </div>
+
+            <div class="clusters-section">
+                <div class="cluster-label away">Moving Away (Evitare)</div>
+                <div class="derailers-grid">
+                    <div class="derailer-card away" data-derailer="excitable">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Excitable</div>
+                        </div>
+                        <div class="derailer-brief">Entuziasmat ușor dar dezamăgit rapid. Emoții volatile.</div>
+                    </div>
+                    <div class="derailer-card away" data-derailer="skeptical">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Skeptical</div>
+                        </div>
+                        <div class="derailer-brief">Cinic, neîncrezător, vede motive ascunse peste tot.</div>
+                    </div>
+                    <div class="derailer-card away" data-derailer="cautious">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Cautious</div>
+                        </div>
+                        <div class="derailer-brief">Evită riscurile, rezistent la schimbare, indecis.</div>
+                    </div>
+                    <div class="derailer-card away" data-derailer="reserved">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Reserved</div>
+                        </div>
+                        <div class="derailer-brief">Distant, greu de citit, nu oferă feedback.</div>
+                    </div>
+                    <div class="derailer-card away" data-derailer="leisurely">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Leisurely</div>
+                        </div>
+                        <div class="derailer-brief">Pasiv-agresiv, cooperant în aparență dar rezistent subtil.</div>
+                    </div>
+                </div>
+
+                <div class="cluster-label against">Moving Against (Confruntare)</div>
+                <div class="derailers-grid">
+                    <div class="derailer-card against" data-derailer="bold">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Bold</div>
+                        </div>
+                        <div class="derailer-brief">Supra-încrezător, nu recunoaște greșelile, intimidant.</div>
+                    </div>
+                    <div class="derailer-card against" data-derailer="mischievous">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Mischievous</div>
+                        </div>
+                        <div class="derailer-brief">Caută senzații, testează limitele, manipulativ.</div>
+                    </div>
+                    <div class="derailer-card against" data-derailer="colorful">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Colorful</div>
+                        </div>
+                        <div class="derailer-brief">Dornic de atenție, dramatic, întrerupe concentrarea.</div>
+                    </div>
+                    <div class="derailer-card against" data-derailer="imaginative">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Imaginative</div>
+                        </div>
+                        <div class="derailer-brief">Idei neconvenționale dar impractice, greu de urmat.</div>
+                    </div>
+                </div>
+
+                <div class="cluster-label toward">Moving Toward (Apropiere)</div>
+                <div class="derailers-grid">
+                    <div class="derailer-card toward" data-derailer="diligent">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Diligent</div>
+                        </div>
+                        <div class="derailer-brief">Perfecționist, micromanager, prea critic cu detaliile.</div>
+                    </div>
+                    <div class="derailer-card toward" data-derailer="dutiful">
+                        <div class="derailer-header">
+                            <div class="derailer-name">Dutiful</div>
+                        </div>
+                        <div class="derailer-brief">Prea conform, evită conflictul cu autoritatea, nu provoacă.</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-panel" id="info-panel">
+                <div class="info-header">
+                    <h2 id="info-name">Excitable</h2>
+                    <span id="info-cluster">Moving Away - Evitare</span>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-box">
+                        <h4>Sub Stres</h4>
+                        <p id="info-stress">Devine entuziasmat de proiecte noi dar își pierde rapid interesul. Emoțional volatil, dezamăgit ușor de oameni și situații.</p>
+                    </div>
+                    <div class="info-box">
+                        <h4>Impact în Echipă</h4>
+                        <p id="info-impact">Echipa devine nesigură pe direcție, nu știe ce să aștepte. Moralul scade când liderul pare să-și piardă entuziasmul.</p>
+                    </div>
+                    <div class="info-box">
+                        <h4>Strategii de Gestionare</h4>
+                        <p id="info-strategies">Monitorizează-ți reacțiile emoționale. Nu lua decizii importante când ești frustrat. Comunică consistent.</p>
+                    </div>
+                    <div class="info-box">
+                        <h4>La Interviuri</h4>
+                        <p id="info-interview">Atenție la candidați care schimbă frecvent job-uri sau proiecte. Întreabă despre momente de frustrare.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB TEORIE -->
+        <div id="theory" class="tab-content">
+            <div class="theory-section">
+                <h2>Sistemul Hogan</h2>
+                <p>Dr. Robert Hogan a dezvoltat unul dintre cele mai utilizate sisteme de evaluare a personalității pentru predicția performanței profesionale. Sistemul include trei instrumente complementare:</p>
+
+                <div class="three-columns">
+                    <div class="column-card" style="border-top: 3px solid var(--bright);">
+                        <h4 style="color: var(--bright);">HPI - Bright Side</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">Trăsăturile care ne definesc când suntem în cea mai bună formă</p>
+                        <ul>
+                            <li>Adjustment (stabilitate)</li>
+                            <li>Ambition (drive)</li>
+                            <li>Sociability</li>
+                            <li>Interpersonal Sensitivity</li>
+                            <li>Prudence</li>
+                            <li>Inquisitive</li>
+                            <li>Learning Approach</li>
+                        </ul>
+                    </div>
+                    <div class="column-card" style="border-top: 3px solid var(--dark);">
+                        <h4 style="color: var(--dark);">HDS - Dark Side</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">Comportamente care apar sub stres sau presiune</p>
+                        <ul>
+                            <li>Moving Away (5 scale)</li>
+                            <li>Moving Against (4 scale)</li>
+                            <li>Moving Toward (2 scale)</li>
+                            <li>Total: 11 derailers</li>
+                        </ul>
+                    </div>
+                    <div class="column-card" style="border-top: 3px solid var(--values);">
+                        <h4 style="color: var(--values);">MVPI - Values</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 0.75rem;">Ce ne motivează și ce tip de cultură căutăm</p>
+                        <ul>
+                            <li>Recognition</li>
+                            <li>Power</li>
+                            <li>Hedonism</li>
+                            <li>Altruistic</li>
+                            <li>Affiliation</li>
+                            <li>Tradition</li>
+                            <li>Security</li>
+                            <li>Commerce</li>
+                            <li>Aesthetics</li>
+                            <li>Science</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h2>Cele 3 Clustere ale Dark Side</h2>
+                <p>Karen Horney a identificat trei moduri în care oamenii răspund la anxietate în relații. Hogan a aplicat acest framework la comportamentele de leadership:</p>
+
+                <div class="three-columns">
+                    <div class="column-card" style="border-top: 3px solid var(--moving-away);">
+                        <h4 style="color: var(--moving-away);">Moving Away</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Gestionează nesiguranța prin retragere și evitare. Include: Excitable, Skeptical, Cautious, Reserved, Leisurely.</p>
+                    </div>
+                    <div class="column-card" style="border-top: 3px solid var(--moving-against);">
+                        <h4 style="color: var(--moving-against);">Moving Against</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Gestionează nesiguranța prin dominare și intimidare. Include: Bold, Mischievous, Colorful, Imaginative.</p>
+                    </div>
+                    <div class="column-card" style="border-top: 3px solid var(--moving-toward);">
+                        <h4 style="color: var(--moving-toward);">Moving Toward</h4>
+                        <p style="font-size: 0.85rem; color: var(--text-muted);">Gestionează nesiguranța prin încercare de a mulțumi. Include: Diligent, Dutiful.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="theory-section">
+                <h2>De Ce Contează Dark Side</h2>
+                <p>Studiile arată că circa 50% din lideri eșuează. Motivele nu sunt lipsa inteligenței sau a competențelor tehnice, ci comportamente interpersonale disfuncționale care apar sub stres. Cunoașterea propriilor „dark side traits" permite:</p>
+                <ul style="color: var(--text-muted); margin-left: 1.5rem; margin-top: 1rem;">
+                    <li style="margin-bottom: 0.5rem;">Auto-monitorizare în situații de stres</li>
+                    <li style="margin-bottom: 0.5rem;">Construirea de strategii preventive</li>
+                    <li style="margin-bottom: 0.5rem;">Alegerea de roluri care minimizează riscurile</li>
+                    <li>Dezvoltarea de relații de coaching pentru feedback</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- TAB PLAYGROUND -->
+        <div id="playground" class="tab-content">
+            <div class="playground-container">
+                <div class="playground-header">
+                    <h2>Simulatorul Dark Side</h2>
+                    <p>Explorează diferite profiluri de risc pentru leadership</p>
+                </div>
+
+                <div class="playground-grid">
+                    <div class="sliders-panel">
+                        <div class="slider-section">
+                            <div class="slider-section-label away">Moving Away</div>
+                            <div class="slider-group">
+                                <span class="slider-name">Excitable</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-excitable">
+                                <span class="slider-value" id="val-excitable">50</span>
+                            </div>
+                            <div class="slider-group">
+                                <span class="slider-name">Skeptical</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-skeptical">
+                                <span class="slider-value" id="val-skeptical">50</span>
+                            </div>
+                            <div class="slider-group">
+                                <span class="slider-name">Cautious</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-cautious">
+                                <span class="slider-value" id="val-cautious">50</span>
+                            </div>
+                            <div class="slider-group">
+                                <span class="slider-name">Reserved</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-reserved">
+                                <span class="slider-value" id="val-reserved">50</span>
+                            </div>
+                            <div class="slider-group">
+                                <span class="slider-name">Leisurely</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-leisurely">
+                                <span class="slider-value" id="val-leisurely">50</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-section">
+                            <div class="slider-section-label against">Moving Against</div>
+                            <div class="slider-group">
+                                <span class="slider-name">Bold</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-bold">
+                                <span class="slider-value" id="val-bold">50</span>
+                            </div>
+                            <div class="slider-group">
+                                <span class="slider-name">Mischievous</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-mischievous">
+                                <span class="slider-value" id="val-mischievous">50</span>
+                            </div>
+                            <div class="slider-group">
+                                <span class="slider-name">Colorful</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-colorful">
+                                <span class="slider-value" id="val-colorful">50</span>
+                            </div>
+                            <div class="slider-group">
+                                <span class="slider-name">Imaginative</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-imaginative">
+                                <span class="slider-value" id="val-imaginative">50</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-section">
+                            <div class="slider-section-label toward">Moving Toward</div>
+                            <div class="slider-group">
+                                <span class="slider-name">Diligent</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-diligent">
+                                <span class="slider-value" id="val-diligent">50</span>
+                            </div>
+                            <div class="slider-group">
+                                <span class="slider-name">Dutiful</span>
+                                <input type="range" min="0" max="100" value="50" class="hogan-slider" id="slider-dutiful">
+                                <span class="slider-value" id="val-dutiful">50</span>
+                            </div>
+                        </div>
+
+                        <div class="preset-buttons">
+                            <span class="preset-label">Profile de Risc:</span>
+                            <button class="preset-btn" data-preset="narcissist">Narcisist</button>
+                            <button class="preset-btn" data-preset="avoider">Evitant</button>
+                            <button class="preset-btn" data-preset="perfectionist">Perfecționist</button>
+                            <button class="preset-btn" data-preset="passive">Pasiv-Agresiv</button>
+                            <button class="preset-btn" data-preset="charismatic">Carismatic Riscant</button>
+                            <button class="preset-btn" data-preset="lowrisk">Risc Scăzut</button>
+                        </div>
+                    </div>
+
+                    <div class="visualization-panel">
+                        <div class="risk-summary">
+                            <h4>Scoruri pe Clustere</h4>
+                            <div class="risk-meters">
+                                <div class="risk-meter away">
+                                    <div class="risk-label">Moving Away</div>
+                                    <div class="risk-score" id="score-away">50</div>
+                                </div>
+                                <div class="risk-meter against">
+                                    <div class="risk-label">Moving Against</div>
+                                    <div class="risk-score" id="score-against">50</div>
+                                </div>
+                                <div class="risk-meter toward">
+                                    <div class="risk-label">Moving Toward</div>
+                                    <div class="risk-score" id="score-toward">50</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="top-derailers">
+                            <h4>Top 3 Riscuri</h4>
+                            <div id="top-derailers-list"></div>
+                        </div>
+
+                        <div class="analysis-panel">
+                            <div class="analysis-section">
+                                <h4>Stilul Sub Stres</h4>
+                                <p id="stress-style">Profil echilibrat - fără tendințe extreme de derailing identificate.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Impact pe Echipă</h4>
+                                <p id="team-impact">Risc moderat pentru dinamica de echipă. Monitorizare recomandată în perioade de presiune.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>Recomandări de Dezvoltare</h4>
+                                <p id="development">Construiește mecanisme de feedback pentru a identifica early warning signs.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB QUIZ -->
+        <div id="simulator" class="tab-content">
+            <div class="simulator-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+
+                <div id="quiz-container">
+                    <div class="question-card">
+                        <div class="question-number" id="question-number">Întrebarea 1 din 22</div>
+                        <div class="question-text" id="question-text">Când ceva nu merge bine la muncă, primul impuls e să-mi pierd entuziasmul.</div>
+                        <div class="likert-scale" id="options"></div>
+                    </div>
+
+                    <div class="nav-buttons">
+                        <button class="btn btn-secondary" id="prev-btn" disabled>Înapoi</button>
+                        <button class="btn btn-primary" id="next-btn" disabled>Următoarea</button>
+                    </div>
+                </div>
+
+                <div id="results-container" class="results-container hidden">
+                    <h2 class="results-title">Profilul Tău Dark Side</h2>
+                    <p class="results-subtitle">Riscuri potențiale de leadership sub stres</p>
+
+                    <div class="results-grid" id="results-grid"></div>
+
+                    <div class="profile-description">
+                        <h3>Interpretare</h3>
+                        <p id="profile-text-main"></p>
+                        <p id="profile-text-secondary"></p>
+                    </div>
+
+                    <button class="btn btn-primary restart-btn" id="restart-btn">Reia Testul</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === DATA ===
+        const derailerData = {
+            excitable: {
+                name: 'Excitable', cluster: 'away', clusterName: 'Moving Away - Evitare',
+                stress: 'Devine entuziasmat de proiecte noi dar își pierde rapid interesul. Emoțional volatil, dezamăgit ușor de oameni și situații.',
+                impact: 'Echipa devine nesigură pe direcție, nu știe ce să aștepte. Moralul scade când liderul pare să-și piardă entuziasmul.',
+                strategies: 'Monitorizează-ți reacțiile emoționale. Nu lua decizii importante când ești frustrat. Comunică consistent.',
+                interview: 'Atenție la candidați care schimbă frecvent job-uri sau proiecte. Întreabă despre momente de frustrare.'
+            },
+            skeptical: {
+                name: 'Skeptical', cluster: 'away', clusterName: 'Moving Away - Evitare',
+                stress: 'Devine cinic și neîncrezător. Suspectează motive ascunse, interpretează neutru ca negativ, ține ranchiună.',
+                impact: 'Creează cultură de neîncredere. Oamenii ezită să împărtășească informații sau să ceară ajutor.',
+                strategies: 'Verifică interpretările înainte de a reacționa. Caută intenții pozitive. Oferă beneficiul dubiului.',
+                interview: 'Ascultă cum vorbesc despre foști colegi și șefi. Atenție la pattern-uri de blamare.'
+            },
+            cautious: {
+                name: 'Cautious', cluster: 'away', clusterName: 'Moving Away - Evitare',
+                stress: 'Devine excesiv de precaut, evită deciziile, rezistent la schimbare, paralizat de frica de eșec.',
+                impact: 'Încetinește progresul. Echipa devine frustrată de lipsa de direcție. Oportunitățile sunt ratate.',
+                strategies: 'Stabilește termene pentru decizii. Acceptă că perfecțiunea nu există. Începe cu pași mici.',
+                interview: 'Întreabă despre decizii rapide. Cum gestionează ambiguitatea? Are exemple de risc calculat?'
+            },
+            reserved: {
+                name: 'Reserved', cluster: 'away', clusterName: 'Moving Away - Evitare',
+                stress: 'Devine retras, distant, greu de citit. Nu oferă feedback sau recunoaștere. Pare dezinteresat.',
+                impact: 'Echipa se simte neapreciată și neghidată. Nu știu pe ce poziție stau. Engagement scăzut.',
+                strategies: 'Programează check-in-uri regulate. Practică oferirea de feedback pozitiv. Împărtășește mai mult.',
+                interview: 'Observă nivelul de engagement în conversație. Întreabă despre stilul de comunicare cu echipa.'
+            },
+            leisurely: {
+                name: 'Leisurely', cluster: 'away', clusterName: 'Moving Away - Evitare',
+                stress: 'Devine pasiv-agresiv. Agreează în aparență dar sabotează subtil. Tergiversează, „uită", găsește scuze.',
+                impact: 'Frustrează colegii. Proiectele întârzie. Ceilalți nu înțeleg de ce lucrurile nu se mișcă.',
+                strategies: 'Fii direct când nu ești de acord. Exprimă nemulțumirile deschis. Respectă angajamentele.',
+                interview: 'Verifică referințele despre follow-through. Întreabă cum gestionează dezacordurile.'
+            },
+            bold: {
+                name: 'Bold', cluster: 'against', clusterName: 'Moving Against - Confruntare',
+                stress: 'Devine supra-încrezător, nu acceptă feedback, minimizează greșelile proprii, poate fi intimidant.',
+                impact: 'Echipa nu mai oferă input onest. Decizii proaste necontrolate. Cultură de frică.',
+                strategies: 'Caută activ feedback critic. Recunoaște greșelile public. Ascultă mai mult.',
+                interview: 'Cum răspunde la feedback negativ în interviu? Cum vorbește despre eșecuri?'
+            },
+            mischievous: {
+                name: 'Mischievous', cluster: 'against', clusterName: 'Moving Against - Confruntare',
+                stress: 'Testează limitele, caută senzații, poate fi manipulativ sau neetic, „regulile sunt pentru alții".',
+                impact: 'Creează riscuri pentru organizație. Politici încălcate. Încrederea se erodează.',
+                strategies: 'Recunoaște impactul pe termen lung. Respectă procesele. Găsește căi legitime de excitement.',
+                interview: 'Explorează situații ambigue etic. Cum justifică scurtături? Verifică referințele atent.'
+            },
+            colorful: {
+                name: 'Colorful', cluster: 'against', clusterName: 'Moving Against - Confruntare',
+                stress: 'Dornic de atenție, dramatic, întrerupe pentru a fi în centrul scenei, poate fi superficial.',
+                impact: 'Distrage de la obiective. Alții nu sunt auziți. Substanța e sacrificată pentru spectacol.',
+                strategies: 'Oferă spațiu celorlalți. Focusează pe rezultate nu pe prezentare. Ascultă activ.',
+                interview: 'Observă dacă domină conversația. Poate oferi credit altora? Cât de substanțial e răspunsul?'
+            },
+            imaginative: {
+                name: 'Imaginative', cluster: 'against', clusterName: 'Moving Against - Confruntare',
+                stress: 'Idei neconvenționale dar deconectate de realitate. Greu de urmat. Schimbă direcția constant.',
+                impact: 'Echipa confuză. Resurse irosite pe idei impractice. Execuția suferă.',
+                strategies: 'Testează ideile cu alții înainte de a le lansa. Acceptă feedback practic. Focus pe implementare.',
+                interview: 'Întreabă cum au implementat idei. Pot face planuri concrete? Au finalizat proiecte?'
+            },
+            diligent: {
+                name: 'Diligent', cluster: 'toward', clusterName: 'Moving Toward - Apropiere',
+                stress: 'Perfectionist, micromanager, prea critic cu detalii, greu de mulțumit, standard nerealist.',
+                impact: 'Echipa paralizată de critici. Burnout. Creativitatea sufocată de control excesiv.',
+                strategies: 'Definește „destul de bun". Delegă cu încredere. Focusează pe ce contează cu adevărat.',
+                interview: 'Cum definesc calitatea? Pot da exemple de delegare? Cum gestionează erori ale altora?'
+            },
+            dutiful: {
+                name: 'Dutiful', cluster: 'toward', clusterName: 'Moving Toward - Apropiere',
+                stress: 'Prea conform, evită orice conflict cu autoritatea, nu provoacă status quo, „yes person".',
+                impact: 'Nu aduce perspectivă critică. Decizii proaste necontestate. Inițiativă limitată.',
+                strategies: 'Practică exprimarea dezacordului constructiv. Oferă alternative. Asumă-ți riscuri calculate.',
+                interview: 'Au contestat vreodată o decizie? Cum? Au inițiat schimbări? Când au zis „nu"?'
+            }
+        };
+
+        // === TAB NAVIGATION ===
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // === MODEL ===
+        const derailerCards = document.querySelectorAll('.derailer-card');
+
+        function updateInfoPanel(derailer) {
+            const data = derailerData[derailer];
+            document.getElementById('info-name').textContent = data.name;
+            document.getElementById('info-cluster').textContent = data.clusterName;
+            document.getElementById('info-stress').textContent = data.stress;
+            document.getElementById('info-impact').textContent = data.impact;
+            document.getElementById('info-strategies').textContent = data.strategies;
+            document.getElementById('info-interview').textContent = data.interview;
+        }
+
+        derailerCards.forEach(card => {
+            card.addEventListener('click', () => {
+                derailerCards.forEach(c => c.classList.remove('active'));
+                card.classList.add('active');
+                updateInfoPanel(card.dataset.derailer);
+            });
+        });
+
+        // === PLAYGROUND ===
+        const derailers = ['excitable', 'skeptical', 'cautious', 'reserved', 'leisurely', 'bold', 'mischievous', 'colorful', 'imaginative', 'diligent', 'dutiful'];
+        const sliders = {};
+        derailers.forEach(d => {
+            sliders[d] = document.getElementById(`slider-${d}`);
+        });
+
+        const clusters = {
+            away: ['excitable', 'skeptical', 'cautious', 'reserved', 'leisurely'],
+            against: ['bold', 'mischievous', 'colorful', 'imaginative'],
+            toward: ['diligent', 'dutiful']
+        };
+
+        const presets = {
+            narcissist: { excitable: 30, skeptical: 60, cautious: 20, reserved: 40, leisurely: 35, bold: 95, mischievous: 75, colorful: 85, imaginative: 70, diligent: 25, dutiful: 15 },
+            avoider: { excitable: 75, skeptical: 70, cautious: 90, reserved: 85, leisurely: 60, bold: 20, mischievous: 25, colorful: 20, imaginative: 30, diligent: 40, dutiful: 70 },
+            perfectionist: { excitable: 50, skeptical: 55, cautious: 65, reserved: 50, leisurely: 40, bold: 35, mischievous: 25, colorful: 30, imaginative: 45, diligent: 95, dutiful: 75 },
+            passive: { excitable: 60, skeptical: 70, cautious: 55, reserved: 65, leisurely: 90, bold: 20, mischievous: 30, colorful: 25, imaginative: 35, diligent: 50, dutiful: 80 },
+            charismatic: { excitable: 55, skeptical: 35, cautious: 25, reserved: 20, leisurely: 30, bold: 85, mischievous: 70, colorful: 95, imaginative: 80, diligent: 30, dutiful: 25 },
+            lowrisk: { excitable: 30, skeptical: 35, cautious: 40, reserved: 35, leisurely: 30, bold: 40, mischievous: 30, colorful: 35, imaginative: 40, diligent: 45, dutiful: 40 }
+        };
+
+        function updatePlayground() {
+            const vals = {};
+            derailers.forEach(d => {
+                vals[d] = parseInt(sliders[d].value);
+                document.getElementById(`val-${d}`).textContent = vals[d];
+            });
+
+            // Calculate cluster averages
+            const clusterScores = {};
+            Object.keys(clusters).forEach(cluster => {
+                const sum = clusters[cluster].reduce((acc, d) => acc + vals[d], 0);
+                clusterScores[cluster] = Math.round(sum / clusters[cluster].length);
+            });
+
+            document.getElementById('score-away').textContent = clusterScores.away;
+            document.getElementById('score-against').textContent = clusterScores.against;
+            document.getElementById('score-toward').textContent = clusterScores.toward;
+
+            // Top 3 derailers
+            const sorted = Object.entries(vals).sort((a, b) => b[1] - a[1]).slice(0, 3);
+            const clusterNames = { away: 'Moving Away', against: 'Moving Against', toward: 'Moving Toward' };
+
+            document.getElementById('top-derailers-list').innerHTML = sorted.map(([derailer, score], i) => {
+                const data = derailerData[derailer];
+                return `
+                    <div class="top-derailer-item">
+                        <div class="top-derailer-rank">${i + 1}</div>
+                        <div class="top-derailer-info">
+                            <div class="top-derailer-name">${data.name}</div>
+                            <div class="top-derailer-cluster">${clusterNames[data.cluster]}</div>
+                        </div>
+                        <div class="top-derailer-score">${score}</div>
+                    </div>
+                `;
+            }).join('');
+
+            // Analysis
+            const maxCluster = Object.entries(clusterScores).sort((a, b) => b[1] - a[1])[0];
+            const topDerailer = sorted[0][0];
+
+            const stressStyles = {
+                away: 'Sub stres, tendința e de retragere și evitare. Riști să te izolezi sau să devii pasiv când presiunea crește.',
+                against: 'Sub stres, tendința e de confruntare și dominare. Riști să devii intimidant sau să ignori inputul altora.',
+                toward: 'Sub stres, tendința e de conformare excesivă. Riști să pierzi vocea proprie sau să devii prea perfecționist.'
+            };
+
+            const teamImpacts = {
+                away: 'Echipa poate simți că nu primește direcție sau feedback suficient. Comunicarea poate suferi.',
+                against: 'Echipa poate deveni reticentă să ofere input onest. Clima poate deveni tensionată.',
+                toward: 'Echipa poate simți că standardele sunt nerealist de înalte sau că nu există spațiu pentru eroare.'
+            };
+
+            document.getElementById('stress-style').textContent = stressStyles[maxCluster[0]] || 'Profil echilibrat - fără tendințe extreme.';
+            document.getElementById('team-impact').textContent = teamImpacts[maxCluster[0]] || 'Risc moderat. Monitorizare recomandată.';
+
+            const topData = derailerData[topDerailer];
+            document.getElementById('development').textContent = topData.strategies;
+        }
+
+        derailers.forEach(d => {
+            sliders[d].addEventListener('input', updatePlayground);
+        });
+
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const preset = presets[btn.dataset.preset];
+                derailers.forEach(d => {
+                    sliders[d].value = preset[d];
+                });
+                updatePlayground();
+            });
+        });
+
+        updatePlayground();
+
+        // === QUIZ ===
+        const questions = [
+            { text: "Când ceva nu merge bine la muncă, primul impuls e să-mi pierd entuziasmul.", derailer: 'excitable' },
+            { text: "Mă întreb adesea ce motive ascunse au ceilalți.", derailer: 'skeptical' },
+            { text: "Prefer să nu risc decât să greșesc.", derailer: 'cautious' },
+            { text: "Oamenii spun că sunt greu de citit.", derailer: 'reserved' },
+            { text: "Când nu sunt de acord, prefer să nu spun direct.", derailer: 'leisurely' },
+            { text: "Sunt încrezător în judecata mea chiar când ceilalți nu sunt de acord.", derailer: 'bold' },
+            { text: "Regulile sunt orientative, nu absolute.", derailer: 'mischievous' },
+            { text: "Îmi place să fiu în centrul atenției.", derailer: 'colorful' },
+            { text: "Am idei creative pe care ceilalți le consideră prea neobișnuite.", derailer: 'imaginative' },
+            { text: "Standardele mele sunt mai înalte decât ale majorității.", derailer: 'diligent' },
+            { text: "Prefer să evit conflictele cu superiorii.", derailer: 'dutiful' },
+            { text: "Mă plictisesc ușor de proiecte după entuziamul inițial.", derailer: 'excitable' },
+            { text: "E greu să am încredere deplină în oameni.", derailer: 'skeptical' },
+            { text: "Am nevoie de multă informație înainte să iau o decizie.", derailer: 'cautious' },
+            { text: "Nu sunt foarte expresiv cu emoțiile mele.", derailer: 'reserved' },
+            { text: "Uneori amân lucruri cu care nu sunt de acord.", derailer: 'leisurely' },
+            { text: "Critica nu mă afectează - știu ce știu.", derailer: 'bold' },
+            { text: "Mă plictisesc dacă nu e un pic de risc și adrenalină.", derailer: 'mischievous' },
+            { text: "Sunt entuziast și expresiv în prezentări.", derailer: 'colorful' },
+            { text: "Văd conexiuni și posibilități pe care alții nu le văd.", derailer: 'imaginative' },
+            { text: "Detaliile contează - le verific de mai multe ori.", derailer: 'diligent' },
+            { text: "Respect autoritatea și ierarhia.", derailer: 'dutiful' }
+        ];
+
+        let currentQuestion = 0;
+        let answers = [];
+
+        const questionText = document.getElementById('question-text');
+        const questionNumber = document.getElementById('question-number');
+        const optionsContainer = document.getElementById('options');
+        const progressFill = document.getElementById('progress-fill');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            questionNumber.textContent = `Întrebarea ${currentQuestion + 1} din ${questions.length}`;
+            questionText.textContent = q.text;
+            progressFill.style.width = `${((currentQuestion) / questions.length) * 100}%`;
+
+            optionsContainer.innerHTML = [1, 2, 3, 4, 5].map(val => `
+                <div class="likert-option ${answers[currentQuestion] === val ? 'selected' : ''}" data-value="${val}">
+                    <span class="likert-value">${val}</span>
+                    <span class="likert-label">${['Deloc', 'Rar', 'Uneori', 'Des', 'Mereu'][val-1]}</span>
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.likert-option').forEach(opt => {
+                opt.addEventListener('click', () => selectOption(parseInt(opt.dataset.value)));
+            });
+
+            prevBtn.disabled = currentQuestion === 0;
+            nextBtn.disabled = answers[currentQuestion] === undefined;
+            nextBtn.textContent = currentQuestion === questions.length - 1 ? 'Vezi Rezultatul' : 'Următoarea';
+        }
+
+        function selectOption(value) {
+            answers[currentQuestion] = value;
+            document.querySelectorAll('.likert-option').forEach(o => o.classList.remove('selected'));
+            document.querySelector(`[data-value="${value}"]`).classList.add('selected');
+            nextBtn.disabled = false;
+        }
+
+        function calculateQuizResults() {
+            const scores = {};
+            derailers.forEach(d => scores[d] = 0);
+            const counts = {};
+            derailers.forEach(d => counts[d] = 0);
+
+            questions.forEach((q, i) => {
+                if (answers[i] !== undefined) {
+                    scores[q.derailer] += answers[i];
+                    counts[q.derailer]++;
+                }
+            });
+
+            const percentages = {};
+            derailers.forEach(d => {
+                percentages[d] = counts[d] > 0 ? Math.round((scores[d] / (counts[d] * 5)) * 100) : 0;
+            });
+
+            return percentages;
+        }
+
+        function showQuizResults() {
+            const percentages = calculateQuizResults();
+
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            progressFill.style.width = '100%';
+
+            const sorted = Object.entries(percentages).sort((a, b) => b[1] - a[1]);
+
+            document.getElementById('results-grid').innerHTML = sorted.map(([derailer, score]) => {
+                const data = derailerData[derailer];
+                return `
+                    <div class="result-item ${data.cluster}">
+                        <div class="result-name">${data.name}</div>
+                        <div class="result-score">${score}%</div>
+                    </div>
+                `;
+            }).join('');
+
+            const top = sorted[0];
+            const topData = derailerData[top[0]];
+
+            document.getElementById('profile-text-main').textContent = `Riscul principal identificat: ${topData.name}. ${topData.stress}`;
+            document.getElementById('profile-text-secondary').textContent = `Strategii recomandate: ${topData.strategies}`;
+        }
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                showQuizResults();
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            currentQuestion = 0;
+            answers = [];
+            quizContainer.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+            renderQuestion();
+        });
+
+        renderQuestion();
+    </script>
+</body>
+</html>

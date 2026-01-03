@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modele de Personalitate & Comportament - Simulatoare Interactive</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+            --accent: #6366f1;
+            --accent-light: #818cf8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a2e 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 3rem 2rem;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+            border-radius: 24px;
+            border: 1px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.2rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--accent-light);
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border);
+        }
+
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .model-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            border: 2px solid var(--border);
+            transition: all 0.3s ease;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .model-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--card-gradient);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .model-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--card-accent, var(--accent));
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .model-card:hover::before {
+            opacity: 1;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .card-icon {
+            font-size: 2.5rem;
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--card-bg, rgba(99, 102, 241, 0.2));
+            border-radius: 15px;
+            flex-shrink: 0;
+        }
+
+        .card-title-group {
+            flex: 1;
+        }
+
+        .card-title {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+        }
+
+        .card-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .card-description {
+            color: var(--text-secondary);
+            margin-bottom: 1.5rem;
+            flex: 1;
+        }
+
+        .card-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tag {
+            padding: 0.35rem 0.75rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        .card-features {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 0.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .feature-icon {
+            color: var(--card-accent, var(--accent));
+        }
+
+        .card-arrow {
+            position: absolute;
+            top: 2rem;
+            right: 2rem;
+            font-size: 1.5rem;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+            color: var(--card-accent, var(--accent));
+        }
+
+        .model-card:hover .card-arrow {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Card-specific colors */
+        .model-card.paei {
+            --card-accent: #10b981;
+            --card-bg: rgba(16, 185, 129, 0.2);
+            --card-gradient: linear-gradient(90deg, #10b981, #3b82f6, #f59e0b, #ef4444);
+        }
+
+        .model-card.disc {
+            --card-accent: #ef4444;
+            --card-bg: rgba(239, 68, 68, 0.2);
+            --card-gradient: linear-gradient(90deg, #ef4444, #f59e0b, #22c55e, #3b82f6);
+        }
+
+        .model-card.mbti {
+            --card-accent: #8b5cf6;
+            --card-bg: rgba(139, 92, 246, 0.2);
+            --card-gradient: linear-gradient(90deg, #8b5cf6, #6366f1, #3b82f6, #06b6d4);
+        }
+
+        .model-card.belbin {
+            --card-accent: #f59e0b;
+            --card-bg: rgba(245, 158, 11, 0.2);
+            --card-gradient: linear-gradient(90deg, #ef4444, #f59e0b, #22c55e);
+        }
+
+        .model-card.ocean {
+            --card-accent: #06b6d4;
+            --card-bg: rgba(6, 182, 212, 0.2);
+            --card-gradient: linear-gradient(90deg, #06b6d4, #3b82f6, #8b5cf6, #ec4899, #f59e0b);
+        }
+
+        .model-card.hogan {
+            --card-accent: #ec4899;
+            --card-bg: rgba(236, 72, 153, 0.2);
+            --card-gradient: linear-gradient(90deg, #ec4899, #8b5cf6, #6366f1);
+        }
+
+        .model-card.insights {
+            --card-accent: #fbbf24;
+            --card-bg: rgba(251, 191, 36, 0.2);
+            --card-gradient: linear-gradient(90deg, #dc2626, #fbbf24, #16a34a, #2563eb);
+        }
+
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-secondary);
+            border-top: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+
+        footer p {
+            font-size: 0.9rem;
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+        }
+
+        .footer-links a {
+            color: var(--accent-light);
+            text-decoration: none;
+            font-size: 0.85rem;
+            transition: color 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .models-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                gap: 1.5rem;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+        }
+
+        .lang-switch {
+            position: absolute;
+            top: 1rem;
+            right: 2rem;
+        }
+
+        .lang-switch a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .lang-switch a:hover {
+            border-color: var(--accent);
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="lang-switch">
+                <a href="index-en.html">English</a>
+            </div>
+            <h1>Modele de Personalitate & Comportament</h1>
+            <p>
+                Explorează cele mai utilizate framework-uri pentru înțelegerea personalității,
+                stilurilor de lucru și dinamicii de echipă prin simulatoare interactive.
+            </p>
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value">7</div>
+                    <div class="stat-label">Modele</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">50+</div>
+                    <div class="stat-label">Dimensiuni</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value">140+</div>
+                    <div class="stat-label">Întrebări Quiz</div>
+                </div>
+            </div>
+        </header>
+
+        <h2 class="section-title">Simulatoare Interactive</h2>
+
+        <div class="models-grid">
+            <!-- PAEI -->
+            <a href="modelul-paei.html" class="model-card paei">
+                <span class="card-arrow">→</span>
+                <div class="card-header">
+                    <div class="card-icon">🎯</div>
+                    <div class="card-title-group">
+                        <div class="card-title">PAEI (Adizes)</div>
+                        <div class="card-subtitle">Stiluri de Management</div>
+                    </div>
+                </div>
+                <p class="card-description">
+                    Modelul Adizes identifică patru roluri esențiale în management:
+                    Producător, Administrator, Antreprenor și Integrator.
+                    Ideal pentru înțelegerea stilurilor de leadership.
+                </p>
+                <div class="card-tags">
+                    <span class="tag">4 roluri</span>
+                    <span class="tag">Management</span>
+                    <span class="tag">Leadership</span>
+                </div>
+                <div class="card-features">
+                    <div class="feature"><span class="feature-icon">✓</span> Quadrant interactiv</div>
+                    <div class="feature"><span class="feature-icon">✓</span> Playground cu slidere</div>
+                    <div class="feature"><span class="feature-icon">✓</span> Quiz de evaluare</div>
+                    <div class="feature"><span class="feature-icon">✓</span> Profile predefinite</div>
+                </div>
+            </a>
+
+            <!-- DISC -->
+            <a href="modelul-disc.html" class="model-card disc">
+                <span class="card-arrow">→</span>
+                <div class="card-header">
+                    <div class="card-icon">💬</div>
+                    <div class="card-title-group">
+                        <div class="card-title">DISC</div>
+                        <div class="card-subtitle">Stiluri de Comunicare</div>
+                    </div>
+                </div>
+                <p class="card-description">
+                    Foarte popular în vânzări și comunicare. Măsoară patru dimensiuni:
+                    Dominance, Influence, Steadiness și Conscientiousness pentru
+                    a înțelege stilurile comportamentale.
+                </p>
+                <div class="card-tags">
+                    <span class="tag">4 dimensiuni</span>
+                    <span class="tag">Vânzări</span>
+                    <span class="tag">Comunicare</span>
+                </div>
+                <div class="card-features">
+                    <div class="feature"><span class="feature-icon">✓</span> Quadrant interactiv</div>
+                    <div class="feature"><span class="feature-icon">✓</span> Playground cu slidere</div>
+                    <div class="feature"><span class="feature-icon">✓</span> 12 întrebări quiz</div>
+                    <div class="feature"><span class="feature-icon">✓</span> 6 profile predefinite</div>
+                </div>
+            </a>
+
+            <!-- MBTI -->
+            <a href="modelul-mbti.html" class="model-card mbti">
+                <span class="card-arrow">→</span>
+                <div class="card-header">
+                    <div class="card-icon">🧠</div>
+                    <div class="card-title-group">
+                        <div class="card-title">MBTI (Myers-Briggs)</div>
+                        <div class="card-subtitle">Tipuri de Personalitate</div>
+                    </div>
+                </div>
+                <p class="card-description">
+                    Bazat pe teoria lui Carl Jung, clasifică personalitatea în 16 tipuri
+                    folosind 4 axe: Extraversion/Introversion, Sensing/Intuition,
+                    Thinking/Feeling, Judging/Perceiving.
+                </p>
+                <div class="card-tags">
+                    <span class="tag">16 tipuri</span>
+                    <span class="tag">4 axe</span>
+                    <span class="tag">Jung</span>
+                </div>
+                <div class="card-features">
+                    <div class="feature"><span class="feature-icon">✓</span> Grid 16 tipuri</div>
+                    <div class="feature"><span class="feature-icon">✓</span> 4 slidere bipolare</div>
+                    <div class="feature"><span class="feature-icon">✓</span> 20 întrebări quiz</div>
+                    <div class="feature"><span class="feature-icon">✓</span> Descrieri complete</div>
+                </div>
+            </a>
+
+            <!-- Belbin -->
+            <a href="modelul-belbin.html" class="model-card belbin">
+                <span class="card-arrow">→</span>
+                <div class="card-header">
+                    <div class="card-icon">👥</div>
+                    <div class="card-title-group">
+                        <div class="card-title">Belbin Team Roles</div>
+                        <div class="card-subtitle">Roluri în Echipă</div>
+                    </div>
+                </div>
+                <p class="card-description">
+                    Identifică 9 roluri distincte în echipă, grupate în trei categorii:
+                    orientate spre acțiune, orientate spre oameni și orientate spre gândire.
+                    Focus pe comportament observabil.
+                </p>
+                <div class="card-tags">
+                    <span class="tag">9 roluri</span>
+                    <span class="tag">3 categorii</span>
+                    <span class="tag">Teamwork</span>
+                </div>
+                <div class="card-features">
+                    <div class="feature"><span class="feature-icon">✓</span> Radar chart</div>
+                    <div class="feature"><span class="feature-icon">✓</span> 9 slidere</div>
+                    <div class="feature"><span class="feature-icon">✓</span> 18 întrebări quiz</div>
+                    <div class="feature"><span class="feature-icon">✓</span> Top 3 roluri</div>
+                </div>
+            </a>
+
+            <!-- Big Five / OCEAN -->
+            <a href="modelul-ocean.html" class="model-card ocean">
+                <span class="card-arrow">→</span>
+                <div class="card-header">
+                    <div class="card-icon">🔬</div>
+                    <div class="card-title-group">
+                        <div class="card-title">Big Five (OCEAN)</div>
+                        <div class="card-subtitle">Model Științific</div>
+                    </div>
+                </div>
+                <p class="card-description">
+                    Cel mai validat științific model de personalitate. Măsoară cinci
+                    dimensiuni: Openness, Conscientiousness, Extraversion,
+                    Agreeableness și Neuroticism.
+                </p>
+                <div class="card-tags">
+                    <span class="tag">5 dimensiuni</span>
+                    <span class="tag">Validat științific</span>
+                    <span class="tag">Cercetare</span>
+                </div>
+                <div class="card-features">
+                    <div class="feature"><span class="feature-icon">✓</span> Pentagon chart</div>
+                    <div class="feature"><span class="feature-icon">✓</span> Facete detaliate</div>
+                    <div class="feature"><span class="feature-icon">✓</span> 25 întrebări Likert</div>
+                    <div class="feature"><span class="feature-icon">✓</span> Analiză completă</div>
+                </div>
+            </a>
+
+            <!-- Hogan -->
+            <a href="modelul-hogan.html" class="model-card hogan">
+                <span class="card-arrow">→</span>
+                <div class="card-header">
+                    <div class="card-icon">⚠️</div>
+                    <div class="card-title-group">
+                        <div class="card-title">Hogan Assessment</div>
+                        <div class="card-subtitle">Dark Side Traits</div>
+                    </div>
+                </div>
+                <p class="card-description">
+                    Folosit în corporate pentru predicția performanței și riscurilor de
+                    derailing. Identifică 11 trăsături de personalitate care pot deveni
+                    problematice sub stres.
+                </p>
+                <div class="card-tags">
+                    <span class="tag">11 trăsături</span>
+                    <span class="tag">3 clustere</span>
+                    <span class="tag">Corporate</span>
+                </div>
+                <div class="card-features">
+                    <div class="feature"><span class="feature-icon">✓</span> Risk profiles</div>
+                    <div class="feature"><span class="feature-icon">✓</span> 11 slidere</div>
+                    <div class="feature"><span class="feature-icon">✓</span> 22 întrebări quiz</div>
+                    <div class="feature"><span class="feature-icon">✓</span> Cluster analysis</div>
+                </div>
+            </a>
+
+            <!-- Insights Discovery -->
+            <a href="modelul-insights.html" class="model-card insights">
+                <span class="card-arrow">→</span>
+                <div class="card-header">
+                    <div class="card-icon">🎨</div>
+                    <div class="card-title-group">
+                        <div class="card-title">Insights Discovery</div>
+                        <div class="card-subtitle">Energii Colorate</div>
+                    </div>
+                </div>
+                <p class="card-description">
+                    Model bazat pe teoria lui Carl Jung, folosind 4 energii colorate:
+                    Fiery Red, Sunshine Yellow, Earth Green și Cool Blue.
+                    Popular pentru dezvoltare personală și de echipă.
+                </p>
+                <div class="card-tags">
+                    <span class="tag">4 culori</span>
+                    <span class="tag">Jung</span>
+                    <span class="tag">Team Building</span>
+                </div>
+                <div class="card-features">
+                    <div class="feature"><span class="feature-icon">✓</span> Color wheel</div>
+                    <div class="feature"><span class="feature-icon">✓</span> 4 slidere energie</div>
+                    <div class="feature"><span class="feature-icon">✓</span> 16 întrebări quiz</div>
+                    <div class="feature"><span class="feature-icon">✓</span> Profil dominant</div>
+                </div>
+            </a>
+        </div>
+
+        <footer>
+            <p>Simulatoare interactive pentru înțelegerea personalității și comportamentului</p>
+            <div class="footer-links">
+                <a href="#">Despre modele</a>
+                <a href="#">Resurse</a>
+                <a href="#">Contact</a>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>

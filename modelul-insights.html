@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modelul Insights Discovery - Simulator Interactiv</title>
+    <style>
+        :root {
+            --red: #C41E3A;
+            --red-light: #FF6B6B;
+            --yellow: #FFD700;
+            --yellow-light: #FFF59D;
+            --green: #228B22;
+            --green-light: #90EE90;
+            --blue: #1E90FF;
+            --blue-light: #87CEEB;
+            --bg-dark: #0f172a;
+            --bg-card: #1e293b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border: #334155;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, var(--bg-dark) 0%, #1a1a2e 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            background: linear-gradient(135deg,
+                rgba(196, 30, 58, 0.3),
+                rgba(255, 215, 0, 0.3),
+                rgba(34, 139, 34, 0.3),
+                rgba(30, 144, 255, 0.3));
+            border-radius: 20px;
+            border: 1px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(90deg, var(--red), var(--yellow), var(--green), var(--blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab {
+            padding: 1rem 2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .tab:hover {
+            border-color: var(--yellow);
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, var(--red), var(--yellow));
+            color: var(--bg-dark);
+            border-color: transparent;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Model Section */
+        .model-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .model-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .quadrant-container {
+            position: relative;
+            aspect-ratio: 1;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .quadrant-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 4px;
+            height: 100%;
+            background: var(--border);
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .quadrant {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .quadrant:hover {
+            transform: scale(1.02);
+            z-index: 2;
+        }
+
+        .quadrant.red { background: linear-gradient(135deg, var(--red), var(--red-light)); }
+        .quadrant.yellow { background: linear-gradient(135deg, var(--yellow), var(--yellow-light)); color: #333; }
+        .quadrant.green { background: linear-gradient(135deg, var(--green), var(--green-light)); }
+        .quadrant.blue { background: linear-gradient(135deg, var(--blue), var(--blue-light)); }
+
+        .quadrant-icon {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .quadrant-title {
+            font-size: 1.3rem;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .quadrant-subtitle {
+            font-size: 0.85rem;
+            opacity: 0.9;
+            text-align: center;
+            margin-top: 0.25rem;
+        }
+
+        .axis-labels {
+            position: absolute;
+            pointer-events: none;
+        }
+
+        .axis-label {
+            position: absolute;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            background: var(--bg-dark);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+
+        .axis-label.top { top: -30px; left: 50%; transform: translateX(-50%); }
+        .axis-label.bottom { bottom: -30px; left: 50%; transform: translateX(-50%); }
+        .axis-label.left { left: -80px; top: 50%; transform: translateY(-50%); }
+        .axis-label.right { right: -80px; top: 50%; transform: translateY(-50%); }
+
+        .model-description {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .model-description h2 {
+            margin-bottom: 1rem;
+            color: var(--yellow);
+        }
+
+        .model-description p {
+            color: var(--text-secondary);
+            margin-bottom: 1rem;
+        }
+
+        .color-list {
+            list-style: none;
+        }
+
+        .color-list li {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .color-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .color-dot.red { background: var(--red); }
+        .color-dot.yellow { background: var(--yellow); }
+        .color-dot.green { background: var(--green); }
+        .color-dot.blue { background: var(--blue); }
+
+        /* Theory Section */
+        .theory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .theory-card {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+
+        .theory-card.red-card { border-color: var(--red); }
+        .theory-card.yellow-card { border-color: var(--yellow); }
+        .theory-card.green-card { border-color: var(--green); }
+        .theory-card.blue-card { border-color: var(--blue); }
+
+        .theory-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .theory-card.red-card h3 { color: var(--red); }
+        .theory-card.yellow-card h3 { color: var(--yellow); }
+        .theory-card.green-card h3 { color: var(--green); }
+        .theory-card.blue-card h3 { color: var(--blue); }
+
+        .theory-card h4 {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin: 1rem 0 0.5rem 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .theory-card ul {
+            list-style: none;
+            color: var(--text-secondary);
+        }
+
+        .theory-card li {
+            padding: 0.25rem 0;
+            padding-left: 1.25rem;
+            position: relative;
+        }
+
+        .theory-card li::before {
+            content: "•";
+            position: absolute;
+            left: 0;
+        }
+
+        .theory-card.red-card li::before { color: var(--red); }
+        .theory-card.yellow-card li::before { color: var(--yellow); }
+        .theory-card.green-card li::before { color: var(--green); }
+        .theory-card.blue-card li::before { color: var(--blue); }
+
+        /* Playground Section */
+        .playground-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 900px) {
+            .playground-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .controls-panel {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .controls-panel h2 {
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .slider-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .slider-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .slider-label {
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .slider-value {
+            background: var(--bg-dark);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: var(--bg-dark);
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .slider-red::-webkit-slider-thumb { background: var(--red); }
+        .slider-yellow::-webkit-slider-thumb { background: var(--yellow); }
+        .slider-green::-webkit-slider-thumb { background: var(--green); }
+        .slider-blue::-webkit-slider-thumb { background: var(--blue); }
+
+        .presets {
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+        }
+
+        .presets h3 {
+            margin-bottom: 1rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .preset-btn {
+            padding: 0.5rem 1rem;
+            border: 1px solid var(--border);
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s ease;
+        }
+
+        .preset-btn:hover {
+            border-color: var(--yellow);
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .visualization-panel {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .visualization-panel h2 {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 0 auto 2rem auto;
+        }
+
+        .color-wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: conic-gradient(
+                var(--red) 0deg 90deg,
+                var(--yellow) 90deg 180deg,
+                var(--green) 180deg 270deg,
+                var(--blue) 270deg 360deg
+            );
+            position: relative;
+        }
+
+        .wheel-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 60px;
+            height: 60px;
+            background: var(--bg-dark);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            border: 3px solid var(--border);
+        }
+
+        .profile-indicator {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            border: 3px solid var(--bg-dark);
+            transform: translate(-50%, -50%);
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            z-index: 10;
+        }
+
+        .dominant-color {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .dominant-color.red { background: linear-gradient(135deg, rgba(196, 30, 58, 0.3), rgba(196, 30, 58, 0.1)); border: 1px solid var(--red); }
+        .dominant-color.yellow { background: linear-gradient(135deg, rgba(255, 215, 0, 0.3), rgba(255, 215, 0, 0.1)); border: 1px solid var(--yellow); }
+        .dominant-color.green { background: linear-gradient(135deg, rgba(34, 139, 34, 0.3), rgba(34, 139, 34, 0.1)); border: 1px solid var(--green); }
+        .dominant-color.blue { background: linear-gradient(135deg, rgba(30, 144, 255, 0.3), rgba(30, 144, 255, 0.1)); border: 1px solid var(--blue); }
+
+        .dominant-color h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .dominant-color p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .color-bars {
+            display: grid;
+            gap: 0.75rem;
+        }
+
+        .color-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .color-bar-label {
+            width: 80px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .color-bar-track {
+            flex: 1;
+            height: 12px;
+            background: var(--bg-dark);
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .color-bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            transition: width 0.3s ease;
+        }
+
+        .color-bar-fill.red { background: linear-gradient(90deg, var(--red), var(--red-light)); }
+        .color-bar-fill.yellow { background: linear-gradient(90deg, var(--yellow), var(--yellow-light)); }
+        .color-bar-fill.green { background: linear-gradient(90deg, var(--green), var(--green-light)); }
+        .color-bar-fill.blue { background: linear-gradient(90deg, var(--blue), var(--blue-light)); }
+
+        .color-bar-value {
+            width: 40px;
+            text-align: right;
+            font-size: 0.85rem;
+        }
+
+        .analysis-panel {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: var(--bg-dark);
+            border-radius: 10px;
+        }
+
+        .analysis-panel h3 {
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            color: var(--yellow);
+        }
+
+        .analysis-panel p {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 0.75rem;
+        }
+
+        /* Quiz Section */
+        .quiz-section {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .quiz-progress {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            padding: 1rem;
+            background: var(--bg-card);
+            border-radius: 10px;
+        }
+
+        .progress-bar {
+            flex: 1;
+            height: 8px;
+            background: var(--bg-dark);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--red), var(--yellow), var(--green), var(--blue));
+            transition: width 0.3s ease;
+            border-radius: 4px;
+        }
+
+        .progress-text {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            min-width: 80px;
+            text-align: right;
+        }
+
+        .quiz-card {
+            background: var(--bg-card);
+            border-radius: 15px;
+            padding: 2rem;
+            border: 1px solid var(--border);
+        }
+
+        .question-number {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .question-text {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            line-height: 1.5;
+        }
+
+        .options-grid {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .option-btn {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1.25rem;
+            background: var(--bg-dark);
+            border: 2px solid var(--border);
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .option-btn:hover {
+            border-color: var(--yellow);
+            background: rgba(255, 215, 0, 0.1);
+        }
+
+        .option-btn.selected {
+            border-color: var(--yellow);
+            background: rgba(255, 215, 0, 0.2);
+        }
+
+        .option-letter {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border-radius: 8px;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .quiz-nav {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        .nav-btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-btn.prev {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .nav-btn.prev:hover {
+            border-color: var(--text-secondary);
+        }
+
+        .nav-btn.next {
+            background: linear-gradient(135deg, var(--yellow), var(--red));
+            color: var(--bg-dark);
+        }
+
+        .nav-btn.next:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .nav-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Results Section */
+        .quiz-results {
+            text-align: center;
+        }
+
+        .results-header {
+            margin-bottom: 2rem;
+        }
+
+        .results-header h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .dominant-result {
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+        }
+
+        .dominant-result.red { background: linear-gradient(135deg, rgba(196, 30, 58, 0.4), rgba(196, 30, 58, 0.1)); }
+        .dominant-result.yellow { background: linear-gradient(135deg, rgba(255, 215, 0, 0.4), rgba(255, 215, 0, 0.1)); }
+        .dominant-result.green { background: linear-gradient(135deg, rgba(34, 139, 34, 0.4), rgba(34, 139, 34, 0.1)); }
+        .dominant-result.blue { background: linear-gradient(135deg, rgba(30, 144, 255, 0.4), rgba(30, 144, 255, 0.1)); }
+
+        .dominant-result h3 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .dominant-result p {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+        }
+
+        .result-bars {
+            display: grid;
+            gap: 1rem;
+            text-align: left;
+            margin-bottom: 2rem;
+        }
+
+        .result-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .result-bar-label {
+            width: 100px;
+            font-weight: 500;
+        }
+
+        .result-bar-label.red { color: var(--red); }
+        .result-bar-label.yellow { color: var(--yellow); }
+        .result-bar-label.green { color: var(--green); }
+        .result-bar-label.blue { color: var(--blue); }
+
+        .result-bar-track {
+            flex: 1;
+            height: 24px;
+            background: var(--bg-dark);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .result-bar-fill {
+            height: 100%;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 10px;
+            color: white;
+            font-weight: bold;
+            font-size: 0.85rem;
+            transition: width 0.5s ease;
+        }
+
+        .result-bar-fill.red { background: linear-gradient(90deg, var(--red), var(--red-light)); }
+        .result-bar-fill.yellow { background: linear-gradient(90deg, var(--yellow), var(--yellow-light)); color: #333; }
+        .result-bar-fill.green { background: linear-gradient(90deg, var(--green), var(--green-light)); }
+        .result-bar-fill.blue { background: linear-gradient(90deg, var(--blue), var(--blue-light)); }
+
+        .result-description {
+            background: var(--bg-dark);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: left;
+            margin-bottom: 2rem;
+        }
+
+        .result-description h4 {
+            margin-bottom: 1rem;
+            color: var(--yellow);
+        }
+
+        .result-description p {
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .restart-btn {
+            padding: 1rem 3rem;
+            background: linear-gradient(135deg, var(--yellow), var(--red));
+            color: var(--bg-dark);
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .restart-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 215, 0, 0.3);
+        }
+
+        /* Hidden */
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Insights Discovery</h1>
+            <p>Model de energie coloristică bazat pe teoria lui Carl Jung</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="model">Model</button>
+            <button class="tab" data-tab="theory">Teorie</button>
+            <button class="tab" data-tab="playground">Playground</button>
+            <button class="tab" data-tab="quiz">Quiz</button>
+        </div>
+
+        <!-- MODEL TAB -->
+        <div id="model" class="tab-content active">
+            <div class="model-section">
+                <div class="quadrant-container">
+                    <div class="axis-labels">
+                        <span class="axis-label top">EXTRAVERTIT</span>
+                        <span class="axis-label bottom">INTROVERTIT</span>
+                        <span class="axis-label left">TASK</span>
+                        <span class="axis-label right">OAMENI</span>
+                    </div>
+                    <div class="quadrant-grid">
+                        <div class="quadrant red" data-color="red">
+                            <div class="quadrant-icon">🔥</div>
+                            <div class="quadrant-title">Fiery Red</div>
+                            <div class="quadrant-subtitle">Directorul</div>
+                        </div>
+                        <div class="quadrant yellow" data-color="yellow">
+                            <div class="quadrant-icon">☀️</div>
+                            <div class="quadrant-title">Sunshine Yellow</div>
+                            <div class="quadrant-subtitle">Inspiratorul</div>
+                        </div>
+                        <div class="quadrant blue" data-color="blue">
+                            <div class="quadrant-icon">❄️</div>
+                            <div class="quadrant-title">Cool Blue</div>
+                            <div class="quadrant-subtitle">Observatorul</div>
+                        </div>
+                        <div class="quadrant green" data-color="green">
+                            <div class="quadrant-icon">🌿</div>
+                            <div class="quadrant-title">Earth Green</div>
+                            <div class="quadrant-subtitle">Suporterul</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="model-description">
+                    <h2>Despre Insights Discovery</h2>
+                    <p>
+                        Insights Discovery este un model de profilare psihometrică dezvoltat în Scoția,
+                        bazat pe teoria tipurilor psihologice a lui Carl Jung. Modelul folosește patru
+                        energii colorate pentru a descrie preferințele comportamentale și stilurile de comunicare.
+                    </p>
+                    <p>
+                        Fiecare persoană are acces la toate cele patru energii, dar tinde să prefere
+                        și să folosească una sau două în mod predominant.
+                    </p>
+
+                    <ul class="color-list">
+                        <li>
+                            <span class="color-dot red"></span>
+                            <span><strong>Fiery Red</strong> — Competitiv, exigent, determinat, orientat spre rezultate</span>
+                        </li>
+                        <li>
+                            <span class="color-dot yellow"></span>
+                            <span><strong>Sunshine Yellow</strong> — Entuziast, sociabil, persuasiv, optimist</span>
+                        </li>
+                        <li>
+                            <span class="color-dot green"></span>
+                            <span><strong>Earth Green</strong> — Calm, răbdător, empatic, orientat spre armonie</span>
+                        </li>
+                        <li>
+                            <span class="color-dot blue"></span>
+                            <span><strong>Cool Blue</strong> — Analitic, precis, metodic, orientat spre calitate</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- THEORY TAB -->
+        <div id="theory" class="tab-content">
+            <div class="theory-grid">
+                <div class="theory-card red-card">
+                    <h3>🔥 Fiery Red</h3>
+                    <p>Energia Roșie este orientată spre acțiune și rezultate. Persoanele cu energie roșie dominantă sunt decisive, directe și competitive.</p>
+
+                    <h4>Puncte forte</h4>
+                    <ul>
+                        <li>Leadership natural</li>
+                        <li>Luare rapidă de decizii</li>
+                        <li>Orientare spre obiective</li>
+                        <li>Încredere în sine</li>
+                        <li>Abordare directă</li>
+                    </ul>
+
+                    <h4>Provocări</h4>
+                    <ul>
+                        <li>Poate părea agresiv</li>
+                        <li>Nerăbdător cu alții</li>
+                        <li>Insensibil la emoții</li>
+                        <li>Dominator în discuții</li>
+                    </ul>
+
+                    <h4>Comunicare</h4>
+                    <ul>
+                        <li>Fii direct și la obiect</li>
+                        <li>Prezintă opțiuni clare</li>
+                        <li>Concentrează-te pe rezultate</li>
+                        <li>Evită detaliile inutile</li>
+                    </ul>
+                </div>
+
+                <div class="theory-card yellow-card">
+                    <h3>☀️ Sunshine Yellow</h3>
+                    <p>Energia Galbenă este orientată spre oameni și entuziasm. Persoanele cu energie galbenă dominantă sunt sociabile, optimiste și inspiraționale.</p>
+
+                    <h4>Puncte forte</h4>
+                    <ul>
+                        <li>Excelent comunicator</li>
+                        <li>Creativitate și inovație</li>
+                        <li>Capacitate de a motiva</li>
+                        <li>Flexibilitate</li>
+                        <li>Networking natural</li>
+                    </ul>
+
+                    <h4>Provocări</h4>
+                    <ul>
+                        <li>Lipsa atenției la detalii</li>
+                        <li>Tendința de a exagera</li>
+                        <li>Dificultăți cu follow-up</li>
+                        <li>Ușor distras</li>
+                    </ul>
+
+                    <h4>Comunicare</h4>
+                    <ul>
+                        <li>Fii entuziast și pozitiv</li>
+                        <li>Permite interacțiune socială</li>
+                        <li>Folosește povești și viziuni</li>
+                        <li>Evită prea multe detalii</li>
+                    </ul>
+                </div>
+
+                <div class="theory-card green-card">
+                    <h3>🌿 Earth Green</h3>
+                    <p>Energia Verde este orientată spre armonie și relații. Persoanele cu energie verde dominantă sunt empatice, răbdătoare și loiale.</p>
+
+                    <h4>Puncte forte</h4>
+                    <ul>
+                        <li>Excelent ascultător</li>
+                        <li>Construiește relații durabile</li>
+                        <li>Stabilitate și consecvență</li>
+                        <li>Diplomație naturală</li>
+                        <li>Suport pentru echipă</li>
+                    </ul>
+
+                    <h4>Provocări</h4>
+                    <ul>
+                        <li>Rezistență la schimbare</li>
+                        <li>Evită conflictele</li>
+                        <li>Poate fi prea acomodant</li>
+                        <li>Decizii lente</li>
+                    </ul>
+
+                    <h4>Comunicare</h4>
+                    <ul>
+                        <li>Fii sincer și autentic</li>
+                        <li>Acordă timp pentru relaționare</li>
+                        <li>Evită presiunea</li>
+                        <li>Arată apreciere</li>
+                    </ul>
+                </div>
+
+                <div class="theory-card blue-card">
+                    <h3>❄️ Cool Blue</h3>
+                    <p>Energia Albastră este orientată spre acuratețe și calitate. Persoanele cu energie albastră dominantă sunt analitice, metodice și prudente.</p>
+
+                    <h4>Puncte forte</h4>
+                    <ul>
+                        <li>Atenție la detalii</li>
+                        <li>Gândire analitică</li>
+                        <li>Standarde înalte</li>
+                        <li>Planificare atentă</li>
+                        <li>Obiectivitate</li>
+                    </ul>
+
+                    <h4>Provocări</h4>
+                    <ul>
+                        <li>Paralizie prin analiză</li>
+                        <li>Perfecționism excesiv</li>
+                        <li>Poate părea distant</li>
+                        <li>Critic excesiv</li>
+                    </ul>
+
+                    <h4>Comunicare</h4>
+                    <ul>
+                        <li>Oferă date și dovezi</li>
+                        <li>Fii precis și organizat</li>
+                        <li>Permite timp de analiză</li>
+                        <li>Evită presiunea emoțională</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- PLAYGROUND TAB -->
+        <div id="playground" class="tab-content">
+            <div class="playground-section">
+                <div class="controls-panel">
+                    <h2>⚙️ Ajustează Energiile</h2>
+
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">🔥 Fiery Red</span>
+                            <span class="slider-value" id="red-value">50</span>
+                        </div>
+                        <input type="range" id="red-slider" class="slider-red" min="0" max="100" value="50">
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">☀️ Sunshine Yellow</span>
+                            <span class="slider-value" id="yellow-value">50</span>
+                        </div>
+                        <input type="range" id="yellow-slider" class="slider-yellow" min="0" max="100" value="50">
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">🌿 Earth Green</span>
+                            <span class="slider-value" id="green-value">50</span>
+                        </div>
+                        <input type="range" id="green-slider" class="slider-green" min="0" max="100" value="50">
+                    </div>
+
+                    <div class="slider-group">
+                        <div class="slider-header">
+                            <span class="slider-label">❄️ Cool Blue</span>
+                            <span class="slider-value" id="blue-value">50</span>
+                        </div>
+                        <input type="range" id="blue-slider" class="slider-blue" min="0" max="100" value="50">
+                    </div>
+
+                    <div class="presets">
+                        <h3>Profile Predefinite</h3>
+                        <div class="preset-buttons">
+                            <button class="preset-btn" data-preset="director">Director</button>
+                            <button class="preset-btn" data-preset="inspirator">Inspirator</button>
+                            <button class="preset-btn" data-preset="suporter">Suporter</button>
+                            <button class="preset-btn" data-preset="analist">Analist</button>
+                            <button class="preset-btn" data-preset="motivator">Motivator</button>
+                            <button class="preset-btn" data-preset="coordonator">Coordonator</button>
+                            <button class="preset-btn" data-preset="echilibrat">Echilibrat</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="visualization-panel">
+                    <h2>Profilul Tău de Energie</h2>
+
+                    <div class="wheel-container">
+                        <div class="color-wheel">
+                            <div class="profile-indicator" id="profile-indicator"></div>
+                        </div>
+                        <div class="wheel-center" id="wheel-emoji">⚡</div>
+                    </div>
+
+                    <div class="dominant-color" id="dominant-display">
+                        <h3 id="dominant-title">Profil Echilibrat</h3>
+                        <p id="dominant-subtitle">Energie distribuită uniform</p>
+                    </div>
+
+                    <div class="color-bars">
+                        <div class="color-bar">
+                            <span class="color-bar-label">Fiery Red</span>
+                            <div class="color-bar-track">
+                                <div class="color-bar-fill red" id="bar-red" style="width: 50%"></div>
+                            </div>
+                            <span class="color-bar-value" id="bar-red-value">50%</span>
+                        </div>
+                        <div class="color-bar">
+                            <span class="color-bar-label">Sunshine Yellow</span>
+                            <div class="color-bar-track">
+                                <div class="color-bar-fill yellow" id="bar-yellow" style="width: 50%"></div>
+                            </div>
+                            <span class="color-bar-value" id="bar-yellow-value">50%</span>
+                        </div>
+                        <div class="color-bar">
+                            <span class="color-bar-label">Earth Green</span>
+                            <div class="color-bar-track">
+                                <div class="color-bar-fill green" id="bar-green" style="width: 50%"></div>
+                            </div>
+                            <span class="color-bar-value" id="bar-green-value">50%</span>
+                        </div>
+                        <div class="color-bar">
+                            <span class="color-bar-label">Cool Blue</span>
+                            <div class="color-bar-track">
+                                <div class="color-bar-fill blue" id="bar-blue" style="width: 50%"></div>
+                            </div>
+                            <span class="color-bar-value" id="bar-blue-value">50%</span>
+                        </div>
+                    </div>
+
+                    <div class="analysis-panel">
+                        <h3>📊 Analiză</h3>
+                        <p id="analysis-text">
+                            Profilul echilibrat sugerează versatilitate și adaptabilitate în diferite situații.
+                            Poți accesa fiecare energie în funcție de context.
+                        </p>
+                        <p id="analysis-strength"></p>
+                        <p id="analysis-growth"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUIZ TAB -->
+        <div id="quiz" class="tab-content">
+            <div class="quiz-section">
+                <div class="quiz-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="quiz-progress-fill" style="width: 0%"></div>
+                    </div>
+                    <span class="progress-text" id="quiz-progress-text">0 / 16</span>
+                </div>
+
+                <div class="quiz-card" id="quiz-card">
+                    <div class="question-number" id="question-number">Întrebarea 1</div>
+                    <div class="question-text" id="question-text">Loading...</div>
+
+                    <div class="options-grid" id="options-grid">
+                        <!-- Options dynamically inserted -->
+                    </div>
+
+                    <div class="quiz-nav">
+                        <button class="nav-btn prev" id="prev-btn" disabled>← Înapoi</button>
+                        <button class="nav-btn next" id="next-btn" disabled>Următoarea →</button>
+                    </div>
+                </div>
+
+                <div class="quiz-card quiz-results hidden" id="quiz-results">
+                    <div class="results-header">
+                        <h2>🎯 Rezultatele Tale</h2>
+                        <p>Profilul tău de energie Insights Discovery</p>
+                    </div>
+
+                    <div class="dominant-result" id="result-dominant">
+                        <h3 id="result-title">Loading...</h3>
+                        <p id="result-subtitle"></p>
+                    </div>
+
+                    <div class="result-bars" id="result-bars">
+                        <!-- Results dynamically inserted -->
+                    </div>
+
+                    <div class="result-description" id="result-description">
+                        <h4>Despre profilul tău</h4>
+                        <p id="result-text"></p>
+                    </div>
+
+                    <button class="restart-btn" id="restart-btn">🔄 Reia Quiz-ul</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Tab Navigation
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+
+        // Color Data
+        const colorData = {
+            red: {
+                name: 'Fiery Red',
+                emoji: '🔥',
+                title: 'Directorul',
+                description: 'Ești orientat spre rezultate, competitiv și determinat. Preferi acțiunea rapidă și deciziile clare.',
+                strengths: 'Leadership natural, determinare, orientare spre obiective',
+                growth: 'Dezvoltă răbdarea și empatia pentru stilurile mai lente'
+            },
+            yellow: {
+                name: 'Sunshine Yellow',
+                emoji: '☀️',
+                title: 'Inspiratorul',
+                description: 'Ești entuziast, sociabil și persuasiv. Aduci energie pozitivă și creativitate în echipă.',
+                strengths: 'Comunicare, creativitate, motivarea altora',
+                growth: 'Lucrează la atenția pentru detalii și follow-through'
+            },
+            green: {
+                name: 'Earth Green',
+                emoji: '🌿',
+                title: 'Suporterul',
+                description: 'Ești calm, empatic și orientat spre armonie. Construiești relații durabile și oferi stabilitate.',
+                strengths: 'Empatie, diplomație, construirea relațiilor',
+                growth: 'Dezvoltă asertivitatea și adaptabilitatea la schimbare'
+            },
+            blue: {
+                name: 'Cool Blue',
+                emoji: '❄️',
+                title: 'Observatorul',
+                description: 'Ești analitic, precis și metodic. Apreciezi calitatea, datele și planificarea atentă.',
+                strengths: 'Analiză, atenție la detalii, standarde înalte',
+                growth: 'Acceptă imperfecțiunea și ia decizii mai rapid'
+            }
+        };
+
+        // Presets
+        const presets = {
+            director: { red: 90, yellow: 40, green: 20, blue: 50 },
+            inspirator: { red: 50, yellow: 90, green: 40, blue: 20 },
+            suporter: { red: 20, yellow: 40, green: 90, blue: 50 },
+            analist: { red: 30, yellow: 20, green: 40, blue: 90 },
+            motivator: { red: 70, yellow: 80, green: 30, blue: 20 },
+            coordonator: { red: 60, yellow: 50, green: 70, blue: 60 },
+            echilibrat: { red: 50, yellow: 50, green: 50, blue: 50 }
+        };
+
+        // Playground Logic
+        const sliders = {
+            red: document.getElementById('red-slider'),
+            yellow: document.getElementById('yellow-slider'),
+            green: document.getElementById('green-slider'),
+            blue: document.getElementById('blue-slider')
+        };
+
+        function updateVisualization() {
+            const values = {
+                red: parseInt(sliders.red.value),
+                yellow: parseInt(sliders.yellow.value),
+                green: parseInt(sliders.green.value),
+                blue: parseInt(sliders.blue.value)
+            };
+
+            // Update value displays
+            document.getElementById('red-value').textContent = values.red;
+            document.getElementById('yellow-value').textContent = values.yellow;
+            document.getElementById('green-value').textContent = values.green;
+            document.getElementById('blue-value').textContent = values.blue;
+
+            // Update bars
+            document.getElementById('bar-red').style.width = values.red + '%';
+            document.getElementById('bar-yellow').style.width = values.yellow + '%';
+            document.getElementById('bar-green').style.width = values.green + '%';
+            document.getElementById('bar-blue').style.width = values.blue + '%';
+
+            document.getElementById('bar-red-value').textContent = values.red + '%';
+            document.getElementById('bar-yellow-value').textContent = values.yellow + '%';
+            document.getElementById('bar-green-value').textContent = values.green + '%';
+            document.getElementById('bar-blue-value').textContent = values.blue + '%';
+
+            // Calculate dominant color
+            const dominant = Object.entries(values).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+            const data = colorData[dominant];
+
+            // Update dominant display
+            const dominantDisplay = document.getElementById('dominant-display');
+            dominantDisplay.className = 'dominant-color ' + dominant;
+            document.getElementById('dominant-title').textContent = data.name;
+            document.getElementById('dominant-subtitle').textContent = data.title;
+            document.getElementById('wheel-emoji').textContent = data.emoji;
+
+            // Update profile indicator position on wheel
+            // Map values to position on wheel (simplified)
+            const extraversion = (values.red + values.yellow) - (values.green + values.blue);
+            const task = (values.red + values.blue) - (values.yellow + values.green);
+
+            const indicator = document.getElementById('profile-indicator');
+            const centerX = 150;
+            const centerY = 150;
+            const maxRadius = 110;
+
+            const angle = Math.atan2(extraversion, -task);
+            const magnitude = Math.min(Math.sqrt(extraversion*extraversion + task*task) / 200, 1);
+            const radius = magnitude * maxRadius;
+
+            const x = centerX + radius * Math.cos(angle - Math.PI/4);
+            const y = centerY - radius * Math.sin(angle - Math.PI/4);
+
+            indicator.style.left = x + 'px';
+            indicator.style.top = y + 'px';
+
+            // Update analysis
+            updateAnalysis(values, dominant);
+        }
+
+        function updateAnalysis(values, dominant) {
+            const data = colorData[dominant];
+
+            document.getElementById('analysis-text').textContent = data.description;
+            document.getElementById('analysis-strength').textContent = '💪 Puncte forte: ' + data.strengths;
+            document.getElementById('analysis-growth').textContent = '🌱 Dezvoltare: ' + data.growth;
+        }
+
+        // Attach slider listeners
+        Object.values(sliders).forEach(slider => {
+            slider.addEventListener('input', updateVisualization);
+        });
+
+        // Preset buttons
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const preset = presets[btn.dataset.preset];
+                sliders.red.value = preset.red;
+                sliders.yellow.value = preset.yellow;
+                sliders.green.value = preset.green;
+                sliders.blue.value = preset.blue;
+                updateVisualization();
+            });
+        });
+
+        // Initial update
+        updateVisualization();
+
+        // Quiz Logic
+        const questions = [
+            {
+                text: "Când trebuie să iei o decizie importantă, preferi să:",
+                options: [
+                    { text: "Acționezi rapid și hotărât", color: "red" },
+                    { text: "Discuți cu toată lumea implicată", color: "yellow" },
+                    { text: "Îți iei timp să reflectezi", color: "green" },
+                    { text: "Analizezi toate datele disponibile", color: "blue" }
+                ]
+            },
+            {
+                text: "La o petrecere, cel mai probabil vei:",
+                options: [
+                    { text: "Conduce conversația și atrage atenția", color: "red" },
+                    { text: "Circula și vorbi cu toată lumea", color: "yellow" },
+                    { text: "Avea conversații profunde cu câțiva oameni", color: "green" },
+                    { text: "Observa și asculta mai mult decât vorbi", color: "blue" }
+                ]
+            },
+            {
+                text: "Ce te motivează cel mai mult la locul de muncă?",
+                options: [
+                    { text: "Provocări și competiție", color: "red" },
+                    { text: "Recunoaștere și interacțiune socială", color: "yellow" },
+                    { text: "Armonie în echipă și relații bune", color: "green" },
+                    { text: "Calitatea muncii și expertiza", color: "blue" }
+                ]
+            },
+            {
+                text: "Cum reacționezi la un conflict?",
+                options: [
+                    { text: "Îl confrunt direct și caut o soluție rapidă", color: "red" },
+                    { text: "Încerc să detensionez atmosfera cu umor", color: "yellow" },
+                    { text: "Caut compromisul și armonia", color: "green" },
+                    { text: "Mă retrag pentru a analiza situația", color: "blue" }
+                ]
+            },
+            {
+                text: "Ce tip de proiecte preferi?",
+                options: [
+                    { text: "Proiecte cu rezultate măsurabile și deadline-uri strânse", color: "red" },
+                    { text: "Proiecte creative cu multă interacțiune", color: "yellow" },
+                    { text: "Proiecte de echipă cu ritm stabil", color: "green" },
+                    { text: "Proiecte complexe care necesită analiză detaliată", color: "blue" }
+                ]
+            },
+            {
+                text: "Cum comunici de obicei?",
+                options: [
+                    { text: "Direct și la obiect", color: "red" },
+                    { text: "Entuziast și expresiv", color: "yellow" },
+                    { text: "Calm și diplomatic", color: "green" },
+                    { text: "Precis și detaliat", color: "blue" }
+                ]
+            },
+            {
+                text: "Ce te frustrează cel mai mult?",
+                options: [
+                    { text: "Lipsa de acțiune și indeciziunea", color: "red" },
+                    { text: "Regulile rigide și lipsa creativității", color: "yellow" },
+                    { text: "Conflictele și presiunea", color: "green" },
+                    { text: "Lipsa de organizare și erorile", color: "blue" }
+                ]
+            },
+            {
+                text: "Când primești feedback negativ:",
+                options: [
+                    { text: "Îl iau ca pe o provocare de îmbunătățit", color: "red" },
+                    { text: "Încerc să văd partea pozitivă", color: "yellow" },
+                    { text: "Mă simt afectat personal", color: "green" },
+                    { text: "Analizez dacă este justificat", color: "blue" }
+                ]
+            },
+            {
+                text: "În planificarea vacanței, preferi:",
+                options: [
+                    { text: "Aventură și activități pline de adrenalină", color: "red" },
+                    { text: "Destinații populare cu viață socială", color: "yellow" },
+                    { text: "Locuri liniștite cu cei dragi", color: "green" },
+                    { text: "Turism cultural bine planificat", color: "blue" }
+                ]
+            },
+            {
+                text: "Ce rol ai de obicei într-un grup?",
+                options: [
+                    { text: "Liderul care direcționează", color: "red" },
+                    { text: "Motivatorul care inspiră", color: "yellow" },
+                    { text: "Mediatorul care armonizează", color: "green" },
+                    { text: "Expertul care analizează", color: "blue" }
+                ]
+            },
+            {
+                text: "Cum îți organizezi ziua de lucru?",
+                options: [
+                    { text: "Prioritizez sarcinile importante și le execut rapid", color: "red" },
+                    { text: "Flexibil, cu pauze pentru socializare", color: "yellow" },
+                    { text: "Cu ritm constant, evitând suprasolicitarea", color: "green" },
+                    { text: "Cu liste detaliate și planificare riguroasă", color: "blue" }
+                ]
+            },
+            {
+                text: "Ce apreciezi cel mai mult la colegi?",
+                options: [
+                    { text: "Competența și eficiența", color: "red" },
+                    { text: "Entuziasmul și creativitatea", color: "yellow" },
+                    { text: "Loialitatea și suportul", color: "green" },
+                    { text: "Precizia și responsabilitatea", color: "blue" }
+                ]
+            },
+            {
+                text: "Când ai o idee nouă:",
+                options: [
+                    { text: "O implementez imediat", color: "red" },
+                    { text: "O împărtășesc cu toată lumea entuziasmat", color: "yellow" },
+                    { text: "O discut calm cu persoane de încredere", color: "green" },
+                    { text: "O documentez și analizez fezabilitatea", color: "blue" }
+                ]
+            },
+            {
+                text: "Ce tip de mediu de lucru preferi?",
+                options: [
+                    { text: "Dinamic, competitiv, orientat spre rezultate", color: "red" },
+                    { text: "Creativ, deschis, colaborativ", color: "yellow" },
+                    { text: "Armonios, stabil, susținător", color: "green" },
+                    { text: "Organizat, structurat, profesionist", color: "blue" }
+                ]
+            },
+            {
+                text: "Cum gestionezi deadline-urile?",
+                options: [
+                    { text: "Le respect întotdeauna, chiar dacă trebuie să push", color: "red" },
+                    { text: "Le tratez flexibil, focusându-mă pe rezultatul final", color: "yellow" },
+                    { text: "Prefer deadline-uri realiste fără presiune excesivă", color: "green" },
+                    { text: "Planific din timp pentru a asigura calitatea", color: "blue" }
+                ]
+            },
+            {
+                text: "Ce te descrie cel mai bine?",
+                options: [
+                    { text: "Determinat și ambițios", color: "red" },
+                    { text: "Optimist și sociabil", color: "yellow" },
+                    { text: "Calm și empatic", color: "green" },
+                    { text: "Analitic și metodic", color: "blue" }
+                ]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let answers = [];
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function displayQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('question-number').textContent = `Întrebarea ${currentQuestion + 1}`;
+            document.getElementById('question-text').textContent = question.text;
+
+            const optionsGrid = document.getElementById('options-grid');
+            const shuffledOptions = shuffleArray(question.options);
+
+            optionsGrid.innerHTML = shuffledOptions.map((opt, idx) => `
+                <button class="option-btn ${answers[currentQuestion] === opt.color ? 'selected' : ''}"
+                        data-color="${opt.color}">
+                    <span class="option-letter">${String.fromCharCode(65 + idx)}</span>
+                    <span>${opt.text}</span>
+                </button>
+            `).join('');
+
+            // Add click handlers
+            optionsGrid.querySelectorAll('.option-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    optionsGrid.querySelectorAll('.option-btn').forEach(b => b.classList.remove('selected'));
+                    btn.classList.add('selected');
+                    answers[currentQuestion] = btn.dataset.color;
+                    document.getElementById('next-btn').disabled = false;
+                });
+            });
+
+            // Update progress
+            document.getElementById('quiz-progress-fill').style.width = ((currentQuestion + 1) / questions.length * 100) + '%';
+            document.getElementById('quiz-progress-text').textContent = `${currentQuestion + 1} / ${questions.length}`;
+
+            // Update navigation
+            document.getElementById('prev-btn').disabled = currentQuestion === 0;
+            document.getElementById('next-btn').disabled = !answers[currentQuestion];
+            document.getElementById('next-btn').textContent = currentQuestion === questions.length - 1 ? 'Vezi Rezultatele' : 'Următoarea →';
+        }
+
+        document.getElementById('prev-btn').addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                displayQuestion();
+            }
+        });
+
+        document.getElementById('next-btn').addEventListener('click', () => {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+            } else {
+                showResults();
+            }
+        });
+
+        function showResults() {
+            const scores = { red: 0, yellow: 0, green: 0, blue: 0 };
+            answers.forEach(answer => {
+                if (answer) scores[answer]++;
+            });
+
+            const total = questions.length;
+            const percentages = {
+                red: Math.round(scores.red / total * 100),
+                yellow: Math.round(scores.yellow / total * 100),
+                green: Math.round(scores.green / total * 100),
+                blue: Math.round(scores.blue / total * 100)
+            };
+
+            const dominant = Object.entries(scores).reduce((a, b) => a[1] > b[1] ? a : b)[0];
+            const data = colorData[dominant];
+
+            document.getElementById('quiz-card').classList.add('hidden');
+            document.getElementById('quiz-results').classList.remove('hidden');
+
+            const resultDominant = document.getElementById('result-dominant');
+            resultDominant.className = 'dominant-result ' + dominant;
+            document.getElementById('result-title').textContent = `${data.emoji} ${data.name}`;
+            document.getElementById('result-subtitle').textContent = data.title;
+
+            const resultBars = document.getElementById('result-bars');
+            resultBars.innerHTML = ['red', 'yellow', 'green', 'blue'].map(color => `
+                <div class="result-bar">
+                    <span class="result-bar-label ${color}">${colorData[color].name}</span>
+                    <div class="result-bar-track">
+                        <div class="result-bar-fill ${color}" style="width: ${percentages[color]}%">
+                            ${percentages[color]}%
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('result-text').textContent = data.description;
+        }
+
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            currentQuestion = 0;
+            answers = [];
+            document.getElementById('quiz-results').classList.add('hidden');
+            document.getElementById('quiz-card').classList.remove('hidden');
+            displayQuestion();
+        });
+
+        // Initialize quiz
+        displayQuestion();
+
+        // Quadrant click handlers
+        document.querySelectorAll('.quadrant').forEach(quad => {
+            quad.addEventListener('click', () => {
+                const color = quad.dataset.color;
+                const preset = {
+                    red: { red: 90, yellow: 30, green: 20, blue: 40 },
+                    yellow: { red: 40, yellow: 90, green: 30, blue: 20 },
+                    green: { red: 20, yellow: 30, green: 90, blue: 40 },
+                    blue: { red: 40, yellow: 20, green: 30, blue: 90 }
+                }[color];
+
+                // Switch to playground tab
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.querySelector('[data-tab="playground"]').classList.add('active');
+                document.getElementById('playground').classList.add('active');
+
+                // Set sliders
+                sliders.red.value = preset.red;
+                sliders.yellow.value = preset.yellow;
+                sliders.green.value = preset.green;
+                sliders.blue.value = preset.blue;
+                updateVisualization();
+            });
+        });
+    </script>
+</body>
+</html>

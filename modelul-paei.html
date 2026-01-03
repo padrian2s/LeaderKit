@@ -1,0 +1,1672 @@
+ 0;
+             padding: 0;
+                         box-sizing: border-box;
+                                 }
+
+                                         body {
+                                                     font-family: 'Source Sans 3', sans-serif;
+                                                                 background: var(--bg-dark);
+                                                                             color: var(--text-light);
+                                                                                         min-height: 100vh;
+                                                                                                     overflow-x: hidden;
+                                                                                                             }
+
+                                                                                                                     .noise-overlay {
+                                                                                                                                 position: fixed;
+                                                                                                                                             top: 0;
+                                                                                                                                                         left: 0;
+                                                                                                                                                                     width: 100%;
+                                                                                                                                                                                 height: 100%;
+                                                                                                                                                                                             background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modelul PAEI - Adizes | Învățare Interactivă</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --producer: #E63946;
+            --administrator: #457B9D;
+            --entrepreneur: #F4A261;
+            --integrator: #2A9D8F;
+            --bg-dark: #1a1a2e;
+            --bg-card: #16213e;
+            --text-light: #edf2f7;
+            --text-muted: #a0aec0;
+            --accent-glow: rgba(244, 162, 97, 0.3);
+        }
+
+        * {
+            margin:'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 2rem 2rem;
+            position: relative;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--text-light) 0%, var(--entrepreneur) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 2rem auto;
+            padding: 0.5rem;
+            background: var(--bg-card);
+            border-radius: 50px;
+            max-width: 500px;
+        }
+
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-light);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--entrepreneur) 0%, var(--producer) 100%);
+            color: var(--bg-dark);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === MODEL VIZUAL === */
+        .model-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            align-items: center;
+        }
+
+        @media (max-width: 900px) {
+            .model-section {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .quadrant-container {
+            position: relative;
+            width: 100%;
+            max-width: 450px;
+            margin: 0 auto;
+            aspect-ratio: 1;
+        }
+
+        .quadrant-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr 1fr;
+            gap: 8px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .quadrant {
+            border-radius: 16px;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quadrant::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .quadrant:hover {
+            transform: scale(1.05);
+            z-index: 10;
+        }
+
+        .quadrant:hover::before {
+            opacity: 1;
+        }
+
+        .quadrant.active {
+            transform: scale(1.08);
+            z-index: 10;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .q-producer { background: linear-gradient(135deg, var(--producer), #c1121f); }
+        .q-administrator { background: linear-gradient(135deg, var(--administrator), #1d3557); }
+        .q-entrepreneur { background: linear-gradient(135deg, var(--entrepreneur), #e76f51); }
+        .q-integrator { background: linear-gradient(135deg, var(--integrator), #264653); }
+
+        .quadrant-letter {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            font-weight: 700;
+            opacity: 0.9;
+        }
+
+        .quadrant-name {
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-top: 0.5rem;
+        }
+
+        .axis-labels {
+            position: absolute;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+        }
+
+        .axis-top { top: -30px; left: 50%; transform: translateX(-50%); }
+        .axis-bottom { bottom: -30px; left: 50%; transform: translateX(-50%); }
+        .axis-left { left: -60px; top: 50%; transform: translateY(-50%) rotate(-90deg); white-space: nowrap; }
+        .axis-right { right: -60px; top: 50%; transform: translateY(-50%) rotate(90deg); white-space: nowrap; }
+
+        .info-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            min-height: 400px;
+        }
+
+        .info-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .info-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .info-title h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-title span {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .info-content p {
+            line-height: 1.8;
+            margin-bottom: 1rem;
+            color: var(--text-muted);
+        }
+
+        .info-traits {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .trait-tag {
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* === SIMULATOR === */
+        .simulator-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-card);
+            border-radius: 3px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--producer), var(--entrepreneur));
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        .question-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .question-number {
+            color: var(--entrepreneur);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            line-height: 1.5;
+            margin-bottom: 2rem;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .option {
+            padding: 1.2rem 1.5rem;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .option:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .option.selected {
+            border-color: var(--entrepreneur);
+            background: rgba(244, 162, 97, 0.15);
+        }
+
+        .option-letter {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .option.selected .option-letter {
+            background: var(--entrepreneur);
+            color: var(--bg-dark);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-light);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--entrepreneur), var(--producer));
+            color: var(--bg-dark);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--accent-glow);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* === REZULTATE === */
+        .results-container {
+            text-align: center;
+        }
+
+        .results-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .results-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 3rem;
+        }
+
+        .profile-chart {
+            max-width: 500px;
+            margin: 0 auto 3rem;
+        }
+
+        .chart-bar {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .chart-label {
+            width: 140px;
+            text-align: right;
+            font-weight: 500;
+        }
+
+        .chart-track {
+            flex: 1;
+            height: 40px;
+            background: var(--bg-card);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chart-fill {
+            height: 100%;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 1rem;
+            font-weight: 600;
+            transition: width 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .chart-fill.p { background: linear-gradient(90deg, var(--producer), #c1121f); }
+        .chart-fill.a { background: linear-gradient(90deg, var(--administrator), #1d3557); }
+        .chart-fill.e { background: linear-gradient(90deg, var(--entrepreneur), #e76f51); }
+        .chart-fill.i { background: linear-gradient(90deg, var(--integrator), #264653); }
+
+        .profile-code {
+            font-family: 'Playfair Display', serif;
+            font-size: 4rem;
+            letter-spacing: 0.2em;
+            margin-bottom: 2rem;
+        }
+
+        .profile-description {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .profile-description h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .profile-description p {
+            color: var(--text-muted);
+            line-height: 1.8;
+        }
+
+        .restart-btn {
+            margin-top: 2rem;
+        }
+
+        /* === TEORIE === */
+        .theory-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .theory-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border-left: 4px solid;
+            transition: transform 0.3s ease;
+        }
+
+        .theory-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .theory-card.tc-p { border-color: var(--producer); }
+        .theory-card.tc-a { border-color: var(--administrator); }
+        .theory-card.tc-e { border-color: var(--entrepreneur); }
+        .theory-card.tc-i { border-color: var(--integrator); }
+
+        .theory-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            margin-bottom: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .theory-card p {
+            color: var(--text-muted);
+            line-height: 1.7;
+            font-size: 0.95rem;
+        }
+
+        .matrix-section {
+            margin-top: 3rem;
+        }
+
+        .matrix-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .matrix-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 4px;
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+
+        .matrix-table th, .matrix-table td {
+            padding: 1rem;
+            text-align: center;
+            border-radius: 8px;
+        }
+
+        .matrix-table th {
+            background: rgba(255,255,255,0.05);
+            font-weight: 600;
+        }
+
+        .matrix-table td {
+            background: rgba(255,255,255,0.02);
+            color: var(--text-muted);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* === PLAYGROUND === */
+        .playground-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .playground-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .playground-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .playground-header p {
+            color: var(--text-muted);
+        }
+
+        .playground-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.2fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .playground-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sliders-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .slider-group {
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .slider-group:last-of-type {
+            border-bottom: none;
+            margin-bottom: 1rem;
+        }
+
+        .slider-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .slider-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .slider-info {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slider-title {
+            font-weight: 600;
+        }
+
+        .slider-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'Playfair Display', serif;
+            min-width: 50px;
+            text-align: right;
+        }
+
+        .paei-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255,255,255,0.1);
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+
+        .paei-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .paei-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .slider-p::-webkit-slider-thumb { background: var(--producer); box-shadow: 0 0 15px var(--producer); }
+        .slider-a::-webkit-slider-thumb { background: var(--administrator); box-shadow: 0 0 15px var(--administrator); }
+        .slider-e::-webkit-slider-thumb { background: var(--entrepreneur); box-shadow: 0 0 15px var(--entrepreneur); }
+        .slider-i::-webkit-slider-thumb { background: var(--integrator); box-shadow: 0 0 15px var(--integrator); }
+
+        .slider-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 0.4rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .preset-label {
+            width: 100%;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .preset-btn {
+            padding: 0.5rem 0.8rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: var(--text-light);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Source Sans 3', sans-serif;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: var(--entrepreneur);
+        }
+
+        .visualization-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .radar-container {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            aspect-ratio: 1;
+            max-width: 400px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        .radar-svg {
+            width: 100%;
+            height: 100%;
+        }
+
+        .radar-polygon {
+            fill: rgba(244, 162, 97, 0.2);
+            stroke: var(--entrepreneur);
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+
+        .radar-point {
+            transition: all 0.3s ease;
+        }
+
+        .point-p { fill: var(--producer); }
+        .point-a { fill: var(--administrator); }
+        .point-e { fill: var(--entrepreneur); }
+        .point-i { fill: var(--integrator); }
+
+        .radar-label {
+            fill: var(--text-muted);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .profile-display {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .code-display {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            letter-spacing: 0.15em;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: center;
+            gap: 0.25rem;
+        }
+
+        .code-letter {
+            transition: all 0.3s ease;
+            min-width: 60px;
+        }
+
+        .code-letter.dim {
+            opacity: 0.3;
+            text-transform: lowercase;
+        }
+
+        .code-letter.absent {
+            opacity: 0.15;
+        }
+
+        .profile-name {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+        }
+
+        .analysis-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .analysis-section {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .analysis-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .analysis-section h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-light);
+        }
+
+        .analysis-section p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div class="noise-overlay"></div>
+    
+    <header>
+        <h1>Modelul PAEI</h1>
+        <p class="subtitle">Framework-ul Adizes pentru Management și Leadership</p>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="model">Modelul</button>
+        <button class="tab-btn" data-tab="theory">Teorie</button>
+        <button class="tab-btn" data-tab="playground">Playground</button>
+        <button class="tab-btn" data-tab="simulator">Quiz</button>
+    </div>
+
+    <div class="container">
+        <!-- TAB MODEL -->
+        <div id="model" class="tab-content active">
+            <div class="model-section">
+                <div class="quadrant-container">
+                    <span class="axis-labels axis-top">Termen Scurt</span>
+                    <span class="axis-labels axis-bottom">Termen Lung</span>
+                    <span class="axis-labels axis-left">Eficacitate</span>
+                    <span class="axis-labels axis-right">Eficiență</span>
+                    
+                    <div class="quadrant-grid">
+                        <div class="quadrant q-producer" data-role="producer">
+                            <span class="quadrant-letter">P</span>
+                            <span class="quadrant-name">Producer</span>
+                        </div>
+                        <div class="quadrant q-administrator" data-role="administrator">
+                            <span class="quadrant-letter">A</span>
+                            <span class="quadrant-name">Administrator</span>
+                        </div>
+                        <div class="quadrant q-entrepreneur" data-role="entrepreneur">
+                            <span class="quadrant-letter">E</span>
+                            <span class="quadrant-name">Entrepreneur</span>
+                        </div>
+                        <div class="quadrant q-integrator" data-role="integrator">
+                            <span class="quadrant-letter">I</span>
+                            <span class="quadrant-name">Integrator</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="info-panel" id="info-panel">
+                    <div class="info-header">
+                        <div class="info-icon" id="info-icon" style="background: var(--producer);">P</div>
+                        <div class="info-title">
+                            <h2 id="info-name">Producer</h2>
+                            <span id="info-focus">Eficacitate pe Termen Scurt</span>
+                        </div>
+                    </div>
+                    <div class="info-content">
+                        <p id="info-description">Producătorul se concentrează pe rezultate imediate și tangibile. Este executantul care aduce energie, output și execuție în organizație. Răspunde la întrebarea fundamentală: "CE trebuie făcut?"</p>
+                        <p id="info-details">Managerii dominanți în P sunt orientați spre acțiune, pragmatici și focusați pe îndeplinirea obiectivelor. Ei sunt forța motrice care transformă planurile în realitate.</p>
+                    </div>
+                    <div class="info-traits" id="info-traits">
+                        <span class="trait-tag">Orientat spre rezultate</span>
+                        <span class="trait-tag">Pragmatic</span>
+                        <span class="trait-tag">Energic</span>
+                        <span class="trait-tag">Executant</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB TEORIE -->
+        <div id="theory" class="tab-content">
+            <div class="theory-grid">
+                <div class="theory-card tc-p">
+                    <h3><span style="color: var(--producer);">P</span> Producer</h3>
+                    <p>Răspunde la "CE facem?" Asigură că organizația produce rezultate, satisface nevoile clienților și atinge obiectivele pe termen scurt. Fără P, organizația nu livrează valoare.</p>
+                </div>
+                <div class="theory-card tc-a">
+                    <h3><span style="color: var(--administrator);">A</span> Administrator</h3>
+                    <p>Răspunde la "CUM facem?" Creează sisteme, procese și proceduri pentru eficiență și consistență. Fără A, organizația devine haotică și imprevizibilă.</p>
+                </div>
+                <div class="theory-card tc-e">
+                    <h3><span style="color: var(--entrepreneur);">E</span> Entrepreneur</h3>
+                    <p>Răspunde la "CÂND și DE CE?" Identifică oportunități, inițiază schimbarea și adaptează organizația la mediu. Fără E, organizația stagnează și devine irelevantă.</p>
+                </div>
+                <div class="theory-card tc-i">
+                    <h3><span style="color: var(--integrator);">I</span> Integrator</h3>
+                    <p>Răspunde la "CINE?" Construiește coeziune, cultură și colaborare. Transformă grupul de indivizi într-o echipă. Fără I, organizația se fragmentează.</p>
+                </div>
+            </div>
+
+            <div class="matrix-section">
+                <h2>Matricea Timpului și Funcției</h2>
+                <table class="matrix-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Eficacitate<br><small>(a face lucrurile corecte)</small></th>
+                            <th>Eficiență<br><small>(a face lucrurile corect)</small></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Termen Scurt</strong></td>
+                            <td style="background: rgba(230, 57, 70, 0.2);"><strong style="color: var(--producer);">P</strong> - Producer<br>Rezultate imediate</td>
+                            <td style="background: rgba(69, 123, 157, 0.2);"><strong style="color: var(--administrator);">A</strong> - Administrator<br>Procese optimizate</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Termen Lung</strong></td>
+                            <td style="background: rgba(244, 162, 97, 0.2);"><strong style="color: var(--entrepreneur);">E</strong> - Entrepreneur<br>Viziune și inovație</td>
+                            <td style="background: rgba(42, 157, 143, 0.2);"><strong style="color: var(--integrator);">I</strong> - Integrator<br>Coeziune organică</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB PLAYGROUND -->
+        <div id="playground" class="tab-content">
+            <div class="playground-container">
+                <div class="playground-header">
+                    <h2>Simulatorul de Profil PAEI</h2>
+                    <p>Ajustează nivelul fiecărei dimensiuni și observă cum se schimbă profilul în timp real</p>
+                </div>
+
+                <div class="playground-grid">
+                    <div class="sliders-panel">
+                        <div class="slider-group" data-role="P">
+                            <div class="slider-header">
+                                <div class="slider-icon" style="background: var(--producer);">P</div>
+                                <div class="slider-info">
+                                    <span class="slider-title">Producer</span>
+                                    <span class="slider-value" id="val-P">50</span>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="paei-slider slider-p" id="slider-P">
+                            <div class="slider-labels">
+                                <span>Absent</span>
+                                <span>Moderat</span>
+                                <span>Dominant</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-group" data-role="A">
+                            <div class="slider-header">
+                                <div class="slider-icon" style="background: var(--administrator);">A</div>
+                                <div class="slider-info">
+                                    <span class="slider-title">Administrator</span>
+                                    <span class="slider-value" id="val-A">50</span>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="paei-slider slider-a" id="slider-A">
+                            <div class="slider-labels">
+                                <span>Absent</span>
+                                <span>Moderat</span>
+                                <span>Dominant</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-group" data-role="E">
+                            <div class="slider-header">
+                                <div class="slider-icon" style="background: var(--entrepreneur);">E</div>
+                                <div class="slider-info">
+                                    <span class="slider-title">Entrepreneur</span>
+                                    <span class="slider-value" id="val-E">50</span>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="paei-slider slider-e" id="slider-E">
+                            <div class="slider-labels">
+                                <span>Absent</span>
+                                <span>Moderat</span>
+                                <span>Dominant</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-group" data-role="I">
+                            <div class="slider-header">
+                                <div class="slider-icon" style="background: var(--integrator);">I</div>
+                                <div class="slider-info">
+                                    <span class="slider-title">Integrator</span>
+                                    <span class="slider-value" id="val-I">50</span>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="paei-slider slider-i" id="slider-I">
+                            <div class="slider-labels">
+                                <span>Absent</span>
+                                <span>Moderat</span>
+                                <span>Dominant</span>
+                            </div>
+                        </div>
+
+                        <div class="preset-buttons">
+                            <span class="preset-label">Profile Predefinite:</span>
+                            <button class="preset-btn" data-preset="founder">Fondator (PaEi)</button>
+                            <button class="preset-btn" data-preset="manager">Manager (pAeI)</button>
+                            <button class="preset-btn" data-preset="bureaucrat">Birocrat (-A--)</button>
+                            <button class="preset-btn" data-preset="arsonist">Incendiar (--E-)</button>
+                            <button class="preset-btn" data-preset="deadwood">Deadwood (----)</button>
+                            <button class="preset-btn" data-preset="balanced">Echilibrat</button>
+                        </div>
+                    </div>
+
+                    <div class="visualization-panel">
+                        <div class="radar-container">
+                            <svg viewBox="0 0 400 400" id="radar-chart" class="radar-svg">
+                                <!-- Background circles -->
+                                <circle cx="200" cy="200" r="150" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                                <circle cx="200" cy="200" r="100" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                                <circle cx="200" cy="200" r="50" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                                
+                                <!-- Axis lines -->
+                                <line x1="200" y1="50" x2="200" y2="350" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                                <line x1="50" y1="200" x2="350" y2="200" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+                                
+                                <!-- Radar polygon -->
+                                <polygon id="radar-polygon" class="radar-polygon" points="200,125 275,200 200,275 125,200"/>
+                                
+                                <!-- Data points -->
+                                <circle id="point-P" cx="200" cy="125" r="8" class="radar-point point-p"/>
+                                <circle id="point-A" cx="275" cy="200" r="8" class="radar-point point-a"/>
+                                <circle id="point-E" cx="200" cy="275" r="8" class="radar-point point-e"/>
+                                <circle id="point-I" cx="125" cy="200" r="8" class="radar-point point-i"/>
+                                
+                                <!-- Labels -->
+                                <text x="200" y="30" text-anchor="middle" class="radar-label">P</text>
+                                <text x="370" y="205" text-anchor="middle" class="radar-label">A</text>
+                                <text x="200" y="385" text-anchor="middle" class="radar-label">E</text>
+                                <text x="30" y="205" text-anchor="middle" class="radar-label">I</text>
+                            </svg>
+                        </div>
+
+                        <div class="profile-display">
+                            <div class="code-display">
+                                <span class="code-letter" id="code-P" style="color: var(--producer);">P</span>
+                                <span class="code-letter" id="code-A" style="color: var(--administrator);">A</span>
+                                <span class="code-letter" id="code-E" style="color: var(--entrepreneur);">E</span>
+                                <span class="code-letter" id="code-I" style="color: var(--integrator);">I</span>
+                            </div>
+                            <div class="profile-name" id="profile-name">Profil Echilibrat</div>
+                        </div>
+
+                        <div class="analysis-panel" id="analysis-panel">
+                            <div class="analysis-section">
+                                <h4>🎯 Puncte Forte</h4>
+                                <p id="strengths">Cu un profil echilibrat, ai versatilitate în toate domeniile managementului.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>⚠️ Puncte de Atenție</h4>
+                                <p id="weaknesses">Echilibrul poate indica lipsa unei specializări clare sau indecizie stilistică.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>👥 Compatibilitate în Echipă</h4>
+                                <p id="team-fit">Te poți integra în diverse roluri, dar ai nevoie de claritate asupra responsabilităților.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB SIMULATOR -->
+        <div id="simulator" class="tab-content">
+            <div class="simulator-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+
+                <div id="quiz-container">
+                    <div class="question-card">
+                        <div class="question-number" id="question-number">Întrebarea 1 din 8</div>
+                        <div class="question-text" id="question-text">Când un proiect important întârzie, primul tău instinct este să:</div>
+                        <div class="options" id="options"></div>
+                    </div>
+
+                    <div class="nav-buttons">
+                        <button class="btn btn-secondary" id="prev-btn" disabled>← Înapoi</button>
+                        <button class="btn btn-primary" id="next-btn" disabled>Următoarea →</button>
+                    </div>
+                </div>
+
+                <div id="results-container" class="results-container hidden">
+                    <h2 class="results-title">Profilul Tău PAEI</h2>
+                    <p class="results-subtitle">Bazat pe răspunsurile tale</p>
+                    
+                    <div class="profile-chart">
+                        <div class="chart-bar">
+                            <span class="chart-label">Producer</span>
+                            <div class="chart-track">
+                                <div class="chart-fill p" id="bar-p" style="width: 0%"><span id="score-p">0%</span></div>
+                            </div>
+                        </div>
+                        <div class="chart-bar">
+                            <span class="chart-label">Administrator</span>
+                            <div class="chart-track">
+                                <div class="chart-fill a" id="bar-a" style="width: 0%"><span id="score-a">0%</span></div>
+                            </div>
+                        </div>
+                        <div class="chart-bar">
+                            <span class="chart-label">Entrepreneur</span>
+                            <div class="chart-track">
+                                <div class="chart-fill e" id="bar-e" style="width: 0%"><span id="score-e">0%</span></div>
+                            </div>
+                        </div>
+                        <div class="chart-bar">
+                            <span class="chart-label">Integrator</span>
+                            <div class="chart-track">
+                                <div class="chart-fill i" id="bar-i" style="width: 0%"><span id="score-i">0%</span></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="profile-code" id="profile-code">----</div>
+
+                    <div class="profile-description">
+                        <h3 id="profile-title">Profilul Tău</h3>
+                        <p id="profile-text">Descrierea profilului tău va apărea aici.</p>
+                    </div>
+
+                    <button class="btn btn-primary restart-btn" id="restart-btn">Reia Testul</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === TAB NAVIGATION ===
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // === MODEL INTERACTIV ===
+        const roleData = {
+            producer: {
+                letter: 'P',
+                name: 'Producer',
+                focus: 'Eficacitate pe Termen Scurt',
+                color: 'var(--producer)',
+                description: 'Producătorul se concentrează pe rezultate imediate și tangibile. Este executantul care aduce energie, output și execuție în organizație. Răspunde la întrebarea fundamentală: "CE trebuie făcut?"',
+                details: 'Managerii dominanți în P sunt orientați spre acțiune, pragmatici și focusați pe îndeplinirea obiectivelor. Ei sunt forța motrice care transformă planurile în realitate.',
+                traits: ['Orientat spre rezultate', 'Pragmatic', 'Energic', 'Executant', 'Focusat']
+            },
+            administrator: {
+                letter: 'A',
+                name: 'Administrator',
+                focus: 'Eficiență pe Termen Scurt',
+                color: 'var(--administrator)',
+                description: 'Administratorul aduce structură și ordine. Proiectează procese, optimizează sisteme și gestionează politici pentru consistență și predictibilitate.',
+                details: 'Managerii dominanți în A excelează în organizare, planificare și control. Ei creează cadrul necesar pentru ca lucrurile să funcționeze lin și eficient.',
+                traits: ['Metodic', 'Organizat', 'Analitic', 'Sistematic', 'Precis']
+            },
+            entrepreneur: {
+                letter: 'E',
+                name: 'Entrepreneur',
+                focus: 'Eficacitate pe Termen Lung',
+                color: 'var(--entrepreneur)',
+                description: 'Antreprenorul caută și recunoaște noi oportunități. Inițiază schimbarea, adaptează organizația și creează viziuni pentru viitor.',
+                details: 'Managerii dominanți în E sunt vizionari, creativi și orientați spre inovație. Ei văd posibilități acolo unde alții văd obstacole.',
+                traits: ['Vizionar', 'Creativ', 'Risk-taker', 'Inovator', 'Proactiv']
+            },
+            integrator: {
+                letter: 'I',
+                name: 'Integrator',
+                focus: 'Eficiență pe Termen Lung',
+                color: 'var(--integrator)',
+                description: 'Integratorul coordonează și creează coeziune. Construiește relații, facilitează colaborarea și menține organizația unită funcțional și social.',
+                details: 'Managerii dominanți în I sunt empatici, diplomatici și orientați spre oameni. Ei transformă grupurile de indivizi în echipe performante.',
+                traits: ['Empatic', 'Diplomatic', 'Colaborativ', 'Comunicativ', 'Armonizator']
+            }
+        };
+
+        const quadrants = document.querySelectorAll('.quadrant');
+
+        function updateInfoPanel(role) {
+            const data = roleData[role];
+            document.getElementById('info-icon').textContent = data.letter;
+            document.getElementById('info-icon').style.background = data.color;
+            document.getElementById('info-name').textContent = data.name;
+            document.getElementById('info-focus').textContent = data.focus;
+            document.getElementById('info-description').textContent = data.description;
+            document.getElementById('info-details').textContent = data.details;
+            
+            const traitsContainer = document.getElementById('info-traits');
+            traitsContainer.innerHTML = data.traits.map(t => `<span class="trait-tag">${t}</span>`).join('');
+        }
+
+        quadrants.forEach(q => {
+            q.addEventListener('click', () => {
+                quadrants.forEach(quad => quad.classList.remove('active'));
+                q.classList.add('active');
+                updateInfoPanel(q.dataset.role);
+            });
+
+            q.addEventListener('mouseenter', () => {
+                updateInfoPanel(q.dataset.role);
+            });
+        });
+
+        // === SIMULATOR ===
+        const questions = [
+            {
+                text: "Când un proiect important întârzie, primul tău instinct este să:",
+                options: [
+                    { text: "Te apuci imediat de treabă pentru a recupera timpul pierdut", type: 'P' },
+                    { text: "Analizezi procesele pentru a identifica unde s-a greșit", type: 'A' },
+                    { text: "Cauți o abordare complet nouă care să accelereze lucrurile", type: 'E' },
+                    { text: "Aduni echipa pentru a discuta și a găsi soluții împreună", type: 'I' }
+                ]
+            },
+            {
+                text: "Ce te motivează cel mai mult în muncă?",
+                options: [
+                    { text: "Să văd rezultate concrete și măsurabile", type: 'P' },
+                    { text: "Să am procese clare și bine definite", type: 'A' },
+                    { text: "Să explorez idei noi și să inovez", type: 'E' },
+                    { text: "Să construiesc relații și să ajut echipa să crească", type: 'I' }
+                ]
+            },
+            {
+                text: "Cum abordezi o decizie importantă?",
+                options: [
+                    { text: "Mă gândesc la ce acțiuni concrete pot lua acum", type: 'P' },
+                    { text: "Analizez datele și urmez procedurile stabilite", type: 'A' },
+                    { text: "Evaluez riscurile și oportunitățile pe termen lung", type: 'E' },
+                    { text: "Consult echipa și caut consensul", type: 'I' }
+                ]
+            },
+            {
+                text: "Ce te frustrează cel mai mult la locul de muncă?",
+                options: [
+                    { text: "Lipsa progresului și a rezultatelor tangibile", type: 'P' },
+                    { text: "Haosul și lipsa de organizare", type: 'A' },
+                    { text: "Stagnarea și rezistența la schimbare", type: 'E' },
+                    { text: "Conflictele și lipsa de colaborare", type: 'I' }
+                ]
+            },
+            {
+                text: "La o întâlnire de echipă, rolul tău natural este să:",
+                options: [
+                    { text: "Stabilești acțiuni concrete și termene", type: 'P' },
+                    { text: "Iei notițe și urmărești agenda", type: 'A' },
+                    { text: "Propui idei noi și alternative", type: 'E' },
+                    { text: "Facilitezi discuția și mediezi diferențele", type: 'I' }
+                ]
+            },
+            {
+                text: "Cum îți descrii stilul de leadership?",
+                options: [
+                    { text: "Conduc prin exemplu și muncă susținută", type: 'P' },
+                    { text: "Stabilesc reguli clare și așteptări precise", type: 'A' },
+                    { text: "Inspir prin viziune și entuziasm", type: 'E' },
+                    { text: "Dezvolt oamenii și construiesc încredere", type: 'I' }
+                ]
+            },
+            {
+                text: "Ce tip de provocări îți place să rezolvi?",
+                options: [
+                    { text: "Probleme practice care necesită acțiune rapidă", type: 'P' },
+                    { text: "Probleme complexe care necesită analiză detaliată", type: 'A' },
+                    { text: "Probleme noi care necesită gândire creativă", type: 'E' },
+                    { text: "Probleme interpersonale care necesită diplomație", type: 'I' }
+                ]
+            },
+            {
+                text: "Cum definești succesul în cariera ta?",
+                options: [
+                    { text: "Realizări concrete și obiective atinse", type: 'P' },
+                    { text: "Sisteme eficiente create și procese îmbunătățite", type: 'A' },
+                    { text: "Inovații aduse și oportunități create", type: 'E' },
+                    { text: "Echipe puternice construite și oameni dezvoltați", type: 'I' }
+                ]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let answers = [];
+        let scores = { P: 0, A: 0, E: 0, I: 0 };
+
+        const questionText = document.getElementById('question-text');
+        const questionNumber = document.getElementById('question-number');
+        const optionsContainer = document.getElementById('options');
+        const progressFill = document.getElementById('progress-fill');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+
+        function shuffleArray(array) {
+            const shuffled = [...array];
+            for (let i = shuffled.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+            }
+            return shuffled;
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            questionNumber.textContent = `Întrebarea ${currentQuestion + 1} din ${questions.length}`;
+            questionText.textContent = q.text;
+            progressFill.style.width = `${((currentQuestion) / questions.length) * 100}%`;
+
+            const shuffledOptions = shuffleArray(q.options);
+            const letters = ['A', 'B', 'C', 'D'];
+            
+            optionsContainer.innerHTML = shuffledOptions.map((opt, i) => `
+                <div class="option ${answers[currentQuestion] === opt.type ? 'selected' : ''}" data-type="${opt.type}">
+                    <span class="option-letter">${letters[i]}</span>
+                    <span>${opt.text}</span>
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.option').forEach(opt => {
+                opt.addEventListener('click', () => selectOption(opt.dataset.type));
+            });
+
+            prevBtn.disabled = currentQuestion === 0;
+            nextBtn.disabled = !answers[currentQuestion];
+            nextBtn.textContent = currentQuestion === questions.length - 1 ? 'Vezi Rezultatul' : 'Următoarea →';
+        }
+
+        function selectOption(type) {
+            answers[currentQuestion] = type;
+            document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+            document.querySelector(`[data-type="${type}"]`).classList.add('selected');
+            nextBtn.disabled = false;
+        }
+
+        function calculateResults() {
+            scores = { P: 0, A: 0, E: 0, I: 0 };
+            answers.forEach(a => scores[a]++);
+            
+            const total = questions.length;
+            const percentages = {
+                P: Math.round((scores.P / total) * 100),
+                A: Math.round((scores.A / total) * 100),
+                E: Math.round((scores.E / total) * 100),
+                I: Math.round((scores.I / total) * 100)
+            };
+
+            return percentages;
+        }
+
+        function getProfileCode(percentages) {
+            const sorted = Object.entries(percentages).sort((a, b) => b[1] - a[1]);
+            return sorted.map(([role, pct]) => {
+                if (pct >= 25) return role;
+                if (pct >= 12) return role.toLowerCase();
+                return '-';
+            }).join('');
+        }
+
+        function getProfileDescription(percentages) {
+            const sorted = Object.entries(percentages).sort((a, b) => b[1] - a[1]);
+            const dominant = sorted[0][0];
+            const secondary = sorted[1][0];
+
+            const descriptions = {
+                'P': 'Ești orientat puternic spre rezultate și acțiune.',
+                'A': 'Excelezi în organizare și sistematizare.',
+                'E': 'Ai o puternică înclinație spre inovație și viziune.',
+                'I': 'Construiești conexiuni și menții armonia în echipe.'
+            };
+
+            const combinations = {
+                'PA': 'Combini execuția cu organizarea - ești un manager eficient care livrează rezultate sistematic.',
+                'PE': 'Ești un antreprenor activ - vezi oportunitățile și le transformi rapid în realitate.',
+                'PI': 'Ești un lider practic care obține rezultate prin colaborare și motivarea echipei.',
+                'AP': 'Creezi sisteme care produc rezultate - eficiența ta vine din structură și disciplină.',
+                'AE': 'Planifici inovația - poți transforma ideile creative în procese scalabile.',
+                'AI': 'Construiești organizații armonioase cu procese clare și cultură puternică.',
+                'EP': 'Vizionar cu execuție - nu doar visezi, ci și realizezi.',
+                'EA': 'Inovator metodic - ideile tale mari au planuri concrete de implementare.',
+                'EI': 'Lider vizionar care inspiră și unește oamenii în jurul unei misiuni comune.',
+                'IP': 'Obții rezultate prin oameni - succesul vine din echipele pe care le construiești.',
+                'IA': 'Creezi structuri organizaționale armonioase și funcționale.',
+                'IE': 'Inspiră schimbarea prin conexiuni - transformi organizațiile prin relații și viziune.'
+            };
+
+            const combo = dominant + secondary;
+            return combinations[combo] || `${descriptions[dominant]} ${descriptions[secondary]}`;
+        }
+
+        function showResults() {
+            const percentages = calculateResults();
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            progressFill.style.width = '100%';
+
+            setTimeout(() => {
+                document.getElementById('bar-p').style.width = `${percentages.P}%`;
+                document.getElementById('bar-a').style.width = `${percentages.A}%`;
+                document.getElementById('bar-e').style.width = `${percentages.E}%`;
+                document.getElementById('bar-i').style.width = `${percentages.I}%`;
+
+                document.getElementById('score-p').textContent = `${percentages.P}%`;
+                document.getElementById('score-a').textContent = `${percentages.A}%`;
+                document.getElementById('score-e').textContent = `${percentages.E}%`;
+                document.getElementById('score-i').textContent = `${percentages.I}%`;
+            }, 100);
+
+            const profileCode = getProfileCode(percentages);
+            document.getElementById('profile-code').textContent = profileCode;
+
+            const sorted = Object.entries(percentages).sort((a, b) => b[1] - a[1]);
+            document.getElementById('profile-title').textContent = `Profil Dominant: ${roleData[sorted[0][0].toLowerCase() === 'p' ? 'producer' : sorted[0][0].toLowerCase() === 'a' ? 'administrator' : sorted[0][0].toLowerCase() === 'e' ? 'entrepreneur' : 'integrator'].name}`;
+            document.getElementById('profile-text').textContent = getProfileDescription(percentages);
+        }
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            currentQuestion = 0;
+            answers = [];
+            scores = { P: 0, A: 0, E: 0, I: 0 };
+            quizContainer.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+            renderQuestion();
+        });
+
+        // Initialize
+        renderQuestion();
+
+        // === PLAYGROUND SIMULATOR ===
+        const sliders = {
+            P: document.getElementById('slider-P'),
+            A: document.getElementById('slider-A'),
+            E: document.getElementById('slider-E'),
+            I: document.getElementById('slider-I')
+        };
+
+        const presets = {
+            founder: { P: 75, A: 35, E: 85, I: 45 },
+            manager: { P: 40, A: 80, E: 35, I: 70 },
+            bureaucrat: { P: 15, A: 95, E: 10, I: 20 },
+            arsonist: { P: 20, A: 15, E: 95, I: 15 },
+            deadwood: { P: 10, A: 10, E: 10, I: 10 },
+            balanced: { P: 50, A: 50, E: 50, I: 50 }
+        };
+
+        const profileAnalysis = {
+            getStrengths: (vals) => {
+                const dominant = Object.entries(vals).sort((a, b) => b[1] - a[1])[0];
+                const strengths = {
+                    P: 'Excelezi în a obține rezultate. Ești orientat spre acțiune și livrezi consecvent.',
+                    A: 'Ai talentul de a crea ordine și sisteme. Procesele tale sunt eficiente și scalabile.',
+                    E: 'Viziunea ta e punctul forte. Vezi oportunități unde alții văd obstacole.',
+                    I: 'Construiești echipe puternice. Oamenii te urmează și colaborează bine sub conducerea ta.'
+                };
+                if (dominant[1] < 30) return 'Profilul tău nu are dimensiuni dominante clare. Aceasta poate indica adaptabilitate sau nevoia de dezvoltare.';
+                return strengths[dominant[0]];
+            },
+            getWeaknesses: (vals) => {
+                const weakest = Object.entries(vals).sort((a, b) => a[1] - b[1])[0];
+                const weaknesses = {
+                    P: 'Riști să fii prea concentrat pe viziune fără execuție. Rezultatele concrete pot suferi.',
+                    A: 'Lipsa structurii poate duce la haos. Ai nevoie de sisteme mai clare.',
+                    E: 'Poți rata oportunitățile de creștere. Gândirea strategică necesită dezvoltare.',
+                    I: 'Relațiile în echipă pot suferi. Focusează-te mai mult pe oameni și colaborare.'
+                };
+                if (weakest[1] > 40) return 'Nu ai slăbiciuni majore evidente. Menține echilibrul și continuă să te dezvolți.';
+                return weaknesses[weakest[0]];
+            },
+            getTeamFit: (vals) => {
+                const sorted = Object.entries(vals).sort((a, b) => b[1] - a[1]);
+                const top = sorted[0][0];
+                const second = sorted[1][0];
+                
+                const fits = {
+                    'PE': 'Ești un starter ideal - inițiezi proiecte și le duci până la primele rezultate. Ai nevoie de A și I în echipă pentru sustenabilitate.',
+                    'PA': 'Combini execuția cu organizarea. Complementezi bine pe E (vizionari) și I (facilitatori).',
+                    'PI': 'Lider de echipă natural care obține rezultate prin oameni. Caută un A și E pentru echilibru.',
+                    'EP': 'Antreprenor activ - vezi și execuți. Ai nevoie de A pentru sisteme și I pentru stabilitate.',
+                    'EA': 'Planificator strategic - poți scala idei. Complementează cu P (execuție) și I (coeziune).',
+                    'EI': 'Lider transformațional - inspiri schimbarea. Ai nevoie de P și A pentru implementare.',
+                    'AP': 'Manager operațional solid. Caută E pentru inovație și I pentru relații.',
+                    'AE': 'Arhitect de sisteme - construiești infrastructura pentru creștere. Ai nevoie de P și I.',
+                    'AI': 'Construiești organizații stabile. Complementează cu P (rezultate) și E (viziune).',
+                    'IP': 'Coach executiv - dezvolți oameni performanți. Ai nevoie de A și E pentru direcție.',
+                    'IE': 'Catalizator cultural - transformi prin relații. Caută P și A pentru concretizare.',
+                    'IA': 'HR strategic - creezi structuri pentru oameni. Ai nevoie de P și E pentru dinamism.'
+                };
+                
+                return fits[top + second] || 'Profilul tău e unic. Analizează ce roluri complementare ai nevoie în echipă.';
+            },
+            getProfileName: (vals) => {
+                const sorted = Object.entries(vals).sort((a, b) => b[1] - a[1]);
+                const dominant = sorted[0];
+                const second = sorted[1];
+                
+                if (dominant[1] < 25) return 'Profil Nedefinit';
+                if (dominant[1] > 80 && second[1] < 30) {
+                    const names = { P: 'Lone Wolf', A: 'Birocrat', E: 'Incendiar', I: 'Super-Follower' };
+                    return names[dominant[0]] + ' (dezechilibrat)';
+                }
+                
+                const combos = {
+                    'PE': 'Fondator / Antreprenor Activ',
+                    'PA': 'Manager de Producție',
+                    'PI': 'Lider de Echipă',
+                    'EP': 'Vizionar Executant',
+                    'EA': 'Strateg Sistematic',
+                    'EI': 'Lider Transformațional',
+                    'AP': 'Manager Operațional',
+                    'AE': 'Arhitect Organizațional',
+                    'AI': 'Administrator de Personal',
+                    'IP': 'Coach de Performanță',
+                    'IE': 'Catalizator de Schimbare',
+                    'IA': 'Manager HR'
+                };
+                
+                return combos[dominant[0] + second[0]] || 'Profil Mixt';
+            }
+        };
+
+        function updatePlayground() {
+            const vals = {
+                P: parseInt(sliders.P.value),
+                A: parseInt(sliders.A.value),
+                E: parseInt(sliders.E.value),
+                I: parseInt(sliders.I.value)
+            };
+
+            // Update value displays
+            Object.keys(vals).forEach(key => {
+                document.getElementById(`val-${key}`).textContent = vals[key];
+            });
+
+            // Update radar chart
+            const center = 200;
+            const maxRadius = 150;
+            
+            const points = {
+                P: { x: center, y: center - (vals.P / 100) * maxRadius },
+                A: { x: center + (vals.A / 100) * maxRadius, y: center },
+                E: { x: center, y: center + (vals.E / 100) * maxRadius },
+                I: { x: center - (vals.I / 100) * maxRadius, y: center }
+            };
+
+            document.getElementById('radar-polygon').setAttribute('points', 
+                `${points.P.x},${points.P.y} ${points.A.x},${points.A.y} ${points.E.x},${points.E.y} ${points.I.x},${points.I.y}`
+            );
+
+            Object.keys(points).forEach(key => {
+                const point = document.getElementById(`point-${key}`);
+                point.setAttribute('cx', points[key].x);
+                point.setAttribute('cy', points[key].y);
+            });
+
+            // Update code display
+            Object.keys(vals).forEach(key => {
+                const codeEl = document.getElementById(`code-${key}`);
+                codeEl.classList.remove('dim', 'absent');
+                if (vals[key] < 25) {
+                    codeEl.classList.add('absent');
+                } else if (vals[key] < 50) {
+                    codeEl.classList.add('dim');
+                }
+            });
+
+            // Update analysis
+            document.getElementById('profile-name').textContent = profileAnalysis.getProfileName(vals);
+            document.getElementById('strengths').textContent = profileAnalysis.getStrengths(vals);
+            document.getElementById('weaknesses').textContent = profileAnalysis.getWeaknesses(vals);
+            document.getElementById('team-fit').textContent = profileAnalysis.getTeamFit(vals);
+        }
+
+        // Attach slider listeners
+        Object.values(sliders).forEach(slider => {
+            slider.addEventListener('input', updatePlayground);
+        });
+
+        // Preset buttons
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const preset = presets[btn.dataset.preset];
+                Object.keys(preset).forEach(key => {
+                    sliders[key].value = preset[key];
+                });
+                updatePlayground();
+            });
+        });
+
+        // Initialize playground
+        updatePlayground();
+    </script>
+</body>
+</html>

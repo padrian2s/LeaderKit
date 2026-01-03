@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modelul Big Five (OCEAN) | Învățare Interactivă</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Source+Sans+3:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --openness: #8B5CF6;
+            --conscientiousness: #3B82F6;
+            --extraversion: #F59E0B;
+            --agreeableness: #10B981;
+            --neuroticism: #EF4444;
+            --bg-dark: #1a1a2e;
+            --bg-card: #16213e;
+            --text-light: #edf2f7;
+            --text-muted: #a0aec0;
+            --accent-glow: rgba(139, 92, 246, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Source Sans 3', sans-serif;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        header {
+            text-align: center;
+            padding: 3rem 2rem 2rem;
+            position: relative;
+        }
+
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 200px;
+            height: 200px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            z-index: -1;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(2.5rem, 5vw, 4rem);
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--text-light) 0%, var(--openness) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            font-weight: 400;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--agreeableness);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin-top: 0.5rem;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 2rem auto;
+            padding: 0.5rem;
+            background: var(--bg-card);
+            border-radius: 50px;
+            max-width: 500px;
+        }
+
+        .tab-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            font-weight: 500;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text-light);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, var(--openness), var(--extraversion));
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem 4rem;
+        }
+
+        .tab-content {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* === MODEL === */
+        .ocean-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .ocean-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .ocean-header p {
+            color: var(--text-muted);
+        }
+
+        .ocean-acronym {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .ocean-letter {
+            width: 60px;
+            height: 60px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .ocean-letter:hover {
+            transform: scale(1.1);
+        }
+
+        .ocean-letter.active {
+            transform: scale(1.15);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .letter-o { background: var(--openness); }
+        .letter-c { background: var(--conscientiousness); }
+        .letter-e { background: var(--extraversion); }
+        .letter-a { background: var(--agreeableness); }
+        .letter-n { background: var(--neuroticism); }
+
+        .traits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .trait-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-top: 4px solid transparent;
+        }
+
+        .trait-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .trait-card.active {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .trait-card[data-trait="O"] { border-color: var(--openness); }
+        .trait-card[data-trait="C"] { border-color: var(--conscientiousness); }
+        .trait-card[data-trait="E"] { border-color: var(--extraversion); }
+        .trait-card[data-trait="A"] { border-color: var(--agreeableness); }
+        .trait-card[data-trait="N"] { border-color: var(--neuroticism); }
+
+        .trait-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .trait-letter {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: white;
+        }
+
+        .trait-card[data-trait="O"] .trait-letter { background: var(--openness); }
+        .trait-card[data-trait="C"] .trait-letter { background: var(--conscientiousness); }
+        .trait-card[data-trait="E"] .trait-letter { background: var(--extraversion); }
+        .trait-card[data-trait="A"] .trait-letter { background: var(--agreeableness); }
+        .trait-card[data-trait="N"] .trait-letter { background: var(--neuroticism); }
+
+        .trait-name {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.1rem;
+        }
+
+        .trait-brief {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .info-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+        }
+
+        .info-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .info-icon {
+            width: 70px;
+            height: 70px;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .info-title h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-title span {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .spectrum-container {
+            margin: 1.5rem 0;
+        }
+
+        .spectrum-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+        }
+
+        .spectrum-bar {
+            height: 12px;
+            border-radius: 6px;
+            background: linear-gradient(90deg, rgba(255,255,255,0.1), rgba(255,255,255,0.3));
+            position: relative;
+        }
+
+        .spectrum-marker {
+            position: absolute;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 3px solid white;
+            transition: left 0.3s ease;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-box {
+            padding: 1rem;
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+        }
+
+        .info-box h4 {
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-box p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* === TEORIE === */
+        .theory-intro {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .theory-intro h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+            margin-bottom: 1rem;
+        }
+
+        .theory-intro p {
+            color: var(--text-muted);
+            line-height: 1.8;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .facets-section {
+            margin-bottom: 2rem;
+        }
+
+        .facets-section h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .facets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .facet-card {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border-left: 4px solid;
+        }
+
+        .facet-card[data-trait="O"] { border-color: var(--openness); }
+        .facet-card[data-trait="C"] { border-color: var(--conscientiousness); }
+        .facet-card[data-trait="E"] { border-color: var(--extraversion); }
+        .facet-card[data-trait="A"] { border-color: var(--agreeableness); }
+        .facet-card[data-trait="N"] { border-color: var(--neuroticism); }
+
+        .facet-card h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .facet-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .facet-list li {
+            padding: 0.3rem 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .facet-list li::before {
+            content: '•';
+            font-size: 1.2rem;
+        }
+
+        /* === PLAYGROUND === */
+        .playground-container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .playground-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .playground-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .playground-header p {
+            color: var(--text-muted);
+        }
+
+        .playground-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .playground-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .sliders-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .slider-group {
+            margin-bottom: 1.75rem;
+        }
+
+        .slider-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .slider-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .slider-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1rem;
+            color: white;
+        }
+
+        .slider-info {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .slider-title {
+            font-weight: 600;
+        }
+
+        .slider-value {
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+
+        .ocean-slider {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            margin: 0.5rem 0;
+        }
+
+        .ocean-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        .ocean-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        .slider-o { background: linear-gradient(90deg, rgba(139,92,246,0.3), var(--openness)); }
+        .slider-c { background: linear-gradient(90deg, rgba(59,130,246,0.3), var(--conscientiousness)); }
+        .slider-e { background: linear-gradient(90deg, rgba(245,158,11,0.3), var(--extraversion)); }
+        .slider-a { background: linear-gradient(90deg, rgba(16,185,129,0.3), var(--agreeableness)); }
+        .slider-n { background: linear-gradient(90deg, rgba(239,68,68,0.3), var(--neuroticism)); }
+
+        .slider-poles {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .preset-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .preset-label {
+            width: 100%;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 0.25rem;
+        }
+
+        .preset-btn {
+            padding: 0.4rem 0.7rem;
+            border: 1px solid rgba(255,255,255,0.2);
+            background: transparent;
+            color: var(--text-light);
+            border-radius: 6px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Source Sans 3', sans-serif;
+        }
+
+        .preset-btn:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .visualization-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .radar-container {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .radar-svg {
+            width: 100%;
+            max-width: 350px;
+            margin: 0 auto;
+            display: block;
+        }
+
+        .radar-polygon {
+            fill: rgba(139, 92, 246, 0.2);
+            stroke: var(--openness);
+            stroke-width: 2;
+            transition: all 0.3s ease;
+        }
+
+        .radar-grid {
+            fill: none;
+            stroke: rgba(255,255,255,0.1);
+            stroke-width: 1;
+        }
+
+        .radar-label {
+            fill: var(--text-light);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .radar-axis {
+            stroke: rgba(255,255,255,0.1);
+            stroke-width: 1;
+        }
+
+        .profile-bars {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .profile-bars h4 {
+            font-size: 1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .bar-item {
+            margin-bottom: 1rem;
+        }
+
+        .bar-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .bar-header {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .bar-track {
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .bar-o { background: var(--openness); }
+        .bar-c { background: var(--conscientiousness); }
+        .bar-e { background: var(--extraversion); }
+        .bar-a { background: var(--agreeableness); }
+        .bar-n { background: var(--neuroticism); }
+
+        .analysis-panel {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+
+        .analysis-section {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1.25rem;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .analysis-section:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .analysis-section h4 {
+            font-size: 0.95rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .analysis-section p {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* === QUIZ === */
+        .simulator-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--bg-card);
+            border-radius: 3px;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--openness), var(--extraversion));
+            border-radius: 3px;
+            transition: width 0.4s ease;
+        }
+
+        .question-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .question-number {
+            color: var(--openness);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .question-text {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            line-height: 1.5;
+            margin-bottom: 2rem;
+        }
+
+        .likert-scale {
+            display: flex;
+            justify-content: space-between;
+            gap: 0.5rem;
+        }
+
+        .likert-option {
+            flex: 1;
+            padding: 1rem 0.5rem;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .likert-option:hover {
+            background: rgba(255,255,255,0.1);
+            border-color: rgba(255,255,255,0.2);
+        }
+
+        .likert-option.selected {
+            border-color: var(--openness);
+            background: rgba(139, 92, 246, 0.15);
+        }
+
+        .likert-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            display: block;
+            margin-bottom: 0.25rem;
+        }
+
+        .likert-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-family: 'Source Sans 3', sans-serif;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary {
+            background: var(--bg-card);
+            color: var(--text-light);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255,255,255,0.15);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--openness), var(--extraversion));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px var(--accent-glow);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results-container {
+            text-align: center;
+        }
+
+        .results-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .results-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        .results-ocean {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .result-trait {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 1.25rem;
+            min-width: 100px;
+            border-top: 4px solid;
+        }
+
+        .result-trait[data-trait="O"] { border-color: var(--openness); }
+        .result-trait[data-trait="C"] { border-color: var(--conscientiousness); }
+        .result-trait[data-trait="E"] { border-color: var(--extraversion); }
+        .result-trait[data-trait="A"] { border-color: var(--agreeableness); }
+        .result-trait[data-trait="N"] { border-color: var(--neuroticism); }
+
+        .result-letter {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+
+        .result-trait[data-trait="O"] .result-letter { color: var(--openness); }
+        .result-trait[data-trait="C"] .result-letter { color: var(--conscientiousness); }
+        .result-trait[data-trait="E"] .result-letter { color: var(--extraversion); }
+        .result-trait[data-trait="A"] .result-letter { color: var(--agreeableness); }
+        .result-trait[data-trait="N"] .result-letter { color: var(--neuroticism); }
+
+        .result-score {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .result-name {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .profile-description {
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 600px;
+            margin: 0 auto;
+            text-align: left;
+        }
+
+        .profile-description h3 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .profile-description p {
+            color: var(--text-muted);
+            line-height: 1.8;
+            margin-bottom: 1rem;
+        }
+
+        .restart-btn {
+            margin-top: 2rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="noise-overlay"></div>
+
+    <header>
+        <h1>Big Five (OCEAN)</h1>
+        <p class="subtitle">Cele 5 Trăsături Fundamentale ale Personalității</p>
+        <span class="badge">Cel mai validat științific</span>
+    </header>
+
+    <div class="tabs">
+        <button class="tab-btn active" data-tab="model">Modelul</button>
+        <button class="tab-btn" data-tab="theory">Teorie</button>
+        <button class="tab-btn" data-tab="playground">Playground</button>
+        <button class="tab-btn" data-tab="simulator">Quiz</button>
+    </div>
+
+    <div class="container">
+        <!-- TAB MODEL -->
+        <div id="model" class="tab-content active">
+            <div class="ocean-header">
+                <h2>Cele 5 Dimensiuni ale Personalității</h2>
+                <p>Click pe o literă sau un card pentru detalii</p>
+            </div>
+
+            <div class="ocean-acronym">
+                <div class="ocean-letter letter-o" data-trait="O">O</div>
+                <div class="ocean-letter letter-c" data-trait="C">C</div>
+                <div class="ocean-letter letter-e" data-trait="E">E</div>
+                <div class="ocean-letter letter-a" data-trait="A">A</div>
+                <div class="ocean-letter letter-n" data-trait="N">N</div>
+            </div>
+
+            <div class="traits-grid">
+                <div class="trait-card" data-trait="O">
+                    <div class="trait-header">
+                        <div class="trait-letter">O</div>
+                        <div class="trait-name">Openness</div>
+                    </div>
+                    <div class="trait-brief">Deschidere la experiențe noi, creativitate, curiozitate intelectuală</div>
+                </div>
+                <div class="trait-card" data-trait="C">
+                    <div class="trait-header">
+                        <div class="trait-letter">C</div>
+                        <div class="trait-name">Conscientiousness</div>
+                    </div>
+                    <div class="trait-brief">Organizare, disciplină, orientare spre obiective, responsabilitate</div>
+                </div>
+                <div class="trait-card" data-trait="E">
+                    <div class="trait-header">
+                        <div class="trait-letter">E</div>
+                        <div class="trait-name">Extraversion</div>
+                    </div>
+                    <div class="trait-brief">Sociabilitate, energie, entuziasm, asertivitate</div>
+                </div>
+                <div class="trait-card" data-trait="A">
+                    <div class="trait-header">
+                        <div class="trait-letter">A</div>
+                        <div class="trait-name">Agreeableness</div>
+                    </div>
+                    <div class="trait-brief">Cooperare, empatie, încredere în ceilalți, armonie</div>
+                </div>
+                <div class="trait-card" data-trait="N">
+                    <div class="trait-header">
+                        <div class="trait-letter">N</div>
+                        <div class="trait-name">Neuroticism</div>
+                    </div>
+                    <div class="trait-brief">Stabilitate emoțională (invers), anxietate, vulnerabilitate la stres</div>
+                </div>
+            </div>
+
+            <div class="info-panel" id="info-panel">
+                <div class="info-header">
+                    <div class="info-icon" id="info-icon" style="background: var(--openness);">O</div>
+                    <div class="info-title">
+                        <h2 id="info-name">Openness</h2>
+                        <span id="info-subtitle">Deschidere la Experiență</span>
+                    </div>
+                </div>
+
+                <div class="spectrum-container">
+                    <div class="spectrum-label">
+                        <span id="low-pole">Convențional</span>
+                        <span id="high-pole">Deschis la nou</span>
+                    </div>
+                    <div class="spectrum-bar" id="spectrum-bar">
+                        <div class="spectrum-marker" id="spectrum-marker" style="left: 75%; background: var(--openness);"></div>
+                    </div>
+                </div>
+
+                <div class="info-grid">
+                    <div class="info-box">
+                        <h4 id="high-label">Scor Ridicat (Deschis)</h4>
+                        <p id="high-desc">Creativ, curios, imaginativ, deschis la idei noi, apreciază arta și estetica, preferă varietatea.</p>
+                    </div>
+                    <div class="info-box">
+                        <h4 id="low-label">Scor Scăzut (Convențional)</h4>
+                        <p id="low-desc">Practic, convențional, preferă rutina, focusat pe concret, mai puțin interesat de abstracțiuni.</p>
+                    </div>
+                    <div class="info-box">
+                        <h4>În Muncă</h4>
+                        <p id="work-context">Excelează în roluri creative, cercetare, inovație. Poate avea dificultăți cu sarcini repetitive.</p>
+                    </div>
+                    <div class="info-box">
+                        <h4>În Relații</h4>
+                        <p id="relationship-context">Deschis la experiențe noi împreună, comunicare despre idei, poate părea „cu capul în nori".</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB TEORIE -->
+        <div id="theory" class="tab-content">
+            <div class="theory-intro">
+                <h2>Modelul Big Five</h2>
+                <p>Big Five (sau OCEAN) este cel mai validat și acceptat model de personalitate în psihologia academică. A fost dezvoltat prin analiză factorială a mii de termeni descriptivi și a fost replicat în multiple culturi și limbi. Spre deosebire de alte modele, Big Five nu categorisează oamenii în tipuri, ci măsoară grade pe fiecare dimensiune.</p>
+            </div>
+
+            <div class="facets-section">
+                <h2>Fațetele Fiecărei Dimensiuni</h2>
+                <div class="facets-grid">
+                    <div class="facet-card" data-trait="O">
+                        <h3 style="color: var(--openness);">Openness (Deschidere)</h3>
+                        <ul class="facet-list">
+                            <li>Imaginație activă</li>
+                            <li>Sensibilitate estetică</li>
+                            <li>Atenție la sentimente interioare</li>
+                            <li>Preferință pentru varietate</li>
+                            <li>Curiozitate intelectuală</li>
+                            <li>Deschidere la valori noi</li>
+                        </ul>
+                    </div>
+                    <div class="facet-card" data-trait="C">
+                        <h3 style="color: var(--conscientiousness);">Conscientiousness (Conștiinciozitate)</h3>
+                        <ul class="facet-list">
+                            <li>Competență</li>
+                            <li>Ordine și organizare</li>
+                            <li>Simț al datoriei</li>
+                            <li>Orientare spre realizare</li>
+                            <li>Auto-disciplină</li>
+                            <li>Deliberare (gândire înainte de acțiune)</li>
+                        </ul>
+                    </div>
+                    <div class="facet-card" data-trait="E">
+                        <h3 style="color: var(--extraversion);">Extraversion (Extraversie)</h3>
+                        <ul class="facet-list">
+                            <li>Căldură și prietenie</li>
+                            <li>Sociabilitate</li>
+                            <li>Asertivitate</li>
+                            <li>Nivel de activitate</li>
+                            <li>Căutare de senzații</li>
+                            <li>Emoții pozitive</li>
+                        </ul>
+                    </div>
+                    <div class="facet-card" data-trait="A">
+                        <h3 style="color: var(--agreeableness);">Agreeableness (Agreabilitate)</h3>
+                        <ul class="facet-list">
+                            <li>Încredere în ceilalți</li>
+                            <li>Sinceritate</li>
+                            <li>Altruism</li>
+                            <li>Complianță</li>
+                            <li>Modestie</li>
+                            <li>Sensibilitate</li>
+                        </ul>
+                    </div>
+                    <div class="facet-card" data-trait="N">
+                        <h3 style="color: var(--neuroticism);">Neuroticism (Instabilitate Emoțională)</h3>
+                        <ul class="facet-list">
+                            <li>Anxietate</li>
+                            <li>Ostilitate / Iritabilitate</li>
+                            <li>Depresie</li>
+                            <li>Conștiință de sine</li>
+                            <li>Impulsivitate</li>
+                            <li>Vulnerabilitate la stres</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="theory-intro">
+                <h2>Diferențe față de Alte Modele</h2>
+                <p>Big Five este un model dimensional, nu tipologic. Nu spune „ești tip X", ci „ai acest nivel pe fiecare dimensiune". Fiecare persoană are un profil unic. Studiile arată că aceste trăsături sunt relativ stabile în timp (după 30 ani), au o componentă genetică semnificativă, și prezic comportamente importante în viață (performanță profesională, sănătate, relații).</p>
+            </div>
+        </div>
+
+        <!-- TAB PLAYGROUND -->
+        <div id="playground" class="tab-content">
+            <div class="playground-container">
+                <div class="playground-header">
+                    <h2>Exploratorul de Personalitate Big Five</h2>
+                    <p>Ajustează nivelul fiecărei dimensiuni pentru a explora profiluri diferite</p>
+                </div>
+
+                <div class="playground-grid">
+                    <div class="sliders-panel">
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <div class="slider-icon" style="background: var(--openness);">O</div>
+                                <div class="slider-info">
+                                    <span class="slider-title">Openness</span>
+                                    <span class="slider-value" id="val-O">50</span>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="ocean-slider slider-o" id="slider-O">
+                            <div class="slider-poles">
+                                <span>Convențional</span>
+                                <span>Deschis</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <div class="slider-icon" style="background: var(--conscientiousness);">C</div>
+                                <div class="slider-info">
+                                    <span class="slider-title">Conscientiousness</span>
+                                    <span class="slider-value" id="val-C">50</span>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="ocean-slider slider-c" id="slider-C">
+                            <div class="slider-poles">
+                                <span>Flexibil</span>
+                                <span>Organizat</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <div class="slider-icon" style="background: var(--extraversion);">E</div>
+                                <div class="slider-info">
+                                    <span class="slider-title">Extraversion</span>
+                                    <span class="slider-value" id="val-E">50</span>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="ocean-slider slider-e" id="slider-E">
+                            <div class="slider-poles">
+                                <span>Introvertit</span>
+                                <span>Extravertit</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <div class="slider-icon" style="background: var(--agreeableness);">A</div>
+                                <div class="slider-info">
+                                    <span class="slider-title">Agreeableness</span>
+                                    <span class="slider-value" id="val-A">50</span>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="ocean-slider slider-a" id="slider-A">
+                            <div class="slider-poles">
+                                <span>Competitiv</span>
+                                <span>Cooperant</span>
+                            </div>
+                        </div>
+
+                        <div class="slider-group">
+                            <div class="slider-header">
+                                <div class="slider-icon" style="background: var(--neuroticism);">N</div>
+                                <div class="slider-info">
+                                    <span class="slider-title">Neuroticism</span>
+                                    <span class="slider-value" id="val-N">50</span>
+                                </div>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="ocean-slider slider-n" id="slider-N">
+                            <div class="slider-poles">
+                                <span>Stabil</span>
+                                <span>Reactiv</span>
+                            </div>
+                        </div>
+
+                        <div class="preset-buttons">
+                            <span class="preset-label">Profile Tip:</span>
+                            <button class="preset-btn" data-preset="entrepreneur">Antreprenor</button>
+                            <button class="preset-btn" data-preset="scientist">Cercetător</button>
+                            <button class="preset-btn" data-preset="caregiver">Îngrijitor</button>
+                            <button class="preset-btn" data-preset="leader">Lider</button>
+                            <button class="preset-btn" data-preset="artist">Artist</button>
+                            <button class="preset-btn" data-preset="balanced">Echilibrat</button>
+                        </div>
+                    </div>
+
+                    <div class="visualization-panel">
+                        <div class="radar-container">
+                            <svg viewBox="0 0 400 400" class="radar-svg" id="radar-chart">
+                                <!-- Pentagon grid -->
+                                <polygon class="radar-grid" points="200,50 362,132 300,332 100,332 38,132" />
+                                <polygon class="radar-grid" points="200,90 322,152 270,302 130,302 78,152" />
+                                <polygon class="radar-grid" points="200,130 282,172 240,272 160,272 118,172" />
+
+                                <!-- Axes -->
+                                <line x1="200" y1="200" x2="200" y2="50" class="radar-axis" />
+                                <line x1="200" y1="200" x2="362" y2="132" class="radar-axis" />
+                                <line x1="200" y1="200" x2="300" y2="332" class="radar-axis" />
+                                <line x1="200" y1="200" x2="100" y2="332" class="radar-axis" />
+                                <line x1="200" y1="200" x2="38" y2="132" class="radar-axis" />
+
+                                <!-- Data polygon -->
+                                <polygon id="radar-polygon" class="radar-polygon" />
+
+                                <!-- Labels -->
+                                <text x="200" y="30" text-anchor="middle" class="radar-label" style="fill: var(--openness);">O</text>
+                                <text x="380" y="132" text-anchor="start" class="radar-label" style="fill: var(--conscientiousness);">C</text>
+                                <text x="310" y="355" text-anchor="middle" class="radar-label" style="fill: var(--extraversion);">E</text>
+                                <text x="90" y="355" text-anchor="middle" class="radar-label" style="fill: var(--agreeableness);">A</text>
+                                <text x="20" y="132" text-anchor="end" class="radar-label" style="fill: var(--neuroticism);">N</text>
+                            </svg>
+                        </div>
+
+                        <div class="profile-bars">
+                            <h4>Profilul Tău OCEAN</h4>
+                            <div class="bar-item">
+                                <div class="bar-header">
+                                    <span>Openness</span>
+                                    <span id="bar-val-O">50%</span>
+                                </div>
+                                <div class="bar-track">
+                                    <div class="bar-fill bar-o" id="bar-O" style="width: 50%;"></div>
+                                </div>
+                            </div>
+                            <div class="bar-item">
+                                <div class="bar-header">
+                                    <span>Conscientiousness</span>
+                                    <span id="bar-val-C">50%</span>
+                                </div>
+                                <div class="bar-track">
+                                    <div class="bar-fill bar-c" id="bar-C" style="width: 50%;"></div>
+                                </div>
+                            </div>
+                            <div class="bar-item">
+                                <div class="bar-header">
+                                    <span>Extraversion</span>
+                                    <span id="bar-val-E">50%</span>
+                                </div>
+                                <div class="bar-track">
+                                    <div class="bar-fill bar-e" id="bar-E" style="width: 50%;"></div>
+                                </div>
+                            </div>
+                            <div class="bar-item">
+                                <div class="bar-header">
+                                    <span>Agreeableness</span>
+                                    <span id="bar-val-A">50%</span>
+                                </div>
+                                <div class="bar-track">
+                                    <div class="bar-fill bar-a" id="bar-A" style="width: 50%;"></div>
+                                </div>
+                            </div>
+                            <div class="bar-item">
+                                <div class="bar-header">
+                                    <span>Neuroticism</span>
+                                    <span id="bar-val-N">50%</span>
+                                </div>
+                                <div class="bar-track">
+                                    <div class="bar-fill bar-n" id="bar-N" style="width: 50%;"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="analysis-panel">
+                            <div class="analysis-section">
+                                <h4>Profil General</h4>
+                                <p id="general-profile">Profil echilibrat pe toate dimensiunile, indicând flexibilitate și adaptabilitate.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>În Context Profesional</h4>
+                                <p id="work-profile">Versatil în roluri diverse, poate necesita clarificarea preferințelor pentru specializare.</p>
+                            </div>
+                            <div class="analysis-section">
+                                <h4>În Relații</h4>
+                                <p id="relationship-profile">Echilibrat între nevoile proprii și ale celorlalți, adaptabil la diferite tipuri de relații.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB QUIZ -->
+        <div id="simulator" class="tab-content">
+            <div class="simulator-container">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+                </div>
+
+                <div id="quiz-container">
+                    <div class="question-card">
+                        <div class="question-number" id="question-number">Întrebarea 1 din 25</div>
+                        <div class="question-text" id="question-text">Îmi place să încerc lucruri noi și neobișnuite.</div>
+                        <div class="likert-scale" id="options">
+                            <div class="likert-option" data-value="1">
+                                <span class="likert-value">1</span>
+                                <span class="likert-label">Deloc</span>
+                            </div>
+                            <div class="likert-option" data-value="2">
+                                <span class="likert-value">2</span>
+                                <span class="likert-label">Puțin</span>
+                            </div>
+                            <div class="likert-option" data-value="3">
+                                <span class="likert-value">3</span>
+                                <span class="likert-label">Neutru</span>
+                            </div>
+                            <div class="likert-option" data-value="4">
+                                <span class="likert-value">4</span>
+                                <span class="likert-label">Mult</span>
+                            </div>
+                            <div class="likert-option" data-value="5">
+                                <span class="likert-value">5</span>
+                                <span class="likert-label">Total</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="nav-buttons">
+                        <button class="btn btn-secondary" id="prev-btn" disabled>Înapoi</button>
+                        <button class="btn btn-primary" id="next-btn" disabled>Următoarea</button>
+                    </div>
+                </div>
+
+                <div id="results-container" class="results-container hidden">
+                    <h2 class="results-title">Profilul Tău Big Five</h2>
+                    <p class="results-subtitle">Bazat pe răspunsurile tale</p>
+
+                    <div class="results-ocean" id="results-ocean"></div>
+
+                    <div class="profile-description">
+                        <h3>Interpretarea Profilului</h3>
+                        <p id="profile-text-o"></p>
+                        <p id="profile-text-c"></p>
+                        <p id="profile-text-e"></p>
+                        <p id="profile-text-a"></p>
+                        <p id="profile-text-n"></p>
+                    </div>
+
+                    <button class="btn btn-primary restart-btn" id="restart-btn">Reia Testul</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // === DATA ===
+        const traitData = {
+            O: {
+                name: 'Openness', fullName: 'Deschidere la Experiență', color: 'var(--openness)',
+                lowPole: 'Convențional', highPole: 'Deschis la nou',
+                highDesc: 'Creativ, curios, imaginativ, deschis la idei noi, apreciază arta și estetica, preferă varietatea.',
+                lowDesc: 'Practic, convențional, preferă rutina, focusat pe concret, mai puțin interesat de abstracțiuni.',
+                workContext: 'Excelează în roluri creative, cercetare, inovație. Poate avea dificultăți cu sarcini repetitive.',
+                relationshipContext: 'Deschis la experiențe noi împreună, comunicare despre idei, poate părea „cu capul în nori".'
+            },
+            C: {
+                name: 'Conscientiousness', fullName: 'Conștiinciozitate', color: 'var(--conscientiousness)',
+                lowPole: 'Flexibil', highPole: 'Organizat',
+                highDesc: 'Organizat, disciplinat, de încredere, orientat spre obiective, planificat, meticulos.',
+                lowDesc: 'Spontan, flexibil, relaxat cu privire la reguli, poate fi dezorganizat sau procrastinator.',
+                workContext: 'Excelent în roluri care necesită precizie și planificare. Poate fi rigid sau prea critic.',
+                relationshipContext: 'De încredere și consistent, poate fi perceput ca rigid sau prea focusat pe muncă.'
+            },
+            E: {
+                name: 'Extraversion', fullName: 'Extraversie', color: 'var(--extraversion)',
+                lowPole: 'Introvertit', highPole: 'Extravertit',
+                highDesc: 'Sociabil, entuziast, asertiv, vorbăreț, căută stimulare socială și experiențe intense.',
+                lowDesc: 'Rezervat, liniștit, preferă activități solitare, reflectiv, își reîncarcă energia singur.',
+                workContext: 'Excelează în roluri sociale, vânzări, leadership vizibil. Introverții preferă roluri independente.',
+                relationshipContext: 'Extraverții caută mai multă interacțiune socială, introverții preferă conexiuni mai profunde cu mai puțini oameni.'
+            },
+            A: {
+                name: 'Agreeableness', fullName: 'Agreabilitate', color: 'var(--agreeableness)',
+                lowPole: 'Competitiv', highPole: 'Cooperant',
+                highDesc: 'Cooperant, empatic, încrezător în ceilalți, altruist, armonios, evită conflictele.',
+                lowDesc: 'Competitiv, sceptic, provocator, direct, prioritizează propriile interese.',
+                workContext: 'Excelează în roluri de echipă, HR, servicii. Scorul scăzut poate fi util în negocieri, management dur.',
+                relationshipContext: 'Scor ridicat: relații armonioase dar poate fi exploatat. Scăzut: poate crea conflicte dar stabilește limite clare.'
+            },
+            N: {
+                name: 'Neuroticism', fullName: 'Instabilitate Emoțională', color: 'var(--neuroticism)',
+                lowPole: 'Stabil emoțional', highPole: 'Reactiv emoțional',
+                highDesc: 'Experimentează mai intens emoțiile negative, anxios, sensibil la stres, variabil emoțional.',
+                lowDesc: 'Calm, stabil emoțional, rezistent la stres, relaxat, optimist.',
+                workContext: 'Scor scăzut: excelează sub presiune. Ridicat: poate fi mai empatic dar vulnerabil la burnout.',
+                relationshipContext: 'Scor ridicat: necesită mai mult suport emoțional. Scăzut: poate părea distant emoțional.'
+            }
+        };
+
+        // === TAB NAVIGATION ===
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                btn.classList.add('active');
+                document.getElementById(btn.dataset.tab).classList.add('active');
+            });
+        });
+
+        // === MODEL ===
+        const traitCards = document.querySelectorAll('.trait-card');
+        const oceanLetters = document.querySelectorAll('.ocean-letter');
+
+        function updateInfoPanel(trait) {
+            const data = traitData[trait];
+            document.getElementById('info-icon').textContent = trait;
+            document.getElementById('info-icon').style.background = data.color;
+            document.getElementById('info-name').textContent = data.name;
+            document.getElementById('info-subtitle').textContent = data.fullName;
+            document.getElementById('low-pole').textContent = data.lowPole;
+            document.getElementById('high-pole').textContent = data.highPole;
+            document.getElementById('high-label').textContent = `Scor Ridicat (${data.highPole.split(' ')[0]})`;
+            document.getElementById('low-label').textContent = `Scor Scăzut (${data.lowPole.split(' ')[0]})`;
+            document.getElementById('high-desc').textContent = data.highDesc;
+            document.getElementById('low-desc').textContent = data.lowDesc;
+            document.getElementById('work-context').textContent = data.workContext;
+            document.getElementById('relationship-context').textContent = data.relationshipContext;
+            document.getElementById('spectrum-marker').style.background = data.color;
+        }
+
+        traitCards.forEach(card => {
+            card.addEventListener('click', () => {
+                traitCards.forEach(c => c.classList.remove('active'));
+                oceanLetters.forEach(l => l.classList.remove('active'));
+                card.classList.add('active');
+                document.querySelector(`.ocean-letter[data-trait="${card.dataset.trait}"]`).classList.add('active');
+                updateInfoPanel(card.dataset.trait);
+            });
+        });
+
+        oceanLetters.forEach(letter => {
+            letter.addEventListener('click', () => {
+                traitCards.forEach(c => c.classList.remove('active'));
+                oceanLetters.forEach(l => l.classList.remove('active'));
+                letter.classList.add('active');
+                document.querySelector(`.trait-card[data-trait="${letter.dataset.trait}"]`).classList.add('active');
+                updateInfoPanel(letter.dataset.trait);
+            });
+        });
+
+        // === PLAYGROUND ===
+        const traits = ['O', 'C', 'E', 'A', 'N'];
+        const sliders = {};
+        traits.forEach(trait => {
+            sliders[trait] = document.getElementById(`slider-${trait}`);
+        });
+
+        const presets = {
+            entrepreneur: { O: 75, C: 70, E: 85, A: 45, N: 35 },
+            scientist: { O: 90, C: 80, E: 35, A: 50, N: 40 },
+            caregiver: { O: 55, C: 65, E: 60, A: 90, N: 50 },
+            leader: { O: 65, C: 85, E: 80, A: 55, N: 25 },
+            artist: { O: 95, C: 35, E: 50, A: 60, N: 65 },
+            balanced: { O: 50, C: 50, E: 50, A: 50, N: 50 }
+        };
+
+        function getRadarPoints(vals) {
+            const center = 200;
+            const maxRadius = 150;
+            const angles = [270, 342, 54, 126, 198]; // degrees for pentagon
+
+            const orderedTraits = ['O', 'C', 'E', 'A', 'N'];
+            const points = orderedTraits.map((trait, i) => {
+                const angle = angles[i] * Math.PI / 180;
+                const radius = (vals[trait] / 100) * maxRadius;
+                return {
+                    x: center + radius * Math.cos(angle),
+                    y: center + radius * Math.sin(angle)
+                };
+            });
+
+            return points.map(p => `${p.x},${p.y}`).join(' ');
+        }
+
+        function getAnalysis(vals) {
+            let general = '';
+            let work = '';
+            let relationships = '';
+
+            // Find highest and lowest
+            const sorted = Object.entries(vals).sort((a, b) => b[1] - a[1]);
+            const highest = sorted[0][0];
+            const lowest = sorted[sorted.length - 1][0];
+
+            const highLabels = { O: 'deschidere creativă', C: 'conștiinciozitate', E: 'extraversie', A: 'agreabilitate', N: 'reactivitate emoțională' };
+            const lowLabels = { O: 'pragmatism', C: 'flexibilitate', E: 'introversie', A: 'competitivitate', N: 'stabilitate emoțională' };
+
+            general = `Profilul tău evidențiază ${highLabels[highest]} ca trăsătură dominantă și ${lowLabels[lowest]} ca punct de echilibru. `;
+
+            if (vals.O > 70 && vals.C > 70) general += 'Combini creativitatea cu disciplina - un profil rar și valoros.';
+            else if (vals.E > 70 && vals.A > 70) general += 'Ești sociabil și cooperant - un „people person" natural.';
+            else if (vals.C > 70 && vals.N < 30) general += 'Ești organizat și calm sub presiune - excelent pentru roluri de responsabilitate.';
+
+            // Work
+            if (vals.C > 70) work = 'Excelezi în roluri care necesită organizare, planificare și atenție la detalii. ';
+            else if (vals.O > 70) work = 'Ești potrivit pentru roluri creative, cercetare și inovație. ';
+            else if (vals.E > 70) work = 'Prosperi în roluri sociale, vânzări și leadership vizibil. ';
+
+            if (vals.N > 70) work += 'Ai grijă la managementul stresului în roluri cu presiune mare.';
+            else if (vals.N < 30) work += 'Poți gestiona bine roluri cu presiune și termene strânse.';
+
+            // Relationships
+            if (vals.A > 70) relationships = 'Ești cooperant și empatic în relații, dar ai grijă să-ți stabilești și limite. ';
+            else if (vals.A < 30) relationships = 'Ești direct și competitiv, ceea ce poate crea tensiuni dar și claritate. ';
+
+            if (vals.E > 70) relationships += 'Ai nevoie de multă interacțiune socială.';
+            else if (vals.E < 30) relationships += 'Preferi conexiuni mai profunde cu mai puțini oameni.';
+
+            return { general, work, relationships };
+        }
+
+        function updatePlayground() {
+            const vals = {};
+            traits.forEach(trait => {
+                vals[trait] = parseInt(sliders[trait].value);
+                document.getElementById(`val-${trait}`).textContent = vals[trait];
+                document.getElementById(`bar-${trait}`).style.width = `${vals[trait]}%`;
+                document.getElementById(`bar-val-${trait}`).textContent = `${vals[trait]}%`;
+            });
+
+            // Update radar
+            document.getElementById('radar-polygon').setAttribute('points', getRadarPoints(vals));
+
+            // Update analysis
+            const analysis = getAnalysis(vals);
+            document.getElementById('general-profile').textContent = analysis.general || 'Profil echilibrat pe toate dimensiunile.';
+            document.getElementById('work-profile').textContent = analysis.work || 'Versatil în diverse roluri profesionale.';
+            document.getElementById('relationship-profile').textContent = analysis.relationships || 'Echilibrat în relații interpersonale.';
+        }
+
+        traits.forEach(trait => {
+            sliders[trait].addEventListener('input', updatePlayground);
+        });
+
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const preset = presets[btn.dataset.preset];
+                traits.forEach(trait => {
+                    sliders[trait].value = preset[trait];
+                });
+                updatePlayground();
+            });
+        });
+
+        updatePlayground();
+
+        // === QUIZ ===
+        const questions = [
+            { text: "Îmi place să încerc lucruri noi și neobișnuite.", trait: 'O', reversed: false },
+            { text: "Sunt mereu pregătit și organizat.", trait: 'C', reversed: false },
+            { text: "Mă simt bine în grupuri mari de oameni.", trait: 'E', reversed: false },
+            { text: "Am încredere în intențiile bune ale celorlalți.", trait: 'A', reversed: false },
+            { text: "Mă îngrijorez adesea pentru lucruri.", trait: 'N', reversed: false },
+            { text: "Prefer rutina și predictibilitatea.", trait: 'O', reversed: true },
+            { text: "Termin mereu ce am de făcut la timp.", trait: 'C', reversed: false },
+            { text: "Prefer să lucrez singur decât în echipă.", trait: 'E', reversed: true },
+            { text: "Critic adesea ideile celorlalți.", trait: 'A', reversed: true },
+            { text: "Rămân calm în situații stresante.", trait: 'N', reversed: true },
+            { text: "Apreciez arta și frumusețea.", trait: 'O', reversed: false },
+            { text: "Las uneori lucrurile în dezordine.", trait: 'C', reversed: true },
+            { text: "Inițiez conversații cu necunoscuți ușor.", trait: 'E', reversed: false },
+            { text: "Îmi place să ajut pe ceilalți chiar dacă nu mă avantajează.", trait: 'A', reversed: false },
+            { text: "Schimbările de dispoziție sunt frecvente la mine.", trait: 'N', reversed: false },
+            { text: "Am o imaginație bogată.", trait: 'O', reversed: false },
+            { text: "Acord atenție detaliilor.", trait: 'C', reversed: false },
+            { text: "Sunt energic și activ.", trait: 'E', reversed: false },
+            { text: "Evit conflictele pe cât posibil.", trait: 'A', reversed: false },
+            { text: "Mă simt adesea trist sau deprimat.", trait: 'N', reversed: false },
+            { text: "Prefer abordări practice față de teoretice.", trait: 'O', reversed: true },
+            { text: "Amân frecvent sarcinile.", trait: 'C', reversed: true },
+            { text: "Prefer să ascult decât să vorbesc în grup.", trait: 'E', reversed: true },
+            { text: "Pun nevoile celorlalți înaintea mele.", trait: 'A', reversed: false },
+            { text: "Mă recuperez rapid după eșecuri.", trait: 'N', reversed: true }
+        ];
+
+        let currentQuestion = 0;
+        let answers = [];
+
+        const questionText = document.getElementById('question-text');
+        const questionNumber = document.getElementById('question-number');
+        const optionsContainer = document.getElementById('options');
+        const progressFill = document.getElementById('progress-fill');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+        const quizContainer = document.getElementById('quiz-container');
+        const resultsContainer = document.getElementById('results-container');
+
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            questionNumber.textContent = `Întrebarea ${currentQuestion + 1} din ${questions.length}`;
+            questionText.textContent = q.text;
+            progressFill.style.width = `${((currentQuestion) / questions.length) * 100}%`;
+
+            optionsContainer.innerHTML = [1, 2, 3, 4, 5].map(val => `
+                <div class="likert-option ${answers[currentQuestion] === val ? 'selected' : ''}" data-value="${val}">
+                    <span class="likert-value">${val}</span>
+                    <span class="likert-label">${['Deloc', 'Puțin', 'Neutru', 'Mult', 'Total'][val-1]}</span>
+                </div>
+            `).join('');
+
+            document.querySelectorAll('.likert-option').forEach(opt => {
+                opt.addEventListener('click', () => selectOption(parseInt(opt.dataset.value)));
+            });
+
+            prevBtn.disabled = currentQuestion === 0;
+            nextBtn.disabled = answers[currentQuestion] === undefined;
+            nextBtn.textContent = currentQuestion === questions.length - 1 ? 'Vezi Rezultatul' : 'Următoarea';
+        }
+
+        function selectOption(value) {
+            answers[currentQuestion] = value;
+            document.querySelectorAll('.likert-option').forEach(o => o.classList.remove('selected'));
+            document.querySelector(`[data-value="${value}"]`).classList.add('selected');
+            nextBtn.disabled = false;
+        }
+
+        function calculateQuizResults() {
+            const scores = { O: 0, C: 0, E: 0, A: 0, N: 0 };
+            const counts = { O: 0, C: 0, E: 0, A: 0, N: 0 };
+
+            questions.forEach((q, i) => {
+                if (answers[i] !== undefined) {
+                    const value = q.reversed ? 6 - answers[i] : answers[i];
+                    scores[q.trait] += value;
+                    counts[q.trait]++;
+                }
+            });
+
+            const percentages = {};
+            Object.keys(scores).forEach(trait => {
+                percentages[trait] = Math.round((scores[trait] / (counts[trait] * 5)) * 100);
+            });
+
+            return percentages;
+        }
+
+        function getTraitInterpretation(trait, score) {
+            const data = traitData[trait];
+            if (score >= 70) return `${data.name} ridicat: ${data.highDesc.split('.')[0]}.`;
+            if (score <= 30) return `${data.name} scăzut: ${data.lowDesc.split('.')[0]}.`;
+            return `${data.name} moderat: echilibru între ${data.lowPole.toLowerCase()} și ${data.highPole.toLowerCase()}.`;
+        }
+
+        function showQuizResults() {
+            const percentages = calculateQuizResults();
+
+            quizContainer.classList.add('hidden');
+            resultsContainer.classList.remove('hidden');
+            progressFill.style.width = '100%';
+
+            const colors = { O: 'var(--openness)', C: 'var(--conscientiousness)', E: 'var(--extraversion)', A: 'var(--agreeableness)', N: 'var(--neuroticism)' };
+            const names = { O: 'Openness', C: 'Conscientiousness', E: 'Extraversion', A: 'Agreeableness', N: 'Neuroticism' };
+
+            document.getElementById('results-ocean').innerHTML = traits.map(trait => `
+                <div class="result-trait" data-trait="${trait}">
+                    <div class="result-letter">${trait}</div>
+                    <div class="result-score">${percentages[trait]}%</div>
+                    <div class="result-name">${names[trait]}</div>
+                </div>
+            `).join('');
+
+            traits.forEach(trait => {
+                document.getElementById(`profile-text-${trait.toLowerCase()}`).textContent = getTraitInterpretation(trait, percentages[trait]);
+            });
+        }
+
+        nextBtn.addEventListener('click', () => {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                showQuizResults();
+            }
+        });
+
+        prevBtn.addEventListener('click', () => {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        });
+
+        document.getElementById('restart-btn').addEventListener('click', () => {
+            currentQuestion = 0;
+            answers = [];
+            quizContainer.classList.remove('hidden');
+            resultsContainer.classList.add('hidden');
+            renderQuestion();
+        });
+
+        renderQuestion();
+    </script>
+</body>
+</html>
